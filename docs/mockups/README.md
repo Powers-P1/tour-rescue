@@ -7,3 +7,11 @@ spec.json holds the shared demo scenario; index.html is a plain static gallery (
 Known gaps: (1) screen 6, the promoter one-pager, is not yet designed; (2) breakpoint sentence says 5h while the threshold is 5h35, and 03b contradicts 03 for the same scenario;
 (3) audit screen lacks the "zero violated constraints" gate and leave-one-out results; (4) evidence table lacks option C; (5) fit values in the heatmap are not realistic percentiles;
 (6) audit timestamps are a demo snapshot dated 13.11.2026; (7) Polish-only copy.
+
+## Known logic gaps (do not copy into code)
+
+- Screen 3: the sentence says "6 h → 5 h", but the slider threshold is 5 h 35 min. The slider must start at the current limit (6 h), and the sentence must state the exact threshold.
+- Screen 3b contradicts screen 3 for the same scenario. "No breakpoint found" must list the checked ranges. Artist toggles must reflect the leave-one-out results.
+- Screen 5 lacks the zero-violated-constraints gate and the leave-one-out results. Timestamps must be the generation time.
+- UI copy must be English in code (for the judges).
+- Screen 6 (promoter one-pager, A4 print) is not mocked. Build it by analogy with the existing screens.
