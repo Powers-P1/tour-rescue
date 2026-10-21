@@ -13,7 +13,7 @@ npm run web:preview
 npm run worker:dev
 ```
 
-`worker:build` invokes Wrangler with `--dry-run`; no Cloudflare account or provider key is required. The default local API serves `/health`, `/do-check`, `/api/demo` and `/api/demo/audit`. Live is disabled. The pure/client/API tests use synthetic evidence and mocked provider requests. A separate local workerd/SQLite smoke check during PR4 verified the actual built entry point, DO binding, demo, audit attachment and disabled live path without a Qloo key.
+`worker:build` invokes Wrangler with `--dry-run`; no Cloudflare account or provider key is required. The default local API serves `/health`, `/do-check`, `/api/demo` and `/api/demo/audit`. Without secrets, live is unavailable. The pure/client/API tests use synthetic evidence and mocked provider requests. A separate local workerd/SQLite smoke check during PR4 verified the actual built entry point, DO binding, demo, audit attachment and disabled live path without a Qloo key.
 
 ## Pages build and local preview
 
@@ -39,7 +39,7 @@ The promoter view renders a single A4 sheet and exports a PNG through browser ca
 - Front: [tour-rescue.pages.dev](https://tour-rescue.pages.dev)
 - API: [tour-rescue-api.oli-struska.workers.dev](https://tour-rescue-api.oli-struska.workers.dev)
 
-These are the maintainer's existing targets, not a claim that this branch has been deployed. `/health` reports the version and live switch; `/do-check` performs a read through the DO binding and fails if the storage cannot be reached.
+These are the maintainer's existing targets, not a claim that this branch has been deployed. `/health` reports the version, live switches and effective Qloo caps; `/do-check` performs a read through the DO binding and fails if the storage cannot be reached.
 
 Export `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in the maintainer shell; do not put either in `wrangler.toml` or commit them. From the repository root:
 
@@ -71,13 +71,13 @@ The secret is read only in Worker code as `env.QLOO_API_KEY`, used in the upstre
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `LIVE_ENABLED` | `"false"` | Both this exact string set to `"true"` and a nonempty secret are required for live mode. |
+| `LIVE_ENABLED` | `"true"` | Both this exact string set to `"true"` and a nonempty secret are required for live mode. |
 | `ALLOWED_ORIGIN` | `"https://tour-rescue.pages.dev"` | Exact browser origin. A local HTTP origin is permitted only for localhost/127.0.0.1. |
-| `DAILY_LIVE_LIMIT` | `"30"` | Global live actions per UTC day; lower values allowed. |
-| `DAILY_PER_IP_LIMIT` | `"10"` | Actions per server-derived daily client hash; lower values allowed. |
+| `LIVE_DAILY_CAP` | `"150"` | Global live actions per UTC day; positive values up to 1000. |
+| `LIVE_IP_CAP` | `"25"` | Actions per server-derived daily client hash; positive values up to 100. |
 | `QLOO_MONTHLY_LIMIT` | `"50000"` | Outgoing provider attempts per UTC month; lower values allowed. |
 
-Search and evaluation each consume one daily action, including cache hits. Invalid requests rejected before reservation consume none. Failed provider attempts are not refunded. Provider calls also share a rolling 10-per-second cap; cache hits skip these provider counters. Quota checks and increments occur in one transaction. No raw IP is stored: only a keyed, daily rotating hash is retained in the current day's quota state. Live requests need Cloudflare's trusted `CF-Connecting-IP`; a missing address fails closed, including in a local proxy that does not supply it.
+The deprecated names `DAILY_LIVE_LIMIT` / `DAILY_PER_IP_LIMIT` remain fallbacks when the corresponding new cap is unset. Search and evaluation each consume one daily action, including cache hits. Invalid requests rejected before reservation consume none. Failed provider attempts are not refunded. Provider calls also share a rolling 10-per-second cap; cache hits skip these provider counters. Quota checks and increments occur in one transaction. No raw IP is stored: only a keyed, daily rotating hash is retained in the current day's quota state. Live requests need Cloudflare's trusted `CF-Connecting-IP`; a missing address fails closed, including in a local proxy that does not supply it.
 
 Daily/monthly boundaries are UTC **application policy**. Qloo's exact provider reset window and remaining-budget header semantics are UNKNOWN, and other tools using the same key are outside this ledger. Set a lower monthly allowance if maintainers also use that key. A provider 429 remains visible even when the application has quota left. Restoring or deleting the DO's stored counters is not a quota reset mechanism.
 
@@ -85,7 +85,19 @@ For the first deployed live check, maintainers set the secret and enable the swi
 
 ## Worker secret names
 
-Secrets set on `tour-rescue-api` (names only): `QLOO_API_KEY` (live Qloo requests), `ANTHROPIC_API_KEY` (reserved for the future AI mode; unused by the current code). Neither is in `wrangler.toml` or the repository.
+Secrets set on `tour-rescue-api` (names only): `QLOO_API_KEY` (live Qloo requests), `ANTHROPIC_API_KEY` (PR6 Claude Sonnet 5.5 Messages requests). Neither is in `wrangler.toml` or the repository.
+
+## AI Rescue live switch (PR6)
+
+The existing `ANTHROPIC_API_KEY` secret is used only by the Worker. Do not copy it to Pages. Enable both `LIVE_ENABLED="true"` and `AI_ENABLED="true"`; both provider secrets must be nonempty. `/health` adds `aiEnabled`. The default AI switch is false so deployment does not begin paid calls before maintainers enable the feature. No extra search API key is needed: search and page reads use Anthropic server tools. Anthropic web search must be enabled for the account; real account/model/tool access remains UNKNOWN until a live probe.
+
+`DAILY_AI_LIMIT="10"` and `DAILY_AI_PER_IP_LIMIT="3"` configure separate global/client AI sessions per UTC day (positive integers, hard configuration maxima 30/10). A session is reserved in UnitLedger before any Anthropic call; failure/cancellation consumes it. PR6 adds namespaced AI quota state and rank-only context entries to the existing private cache. It changes no DO class, binding or migration. A saved context needs the same daily client identity and expires after six hours or cache eviction. Existing Qloo rate/monthly/daily limits are unchanged.
+
+The browser route `#ai` replays two bundled synthetic transcripts without any network. To probe live: load **Try live**, open **Rescue with AI (Pro)**, select live research, verify streamed tool summaries and 2–4 source-linked checked proposals, then explicitly accept one. Check the cards, breakpoint outcomes and downloaded AI audit envelope. A 409 `AI_BASE_EXPIRED` means reload the live Qloo decision; a 429 carries Retry-After. Turning off `AI_ENABLED` prevents new paid sessions; the saved demo and deterministic app keep working.
+
+The agent has six Messages requests, 8,000 cumulative output tokens, 24 client tool calls, at most six searches and six page reads, and a 90-second session deadline. The 80,000 reported input-token stop is checked after responses and is not a pre-billing hard cap for server-tool input. See [AI_RESCUE](AI_RESCUE.md) for exact bounds, official provider references and evidence limits. PR6 does not implement billing or product entitlements.
+
+`enable_request_signal` and `request_signal_passthrough` are explicit [Cloudflare compatibility flags](https://developers.cloudflare.com/workers/configuration/compatibility-flags/#enable-requestsignal-for-incoming-requests). They allow cancellation to reach the Worker and its forwarded request. Cancellation during the quota transaction is checked again before calculation/provider work. The reservation remains counted, so disconnecting does not reopen the allowance.
 
 ## Platform budgets
 

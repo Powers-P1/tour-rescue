@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "tour-rescue.ai-demo-transcript.v1",
+  "id": "evidence-gaps",
+  "title": "An empty calendar is not availability",
+  "description": "Two researched-style fictional leads retain unknown venue facts and show why a routing pass is not a booking confirmation.",
+  "provenance": "authored-synthetic",
+  "recordedAt": { "status": "unknown", "reason": "This is an authored demonstration transcript. No Anthropic call or venue-page fetch was recorded." },
+  "preserveSyntheticBookingFacts": false,
+  "sources": [
+    { "id": "demo-calendar-gap", "title": "Synthetic calendar excerpt - missing date", "path": "fixtures/ai/evidence-gaps.json", "excerpt": "The fictional calendar contains no entry for 14 November. This absence is not a statement that the room is free." },
+    { "id": "demo-regional-gap", "title": "Synthetic regional checks - unresolved", "path": "fixtures/ai/evidence-gaps.json", "excerpt": "No date-specific festival collision, applicable holiday impact, reliable weather forecast or signed venue fee has been verified." }
+  ],
+  "steps": [
+    { "type": "status", "message": "Replay an authored synthetic evidence-gap transcript. Every linked excerpt belongs to this public fixture." },
+    { "type": "tool", "toolName": "get_fit_data", "message": "Keep the same Qloo-shaped synthetic percentiles and frozen 24-city comparison set." },
+    { "type": "research", "message": "The fixture calendar has a missing date. Leave availability UNKNOWN; absence is not consent or confirmation.", "sourceIds": ["demo-calendar-gap"] },
+    { "type": "research", "message": "Regional festival, holiday and weather evidence is incomplete. Record the gaps instead of claiming that no conflicts exist.", "sourceIds": ["demo-regional-gap"] },
+    { "type": "tool", "toolName": "get_road_legs", "message": "Reuse the frozen directed matrix for both leads; do not substitute straight-line distance or the reverse leg." },
+    { "type": "warning", "message": "Both researched-style venues have unconfirmed availability and fees. A routing PASS cannot promote their booking checks to PASS." }
+  ],
+  "proposals": [
+    { "id": "demo-nuremberg-gap", "kind": "replacement", "cityId": "de-nuremberg", "venueName": "Example Nuremberg room - unverified", "reason": "The corridor location merits an enquiry, but the blank date and absent fee cannot support a bookable recommendation.", "sourceIds": ["demo-calendar-gap", "demo-regional-gap"], "risks": ["Date-specific availability is UNKNOWN.", "The venue fee and terms are UNKNOWN.", "Festival, holiday and weather impacts are UNKNOWN."] },
+    { "id": "demo-stuttgart-gap", "kind": "detour", "cityId": "de-stuttgart", "venueName": "Example Stuttgart room - unverified", "reason": "Inspect a different market with the same date and locked commitments. Check travel independently of the unresolved venue facts.", "sourceIds": ["demo-calendar-gap", "demo-regional-gap"], "risks": ["This is a fictional lead, not a real venue listing.", "Availability, venue fee and capacity require confirmation.", "No absence-of-conflict claim is supported."] }
+  ]
+}

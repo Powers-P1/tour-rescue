@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "tour-rescue.ai-demo-transcript.v1",
+  "id": "corridor-repair",
+  "title": "Keep the corridor",
+  "description": "Three fictional leads illustrate fit, extra travel and a rejected detour while all four commitments remain locked.",
+  "provenance": "authored-synthetic",
+  "recordedAt": { "status": "unknown", "reason": "This is an authored demonstration transcript. No Anthropic call or venue-page fetch was recorded." },
+  "preserveSyntheticBookingFacts": true,
+  "sources": [
+    { "id": "demo-corridor-brief", "title": "Synthetic venue brief - fixture, not a real calendar", "path": "fixtures/ai/corridor-repair.json", "excerpt": "Fictional venue fees and availability are inherited from the synthetic Germany scenario. These do not represent any real booking." },
+    { "id": "demo-corridor-research", "title": "Synthetic regional research notes", "path": "fixtures/ai/corridor-repair.json", "excerpt": "Festival clashes, holiday effects and weather are unverified. No empty calendar is interpreted as availability, and no weather forecast is invented." }
+  ],
+  "steps": [
+    { "type": "status", "message": "Replay an authored synthetic transcript. No model call or live web research is taking place." },
+    { "type": "tool", "toolName": "get_fit_data", "message": "Read the unchanged 24-city percentile universe, with a 50% target and 50% comparison contribution." },
+    { "type": "tool", "toolName": "get_road_legs", "message": "Inspect directed OSRM travel around the lost Leipzig date. Keep Hamburg, Berlin, Munich and Cologne locked." },
+    { "type": "research", "message": "Read the fictional venue brief and mark regional event, holiday and weather claims as unverified.", "sourceIds": ["demo-corridor-brief", "demo-corridor-research"] },
+    { "type": "tool", "toolName": "analyze_decision", "message": "Apply the existing minimum-fit and additional-distance gates independently. Venue facts in this example are explicitly fictional." },
+    { "type": "tool", "toolName": "generate_audit", "message": "Retain query provenance, source links, the control artist and leave-one-artist-out evidence in the deterministic audit." }
+  ],
+  "proposals": [
+    { "id": "demo-nuremberg", "kind": "replacement", "cityId": "de-nuremberg", "venueName": "Fictional Nuremberg venue", "reason": "Investigate the shorter corridor alternative. The fit and travel figures come from the unchanged demo percentiles and directed OSRM matrix.", "sourceIds": ["demo-corridor-brief", "demo-corridor-research"], "risks": ["Venue availability and fee are fictional demo inputs, not a real offer.", "Festival, holiday and weather effects are unverified."] },
+    { "id": "demo-frankfurt", "kind": "detour", "cityId": "de-frankfurt", "venueName": "Fictional Frankfurt am Main venue", "reason": "Compare the higher-fit city against the extra-distance cap. The deterministic checker decides whether the declared travel limit excludes it.", "sourceIds": ["demo-corridor-brief", "demo-corridor-research"], "risks": ["Higher cultural fit does not guarantee ticket sales.", "The extra-distance cap may reject this lead.", "The venue facts are fictional."] },
+    { "id": "demo-dresden", "kind": "replacement", "cityId": "de-dresden", "venueName": "Fictional Dresden venue", "reason": "Check a second corridor city without moving a confirmed show or shrinking the city universe to improve its percentile.", "sourceIds": ["demo-corridor-brief"], "risks": ["This lead replaces card A only after explicit acceptance.", "Booking facts are synthetic and external conditions remain unverified."] }
+  ]
+}

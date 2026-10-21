@@ -6,7 +6,7 @@ Qloo-powered agent that repairs a concert tour when one date falls through.
 
 A booker or tour manager has a confirmed 5-date tour in one region and loses one date. Tour Rescue compares three repair options (replacement venue in another city, a detour, or a day off), keeps all confirmed shows feasible (dates, drive times, daily limits, minimum spacing), scores cities with a Qloo taste "fit index", and shows for every recommendation which single assumption or comparison artist would flip the choice. Every run produces a reproducible, downloadable decision audit.
 
-The core is deterministic (pure TypeScript functions). The current demo, live Qloo flow, breakpoint exploration and promoter sheet require no LLM. PR6 will add the separately scoped AI Rescue investigation mode; its proposals will still pass through the deterministic checker and audit.
+The core is deterministic (pure TypeScript functions). The demo, live Qloo flow, breakpoint exploration and promoter sheet require no LLM. **AI Rescue (Pro)** adds bounded Claude Sonnet 5.5 research with source links; every proposal passes through the same checker and enters comparison only after explicit user acceptance.
 
 ## Documents
 
@@ -15,6 +15,7 @@ The core is deterministic (pure TypeScript functions). The current demo, live Ql
 - [docs/PRD.md](docs/PRD.md): domain decisions, fit formula, acceptance boundaries and six-PR roadmap
 - [docs/API.md](docs/API.md): demo/live requests, audit replay and error semantics
 - [docs/DEPLOY.md](docs/DEPLOY.md): Worker configuration, private quotas/cache and maintainer deployment commands
+- [docs/AI_RESCUE.md](docs/AI_RESCUE.md): agent tools, source provenance, token/session bounds and AI audit contract
 - [fixtures/README.md](fixtures/README.md): fixture naming for offline tests
 
 ## Licence
@@ -36,9 +37,11 @@ npm run web:preview
 
 Open **`http://localhost:4173`** for the five-screen demo: Route, Options, Breakpoint, Evidence and Audit. It runs the bundled synthetic fixture locally and makes no provider request. Select an option and open its **Promoter sheet** for A4 print/Save PDF or a canvas PNG download. Demo includes two comparison artists; the third sheet slot is explicitly UNKNOWN.
 
+**Rescue with AI (Pro)** opens two saved synthetic research transcripts without a key or network request. Live AI starts from a server-recorded live Qloo result, streams tool progress, and proposes 2–4 evidence-linked options. Accept a lead to replace its A/B comparison card and recalculate constraints, breakpoints and the audit. Researched venue availability and fees remain UNKNOWN. Saved demo transcripts are authored examples, not claimed recordings of Claude calls.
+
 The **Try live** dialog uses the public Worker, searches real artist identities, and submits a target, zero to three comparisons and a distinct control. Qloo evidence can change; the Germany route and venue facts remain fictional. Failures and missing evidence remain visible without falling back to synthetic scores. `PUBLIC_WORKER_ORIGIN` configures the public API origin at build time; it is never a key. See [DEPLOY](docs/DEPLOY.md) for Pages settings, CORS, quotas and maintainer deployment.
 
-If running `worker:dev`, `http://localhost:8787/api/demo` and `/api/demo/audit` expose the same labelled demo and JSON without a secret. `/health` describes the service; `/do-check` exercises `UnitLedger`. Live remains disabled by default. PR5 includes the promoter page; PR6 is AI Rescue, as defined in the single [PRD roadmap](docs/PRD.md).
+If running `worker:dev`, `http://localhost:8787/api/demo` and `/api/demo/audit` expose the same labelled demo and JSON without a secret. `/health` describes both live switches and effective Qloo caps; `/do-check` exercises `UnitLedger`. Qloo live is configured on and requires its secret; AI live remains disabled until explicitly enabled. See the single [PRD roadmap](docs/PRD.md).
 
 ## Repository layout
 
@@ -46,6 +49,7 @@ If running `worker:dev`, `http://localhost:8787/api/demo` and `/api/demo/audit` 
 src/core/        Validation, fit, travel, decisions, breakpoints, sensitivity and audit
 src/qloo/        Verified Qloo contracts, bounded client and cell-to-city normalization
 src/demo/        Shared Germany scenario builder and explicitly synthetic demo inputs
+src/ai/          Pure proposal tools, AI evidence contracts and synthetic transcript replay
 src/worker/      Pointer to the runtime implementation under worker/
 src/web/         Pointer to the implemented frontend under web/
 worker/         Edge API, SQLite UnitLedger, persistent quotas and private cache
@@ -121,13 +125,13 @@ Leave-one-artist-out removes **comparison artists only**, one at a time, keeping
 
 The fixed Germany API uses the same scenario builder as the tests. Demo artist affinities, venues, availability and fees are invented. Live mode replaces artist evidence with separate Qloo calls while keeping this explicitly synthetic booking scenario and the frozen OSRM matrix. It accepts resolved artist UUIDs and bounded preference changes, not arbitrary routes or Qloo query URLs. The target/comparison weights remain 50/50; up to three comparisons and one distinct control artist are supported. Search and live evaluation each count as one daily action.
 
-Server-side calculation runs inside the existing SQLite `UnitLedger` Durable Object; the outer Worker bounds requests and forwards them. The frontend also runs the pure core for fixture demo, response replay verification and local what-if adjustments. Limits are persistent: **10 outgoing Qloo calls per rolling second**, **50,000 per UTC month**, **30 live actions per UTC day**, and **10 per daily client hash**. Private cache hits skip provider quota but still count as live actions. Failed requests consume their reserved allowance. The Qloo key stays in `QLOO_API_KEY`; only allowlisted metadata and derived ranks reach public responses. See [API](docs/API.md) for schemas and failure behavior.
+Server-side calculation runs inside the existing SQLite `UnitLedger` Durable Object; the outer Worker bounds requests and forwards them. The frontend also runs the pure core for fixture demo, response replay verification and local what-if adjustments. Limits are persistent: **10 outgoing Qloo calls per rolling second**, **50,000 per UTC month**, and defaults of **150 live actions per UTC day** and **25 per daily client hash**. AI uses its separate daily session budget. Private cache hits skip provider quota but still count as live actions. Failed requests consume their reserved allowance. The Qloo key stays in `QLOO_API_KEY`; only allowlisted metadata and derived ranks reach public responses. See [API](docs/API.md) for schemas and failure behavior.
 
 ## Current evidence boundary
 
 Public Qloo fixtures must be **synthetic**. Raw Qloo responses must not be published. The Germany road matrix is a separate maintainer-recorded OSRM model snapshot with its own source, timestamp and units. Qloo response shapes are checked against official documentation and the published official search harness, then exercised with invented values. `src/qloo/geo.ts` maps cells to the frozen cities; the adapter averages returned cell affinity per city before the core computes percentiles. An incomplete profile makes aggregate fit UNKNOWN; it never silently shrinks the city set.
 
-Real coverage for selected artists and access from a deployed Cloudflare Worker remain **UNKNOWN** until maintainer live probes. The client caps each response at 1 MB, 5,000 cells and 10 seconds, with no partial ranking on overflow. No real Qloo key or response was used during implementation. The live key and probe data stay with maintainers. Existing `BRIEF.md` and `QLOO_NOTES.md` remain the source of product and probe requirements.
+Coverage for selected artists is recorded in each returned audit; missing city evidence remains **UNKNOWN**. The client caps each response at 8,000,000 bytes, 60,000 cells and 10 seconds, with no partial ranking on overflow. Maintainers run the deployed live probes; implementation tests use synthetic responses. The live key and raw probe data stay with maintainers. Existing `BRIEF.md` and `QLOO_NOTES.md` remain the source of product and probe requirements.
 
 ## Frontend evidence and design boundaries
 

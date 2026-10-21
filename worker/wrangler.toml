@@ -1,6 +1,7 @@
 name = "tour-rescue-api"
 main = "src/index.ts"
 compatibility_date = "2026-10-21"
+compatibility_flags = ["enable_request_signal", "request_signal_passthrough"]
 
 [vars]
 # Live mode ON. To disable: set to "false" and run `npx wrangler deploy` (or override once with --var LIVE_ENABLED:false).
@@ -10,6 +11,9 @@ ALLOWED_ORIGIN = "https://tour-rescue.pages.dev"
 LIVE_DAILY_CAP = "150"
 LIVE_IP_CAP = "25"
 QLOO_MONTHLY_LIMIT = "50000"
+AI_ENABLED = "false"
+DAILY_AI_LIMIT = "10"
+DAILY_AI_PER_IP_LIMIT = "3"
 
 [[durable_objects.bindings]]
 name = "UNIT_LEDGER"

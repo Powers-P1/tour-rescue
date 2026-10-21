@@ -17,13 +17,17 @@ export type RateDeniedCode =
   | 'QLOO_RATE_LIMIT'
   | 'QLOO_MONTHLY_LIMIT'
   | 'LIVE_DAILY_LIMIT'
-  | 'LIVE_CLIENT_DAILY_LIMIT';
+  | 'LIVE_CLIENT_DAILY_LIMIT'
+  | 'AI_DAILY_LIMIT'
+  | 'AI_CLIENT_DAILY_LIMIT';
 
 const rateMessages: Record<RateDeniedCode, string> = {
   QLOO_RATE_LIMIT: 'The Qloo request rate limit has been reached.',
   QLOO_MONTHLY_LIMIT: 'The Qloo monthly request allowance has been reached.',
   LIVE_DAILY_LIMIT: 'The daily live-mode allowance has been reached.',
   LIVE_CLIENT_DAILY_LIMIT: 'The daily live-mode allowance for this client has been reached.',
+  AI_DAILY_LIMIT: 'The daily AI Rescue session allowance has been reached.',
+  AI_CLIENT_DAILY_LIMIT: 'The daily AI Rescue session allowance for this client has been reached.',
 };
 
 export class RateDenied extends Error {
@@ -44,6 +48,8 @@ export interface LedgerOptions {
   readonly monthlyQlooRequests?: number;
   readonly dailyLiveRequests?: number;
   readonly dailyPerClientRequests?: number;
+  readonly dailyAiSessions?: number;
+  readonly dailyAiPerClientSessions?: number;
   readonly cacheTtlMs?: number;
   readonly cacheMaxEntries?: number;
   readonly cacheMaxEntryBytes?: number;
@@ -54,6 +60,8 @@ interface Limits {
   monthlyQlooRequests: number;
   dailyLiveRequests: number;
   dailyPerClientRequests: number;
+  dailyAiSessions: number;
+  dailyAiPerClientSessions: number;
   cacheTtlMs: number;
   cacheMaxEntries: number;
   cacheMaxEntryBytes: number;
@@ -83,6 +91,7 @@ interface CacheEntry {
 }
 
 const QUOTA_KEY = 'tour-rescue:quotas:v1';
+const AI_QUOTA_KEY = 'tour-rescue:ai-quotas:v1';
 const CACHE_INDEX_KEY = 'tour-rescue:cache-index:v1';
 const cacheKey = (key: string) => `tour-rescue:cache:v1:${key}`;
 const MAX_TIME = 253402300799999; // Last millisecond of year 9999, a supported ISO calendar.
@@ -236,6 +245,8 @@ export class UsageLedger {
       monthlyQlooRequests: limit(options.monthlyQlooRequests, 50000, 50000, 'monthlyQlooRequests'),
       dailyLiveRequests: limit(options.dailyLiveRequests, 150, 1000, 'dailyLiveRequests'),
       dailyPerClientRequests: limit(options.dailyPerClientRequests, 25, 100, 'dailyPerClientRequests'),
+      dailyAiSessions: limit(options.dailyAiSessions, 10, 30, 'dailyAiSessions'),
+      dailyAiPerClientSessions: limit(options.dailyAiPerClientSessions, 3, 10, 'dailyAiPerClientSessions'),
       cacheTtlMs: limit(options.cacheTtlMs, 6 * 60 * 60 * 1000, MAX_TTL, 'cacheTtlMs'),
       cacheMaxEntries: limit(options.cacheMaxEntries, 128, 128, 'cacheMaxEntries'),
       cacheMaxEntryBytes: limit(options.cacheMaxEntryBytes, 256 * 1024, 512 * 1024, 'cacheMaxEntryBytes'),
@@ -244,24 +255,34 @@ export class UsageLedger {
 
   /** Reserve before live work starts. Invalid input and rejected work consume no allowance. */
   async reserveSession(clientHash: string): Promise<void> {
+    await this.reserveDailySession(clientHash, false);
+  }
+
+  /** Separate persistent allowance: provider errors and cancelled sessions are not refunded. */
+  async reserveAiSession(clientHash: string): Promise<void> {
+    await this.reserveDailySession(clientHash, true);
+  }
+
+  private async reserveDailySession(clientHash: string, ai: boolean): Promise<void> {
     if (typeof clientHash !== 'string' || !SHA256.test(clientHash)) {
       throw new TypeError('Client identity must be a SHA-256 hash, never a raw address.');
     }
     await this.storage.transaction(async transaction => {
       const observedNow = timeValue(this.now());
-      const state = quotaState(await transaction.get<unknown>(QUOTA_KEY), observedNow);
+      const key = ai ? AI_QUOTA_KEY : QUOTA_KEY;
+      const state = quotaState(await transaction.get<unknown>(key), observedNow);
       const now = advanceQuota(state, observedNow);
-      if (state.sessions >= this.limits.dailyLiveRequests) {
-        throw new RateDenied('LIVE_DAILY_LIMIT', secondsUntilDayEnd(now));
+      if (state.sessions >= (ai ? this.limits.dailyAiSessions : this.limits.dailyLiveRequests)) {
+        throw new RateDenied(ai ? 'AI_DAILY_LIMIT' : 'LIVE_DAILY_LIMIT', secondsUntilDayEnd(now));
       }
       const client = state.clients.find(row => row.hash === clientHash);
-      if (client !== undefined && client.count >= this.limits.dailyPerClientRequests) {
-        throw new RateDenied('LIVE_CLIENT_DAILY_LIMIT', secondsUntilDayEnd(now));
+      if (client !== undefined && client.count >= (ai ? this.limits.dailyAiPerClientSessions : this.limits.dailyPerClientRequests)) {
+        throw new RateDenied(ai ? 'AI_CLIENT_DAILY_LIMIT' : 'LIVE_CLIENT_DAILY_LIMIT', secondsUntilDayEnd(now));
       }
       if (client === undefined) state.clients.push({ hash: clientHash, count: 1 });
       else client.count += 1;
       state.sessions += 1;
-      await transaction.put(QUOTA_KEY, state);
+      await transaction.put(key, state);
     });
   }
 

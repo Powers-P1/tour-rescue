@@ -1,4 +1,4 @@
-# Decision API and audit (PR4)
+# Decision and AI research API
 
 The API uses the frozen `germany-five-dates-v1` scenario: 24 candidate cities, five dates, one cancellation and three nominated options. All venue and booking facts are explicitly synthetic, including in **live** mode. Live mode changes the artist evidence; it does not verify a venue or create a booking. The directed OSRM snapshot keeps its original provenance.
 
@@ -6,12 +6,13 @@ The API uses the frozen `germany-five-dates-v1` scenario: 24 candidate cities, f
 
 | Method and path | Result | Qloo access / daily action |
 |---|---|---|
-| `GET /health` | Edge version and `liveEnabled` | Neither |
+| `GET /health` | Edge version, `liveEnabled`, `aiEnabled` and effective Qloo `caps` | Neither |
 | `GET /do-check` | Existing `UnitLedger` is reachable and its storage can be read | Neither |
 | `GET /api/demo` | `tour-rescue.api-result.v1` with synthetic artists and the complete audit | Neither |
 | `GET /api/demo/audit` | The same audit as an attachment | Neither |
 | `POST /api/live/search` | Resolved artist IDs/names and projected search evidence | One daily action; provider quota on cache miss |
 | `POST /api/live` | `tour-rescue.api-result.v1` with resolved IDs and a complete audit | One daily action; separate provider calls for target, comparisons and control on cache miss |
+| `POST /api/ai/live` | NDJSON progress and `tour-rescue.ai-session.v1` | One separate daily AI session; no extra Qloo acquisition |
 
 The edge accepts only the configured browser origin. Requests without an Origin header are permitted, so this is CORS configuration, not authentication. Every live action still requires Cloudflare's server-provided client address and consumes durable limits. The address is transformed into a keyed daily hash before it reaches the Durable Object and is never returned. Query-string parameters are not supported. JSON request bodies are capped at 16 KiB, including streamed bodies without a Content-Length.
 
@@ -61,6 +62,24 @@ The result wrapper contains `schemaVersion`, `mode`, `scenarioId`, selected `art
 
 ## What the audit proves
 
+### AI research request (PR6)
+
+`POST /api/ai/live` accepts `{ "baseRunId": "<runId from your live Qloo result>" }` plus optional `policy` and `additionalBudgetMinorUnits` using the same bounds as live evaluation. It rejects arbitrary context, routes, model/tool configuration and venue facts. The Worker retrieves private rank-only replay by run ID and daily client identity; it cannot research someone else's run. Missing, expired or evicted context returns 409 `AI_BASE_EXPIRED` before charging a session. Both live switches and secrets are required.
+
+Successful transport uses `application/x-ndjson`, `Cache-Control: no-store, no-transform` and the usual exact-origin CORS headers. Each line is one of:
+
+```json
+{"type":"step","step":{"sequence":1,"at":"2026-10-21T12:00:00.000Z","type":"status","message":"Research started."}}
+{"type":"result","result":{"schemaVersion":"tour-rescue.ai-session.v1","...":"complete versioned session"}}
+{"type":"error","error":{"code":"AI_SERVICE_UNAVAILABLE","message":"The AI session could not be completed. No new option was accepted."}}
+```
+
+The abbreviated result above is illustrative, not a parseable session fixture. The actual session includes exact model, baseline result, 2–4 checked proposals on completion, source metadata, safe step summaries, usage, warnings and `stopReason`. HTTP 200 only establishes the stream: a non-`completed` result is incomplete and cannot be accepted. Provider errors do not expose provider bodies or trigger a model/demo fallback. Cancellation aborts in-flight work without refunding a reserved session. Bounds and source semantics are in [AI_RESCUE](AI_RESCUE.md).
+
+The frontend reruns the pure checker on received drafts and again on explicit acceptance. It does not submit new bookings to an API. After acceptance, audit download uses `tour-rescue.ai-audit.v1` with `session`, any `priorSessions` still supplying the other card, `accepted` and the current nested `decisionAudit`; the original Qloo-only audit remains v1 and independently replayable.
+
+### Deterministic audit fields
+
 `tour-rescue.decision-audit.v1` records:
 
 - `frozenCandidateSet`: the exact city universe, including when provider acquisition fails.
@@ -85,6 +104,6 @@ Invalid requests return 400/413/415; unsupported methods return 405. An unapprov
 
 A live **evaluation** whose Qloo request fails still returns HTTP 200 when a valid audit can be computed: the failed query is logged, required fit/recommendation become UNKNOWN, and the response never switches to synthetic artist data. If only the control fails, the baseline stays available and the control is UNKNOWN. Partial heatmaps retain every frozen city and explicit missing observations; there is no silent subset ranking. A failed required baseline acquisition prevents constructing a full baseline/leave-one-out fit input; the audit says why rather than inventing its provenance.
 
-The private client sends GET `/v2/insights` with `filter.type=urn:heatmap`, one `signal.interests.entities` UUID, the fixed bounded WKT and `output.heatmap.boundary=urn:geohash`. It never sends heatmap `take`. At most two artist bodies are in flight at once. Each response is limited to 1,000,000 bytes, 5,000 cells and ten seconds, including download; exceeding a bound fails the complete query. Mean mapped-cell affinity is computed per city, then converted into within-query percentiles by the core. Coverage of all 24 cities for real selected artists is UNKNOWN until maintainers probe it.
+The private client sends GET `/v2/insights` with `filter.type=urn:heatmap`, one `signal.interests.entities` UUID, the fixed bounded WKT and `output.heatmap.boundary=urn:geohash`. It never sends heatmap `take`. At most two artist bodies are in flight at once. Each response is limited to 8,000,000 bytes, 60,000 cells and ten seconds, including download; exceeding a bound fails the complete query. Mean mapped-cell affinity is computed per city, then converted into within-query percentiles by the core. Coverage of all 24 cities for real selected artists is UNKNOWN until maintainers probe it.
 
-The SQLite ledger persists provider ceilings of 10 calls per rolling second and 50,000 per UTC month; these limits cover calls made by this service, not other uses of the same provider key. Daily defaults are 30 live actions globally and 10 per keyed client hash. Search and evaluation both count, including cache hits. Failed attempts are not refunded. The private cache uses a six-hour TTL, up to 128 entries and at most 512 KiB per stored entry; an oversized valid response may be used without being cached. Raw provider projections remain server-side. See [DEPLOY](DEPLOY.md) for the live switch and maintainer smoke check.
+The SQLite ledger persists provider ceilings of 10 calls per rolling second and 50,000 per UTC month; these limits cover calls made by this service, not other uses of the same provider key. Daily defaults are 150 live actions globally and 25 per keyed client hash, configurable up to 1000/100. Search and evaluation both count, including cache hits. Failed attempts are not refunded. The private cache uses a six-hour TTL, up to 128 entries and at most 512 KiB per stored entry; an oversized valid response may be used without being cached. Raw provider projections remain server-side. See [DEPLOY](DEPLOY.md) for the live switch and maintainer smoke check.

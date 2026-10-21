@@ -55,6 +55,13 @@ small { font-size: .78rem; }
 .live-button { display: inline-flex; align-items: center; gap: 7px; border: 0; background: transparent; padding: 0; font-size: .8rem; font-weight: 600; }
 .live-dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; }
 .mode-note { display: block; color: var(--muted); font-size: .67rem; margin-left: auto; }
+.ai-mode-button { width: 100%; border: 1px solid #aebed3; background: #f4f7fa; font-size: .7rem; font-weight: 650; padding: 6px 5px; line-height: 1.3; }
+.ai-mode-button[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+.ai-card-note { color: #386585; font-size: .76rem; margin-top: 8px; }
+.accepted-research { margin-top: 24px; padding: 22px; }
+.accepted-research > .muted { font-size: .88rem; margin-top: 8px; }
+.research-source-list { padding-left: 20px; margin: 14px 0; display: grid; gap: 10px; overflow-wrap: anywhere; }
+.research-source-list small { display: block; color: var(--muted); margin-top: 3px; }
 .main-content { max-width: 1510px; padding: 25px 36px 26px; margin: 0 auto; }
 .page-hero { margin-bottom: 30px; }
 .eyebrow { color: #7a8da3; font-size: .66rem; font-weight: 650; letter-spacing: .13em; margin-bottom: 10px; }
