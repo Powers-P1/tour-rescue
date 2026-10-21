@@ -9,14 +9,17 @@
     "node": ">=24 <25"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit && tsc --project web/tsconfig.json --noEmit",
+    "typecheck": "tsc --noEmit && tsc --project web/tsconfig.json --noEmit && tsc --project web2/tsconfig.json --noEmit",
     "test": "node --test --test-isolation=none tests/*.test.ts",
     "check": "npm run typecheck && npm test",
     "worker:dev": "wrangler dev --config worker/wrangler.toml",
     "worker:build": "wrangler deploy --dry-run --config worker/wrangler.toml --outdir dist/worker",
     "web:build": "node web/build.mjs",
     "web:dev": "npm run web:build && node web/serve.mjs",
-    "web:preview": "node web/serve.mjs"
+    "web:preview": "node web/serve.mjs",
+    "web2:build": "node web2/build.mjs",
+    "web2:dev": "npm run web2:build && node web2/serve.mjs",
+    "web2:preview": "node web2/serve.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

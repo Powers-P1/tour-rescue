@@ -25,6 +25,7 @@ jobs:
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run check
       - run: npm run web:build
+      - run: npm run web2:build
       - run: npm run worker:build
         env:
           WRANGLER_SEND_METRICS: "false"
