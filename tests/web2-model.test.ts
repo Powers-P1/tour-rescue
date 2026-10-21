@@ -22,3 +22,15 @@ test('unknown driving evidence remains unknown, not a fabricated zero', () => {
   assert.equal(duration({ status: 'known', value: 12_600 }), '3h 30m');
   assert.equal(duration({ status: 'known', value: 0 }), '0m');
 });
+
+test('Frankfurt cannot advertise a passing outcome when extra distance fails', () => {
+  const demo = createDemoResult({ runId: 'frankfurt-test', generatedAt: '2026-10-21T12:00:00.000Z' });
+  const view = projectRescue(demo);
+  const frankfurt = view.options.find(option => option.cityName === 'Frankfurt');
+  assert.ok(frankfurt);
+  const failedExtraDistance = frankfurt.checks.some(check => check.id === 'decision:additional-distance' && check.status === 'FAIL');
+  assert.equal(failedExtraDistance, true, 'Fixture should expose the extra-distance failure');
+  assert.equal(frankfurt.decisionCheck, 'FAIL');
+  assert.match(frankfurt.reason, /extra distance exceeds your cap/i);
+  assert.doesNotMatch(frankfurt.reason, /taste fit meets threshold/i);
+});

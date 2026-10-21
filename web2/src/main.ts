@@ -121,7 +121,8 @@ function shortlist(): string {
         '<span class="fake-radio" aria-hidden="true"></span></div>' +
         '<div class="option-reason">' + HTML(option.reason) + '</div>' +
         '<div class="drive-line">' + (option.kind === 'day-off' ? 'No added show · locked dates retained' :
-          HTML(option.inbound) + ' in <span class="middle-dot">·</span> ' + HTML(option.outbound) + ' onward') + '</div></button>';
+          HTML(option.inbound) + ' in <span class="middle-dot">·</span> ' + HTML(option.outbound) + ' onward') + '</div>' +
+        '<div class="option-validation">' + statusBadge(option.decisionCheck) + '</div></button>';
     }).join('') + '</fieldset>' +
     '<div class="focused-bottom">' + primary('Review ' + (optionById(pendingId)?.cityName ?? 'option') + ' →', 'review') +
     '<p class="tiny-label">Source-labelled estimates · venue/date not confirmed</p>' +
@@ -291,7 +292,7 @@ function liveDialog(): string {
   const formatArtist = (artist: ArtistChoice | null) =>
     artist ? HTML(artist.name ?? artist.id) : '<em>Not selected</em>';
   return '<div class="modal-backdrop"><section role="dialog" aria-modal="true" aria-labelledby="live-title" class="live-dialog">' +
-    '<div class="modal-head"><div><p class="overline accent-text">LIVE QLOO · EXPLICIT ACTION</p><h2 id="live-title">Fresh cultural-fit evidence</h2></div>' +
+    '<div class="modal-head"><div><p class="overline accent-text">LIVE QLOO · EXPLICIT ACTION</p><h2 id="live-title" tabindex="-1">Fresh cultural-fit evidence</h2></div>' +
     '<button class="close-button" type="button" data-action="close-live" aria-label="Close">×</button></div>' +
     '<p class="muted">Search for real, resolved Qloo artists. Live results replace the demo taste data, not the synthetic tour, venue or OSRM snapshot.</p>' +
     '<p class="tiny-label">Each search and evaluation consumes a rate-limited Worker action. No API key reaches your browser.</p>' +
@@ -313,23 +314,82 @@ function liveDialog(): string {
 function sosDialog(): string {
   if (!showSOS) return '';
   return '<div class="modal-backdrop"><section class="sos-dialog" role="dialog" aria-modal="true" aria-label="Local SOS">' +
-    '<p class="overline accent-text">LOCAL SOS</p><h2>Designed for the next increment.</h2>' +
+    '<p class="overline accent-text">LOCAL SOS</p><h2 tabindex="-1">Designed for the next increment.</h2>' +
     '<p>The supplier shortlist and spend approval shown in board 02 are sample concepts, not working bookings or dispatch.</p>' +
     primary('Return to the tour', 'close-sos') + '</section></div>';
 }
+const desktopMedia = window.matchMedia('(min-width: 980px)');
+let dialogReturnAction: 'open-live' | 'sos' | null = null;
+
+/** Match previous keyboard target across DOM updates; scoped to the only mounted layout. */
+function previousFocus(): { id?: string; action?: string; dataId?: string; dataIndex?: string } | null {
+  const active = document.activeElement;
+  if (!active || !root!.contains(active)) return null;
+  if (!(active instanceof HTMLElement)) return null;
+  const action = active.closest<HTMLElement>('[data-action]');
+  return {
+    ...(active.id ? { id: active.id } : {}),
+    ...(action?.dataset.action ? { action: action.dataset.action } : {}),
+    ...(action?.dataset.id ? { dataId: action.dataset.id } : {}),
+    ...(action?.dataset.index ? { dataIndex: action.dataset.index } : {}),
+  };
+}
+function findPreviousTarget(focus: NonNullable<ReturnType<typeof previousFocus>>, scope: Element): HTMLElement | null {
+  if (focus.id) {
+    const match = document.getElementById(focus.id);
+    if (match instanceof HTMLElement && scope.contains(match)) return match;
+  }
+  if (!focus.action) return null;
+  return [...scope.querySelectorAll<HTMLElement>('[data-action]')].find(node =>
+    node.dataset.action === focus.action
+    && (focus.dataId === undefined || node.dataset.id === focus.dataId)
+    && (focus.dataIndex === undefined || node.dataset.index === focus.dataIndex)) ?? null;
+}
+function focusFirstHeading(scope: Element): void {
+  const heading = scope.querySelector<HTMLElement>('h1, h2, [role="heading"]');
+  if (heading) { heading.setAttribute('tabindex', '-1'); heading.focus(); }
+  else root!.querySelector<HTMLElement>('#main')?.focus();
+}
+function focusedDialog(): HTMLElement | null {
+  return root!.querySelector<HTMLElement>('[role="dialog"][aria-modal="true"]');
+}
 function render(): void {
+  const focus = previousFocus();
+  const priorDialog = focusedDialog();
+  const previouslyInDialog = !!(priorDialog && document.activeElement && priorDialog.contains(document.activeElement));
+  const previouslyRendered = root!.querySelector('.app-layout') !== null;
   document.body.classList.toggle('focused-rescue', isFocusedRescue(incident.phase) && ['options','detail','draft'].includes(screen));
+  const desktop = desktopMedia.matches;
   const mobile = screen === 'today' ? homeMobile() : screen === 'options' ? shortlist() :
     screen === 'detail' ? details() : screen === 'draft' ? draft() : screen === 'crew' ? crew() : unbuilt();
+  // Only one responsive tree is mounted. Every id, label and heading is unique.
   root!.innerHTML = '<a href="#main" class="skip-link">Skip to content</a>' +
-    '<div class="app-layout">' + sidebar() + '<main id="main" class="main-content" tabindex="-1">' +
-    '<div class="mobile-only">' + mobile + '</div>' +
-    '<div class="desktop-only">' + desktopInner() + '</div>' +
+    '<div class="app-layout">' + (desktop ? sidebar() : '') + '<main id="main" class="main-content" tabindex="-1">' +
+    (desktop ? '<div class="desktop-only">' + desktopInner() + '</div>' : '<div class="mobile-only">' + mobile + '</div>') +
     (notice ? '<p role="status" class="toast">' + HTML(notice) + '</p>' : '') +
     '</main></div>' + liveDialog() + sosDialog();
   printRoot!.innerHTML = screen === 'draft' && chosenProposal ? sheetHtml(chosenProposal) : '';
   document.title = 'Tour Rescue · ' + (screen === 'today' ? 'Today' : screen === 'options' ? 'Rescue options' : screen === 'detail' ? 'Review' : screen === 'draft' ? 'Promoter draft' : screen === 'crew' ? 'Crew' : unbuiltName);
+
+  const dialog = focusedDialog();
+  const layout = root!.querySelector<HTMLElement>('.app-layout');
+  if (layout) layout.inert = dialog !== null; // real background tab suppression
+  if (dialog) {
+    const restored = previouslyInDialog && focus ? findPreviousTarget(focus, dialog) : null;
+    if (restored && !restored.hasAttribute('disabled')) restored.focus();
+    else focusFirstHeading(dialog);
+  } else if (priorDialog && dialogReturnAction) {
+    const opener = root!.querySelector<HTMLElement>('[data-action="' + dialogReturnAction + '"]');
+    dialogReturnAction = null;
+    if (opener) opener.focus();
+    else focusFirstHeading(root!.querySelector('#main') ?? root!);
+  } else if (previouslyRendered) {
+    const restored = focus ? findPreviousTarget(focus, root!) : null;
+    if (restored && !restored.hasAttribute('disabled')) restored.focus();
+    else if (focus) focusFirstHeading(root!.querySelector('#main') ?? root!);
+  }
 }
+desktopMedia.addEventListener('change', () => render());
 function goHome(): void {
   incident = initialIncident();
   screen = 'today';
@@ -500,9 +560,9 @@ root!.addEventListener('click', async event => {
       try { await navigator.clipboard.writeText(window.location.href); notice = 'Preview link copied (not a booking).'; }
       catch { notice = 'Copy this page URL to share the preview.'; }
       render(); break;
-    case 'sos': showSOS = true; render(); break;
+    case 'sos': dialogReturnAction = 'sos'; showSOS = true; render(); break;
     case 'close-sos': showSOS = false; render(); break;
-    case 'open-live': liveOpen = true; notice = ''; render(); break;
+    case 'open-live': dialogReturnAction = 'open-live'; liveOpen = true; notice = ''; render(); break;
     case 'close-live': liveOpen = false; render(); break;
     case 'pick-artist': {
       const choice = liveChoices[Number(button.dataset.index)];
@@ -517,11 +577,34 @@ root!.addEventListener('click', async event => {
     case 'run-live': await runLive(); break;
   }
 });
-root!.addEventListener('keydown', event => {
-  if (event.key === 'Escape' && (liveOpen || showSOS)) {
-    if (liveOpen) liveOpen = false;
-    else showSOS = false;
-    render();
+document.addEventListener('keydown', event => {
+  const dialog = focusedDialog();
+  if (dialog) {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      if (liveOpen) liveOpen = false;
+      else showSOS = false;
+      render();
+      return;
+    }
+    if (event.key === 'Tab') {
+      const focusable = [...dialog.querySelectorAll<HTMLElement>(
+        'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
+      )].filter(node => node.getClientRects().length > 0);
+      if (!focusable.length) { event.preventDefault(); focusFirstHeading(dialog); return; }
+      const first = focusable[0]!;
+      const last = focusable[focusable.length - 1]!;
+      const active = document.activeElement;
+      if (!active || !dialog.contains(active) || (event.shiftKey && active === first) ||
+          (event.shiftKey && !focusable.includes(active as HTMLElement))) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
     return;
   }
   if (screen === 'options' && (event.key === 'ArrowDown' || event.key === 'ArrowUp')
@@ -536,6 +619,11 @@ root!.addEventListener('keydown', event => {
     [...root!.querySelectorAll<HTMLElement>('[data-action="select-option"]')]
       .find(node => node.dataset.id === pendingId)?.focus();
   }
+});
+// Programmatic focus (including screen readers) must not escape an open modal.
+document.addEventListener('focusin', event => {
+  const dialog = focusedDialog();
+  if (dialog && event.target instanceof Node && !dialog.contains(event.target)) focusFirstHeading(dialog);
 });
 // The old web/ shell and deployment remain unchanged until PR-D.
 render();

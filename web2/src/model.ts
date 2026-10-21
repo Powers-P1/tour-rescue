@@ -91,13 +91,31 @@ export function projectRescue(result: ApiDecisionResult): RescueProjection {
     const fitKnown = option.fit.status === 'known';
     const fitPass = fitKnown && option.fit.value >= policy.minimumFitIndex;
     const routeCheck = option.routingStatus;
-    const reason = candidate.kind === 'day-off'
-      ? 'Protect the next confirmed show. No replacement booking.'
-      : routeCheck === 'FAIL' ? 'Route constraints fail. Review the evidence.'
-        : !fitKnown ? 'Taste fit unavailable. Evidence to confirm.'
-          : !fitPass ? 'Relative taste fit below your threshold.'
-            : routeCheck === 'UNKNOWN' ? 'Taste fit meets threshold. Route needs evidence.'
-              : 'Taste fit meets threshold. Check the venue and terms.';
+    // The complete deterministic decision is authoritative, not just the travel + fit subset.
+    // In particular Frankfurt can meet the fit threshold while failing the extra-distance cap.
+    const failed = decision.checks.filter(check => check.status === 'FAIL');
+    const unresolved = decision.checks.filter(check => check.status === 'UNKNOWN');
+    const reason = failed.some(check => check.id === 'decision:additional-distance')
+      ? 'Extra distance exceeds your cap. See evidence.'
+      : failed.some(check => check.id === 'decision:minimum-fit')
+        ? 'Relative taste fit falls below your threshold.'
+        : failed.some(check => check.id === 'venue-availability')
+          ? 'Supplied venue availability fails. See evidence.'
+          : failed.length > 0 || decision.status === 'FAIL'
+            ? 'A declared constraint fails. See evidence.'
+            : decision.status === 'UNKNOWN' || unresolved.length > 0
+              ? (candidate.kind === 'day-off'
+                ? 'Locked dates remain. Other checks need confirmation.'
+                : 'Checks need confirmation. See evidence.')
+              : candidate.kind === 'day-off'
+                ? 'Protect the next confirmed show. No replacement booking.'
+                : routeCheck === 'UNKNOWN'
+                  ? 'Route evidence needs confirmation.'
+                  : !fitKnown
+                    ? 'Taste fit unavailable. Evidence to confirm.'
+                    : !fitPass
+                      ? 'Relative taste fit falls below your threshold.'
+                      : 'Taste fit meets threshold. Check the venue and terms.';
     return {
       id: option.id, kind: option.kind,
       cityId,
