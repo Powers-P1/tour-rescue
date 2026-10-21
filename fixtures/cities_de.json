@@ -1,0 +1,205 @@
+{
+  "schemaVersion": 1,
+  "id": "cities-de-v1",
+  "dataKind": "reference",
+  "description": "Frozen candidate city set for the Germany demo scenario (24 cities, fixed order = OSRM matrix index order).",
+  "provenance": {
+    "coordinates": "English Wikipedia page coordinates (MediaWiki API prop=coordinates, GeoNames-compatible city-centre points), retrieved 2026-10-21, rounded to 4 decimals",
+    "population": "Approximate resident population rounded to the nearest 10,000, from English Wikipedia city infoboxes (2022-2023 figures); used only for display and sorting, not for scoring",
+    "license_note": "Facts (coordinates, rounded counts) from CC BY-SA sources; no Qloo data."
+  },
+  "cities": [
+    {
+      "id": "de-hamburg",
+      "name": "Hamburg",
+      "lat": 53.55,
+      "lon": 10.0,
+      "population": 1890000,
+      "country": "DE"
+    },
+    {
+      "id": "de-berlin",
+      "name": "Berlin",
+      "lat": 52.52,
+      "lon": 13.405,
+      "population": 3670000,
+      "country": "DE"
+    },
+    {
+      "id": "de-leipzig",
+      "name": "Leipzig",
+      "lat": 51.34,
+      "lon": 12.375,
+      "population": 620000,
+      "country": "DE"
+    },
+    {
+      "id": "de-munich",
+      "name": "Munich",
+      "lat": 48.1375,
+      "lon": 11.575,
+      "population": 1510000,
+      "country": "DE"
+    },
+    {
+      "id": "de-cologne",
+      "name": "Cologne",
+      "lat": 50.9364,
+      "lon": 6.9528,
+      "population": 1080000,
+      "country": "DE"
+    },
+    {
+      "id": "de-frankfurt",
+      "name": "Frankfurt am Main",
+      "lat": 50.1106,
+      "lon": 8.6822,
+      "population": 760000,
+      "country": "DE"
+    },
+    {
+      "id": "de-stuttgart",
+      "name": "Stuttgart",
+      "lat": 48.7775,
+      "lon": 9.18,
+      "population": 630000,
+      "country": "DE"
+    },
+    {
+      "id": "de-duesseldorf",
+      "name": "Düsseldorf",
+      "lat": 51.2256,
+      "lon": 6.7767,
+      "population": 630000,
+      "country": "DE"
+    },
+    {
+      "id": "de-dortmund",
+      "name": "Dortmund",
+      "lat": 51.5139,
+      "lon": 7.4653,
+      "population": 590000,
+      "country": "DE"
+    },
+    {
+      "id": "de-essen",
+      "name": "Essen",
+      "lat": 51.4508,
+      "lon": 7.0131,
+      "population": 580000,
+      "country": "DE"
+    },
+    {
+      "id": "de-bremen",
+      "name": "Bremen",
+      "lat": 53.0758,
+      "lon": 8.8072,
+      "population": 570000,
+      "country": "DE"
+    },
+    {
+      "id": "de-dresden",
+      "name": "Dresden",
+      "lat": 51.05,
+      "lon": 13.74,
+      "population": 560000,
+      "country": "DE"
+    },
+    {
+      "id": "de-hanover",
+      "name": "Hanover",
+      "lat": 52.3667,
+      "lon": 9.7167,
+      "population": 530000,
+      "country": "DE"
+    },
+    {
+      "id": "de-nuremberg",
+      "name": "Nuremberg",
+      "lat": 49.4539,
+      "lon": 11.0775,
+      "population": 520000,
+      "country": "DE"
+    },
+    {
+      "id": "de-duisburg",
+      "name": "Duisburg",
+      "lat": 51.4347,
+      "lon": 6.7625,
+      "population": 500000,
+      "country": "DE"
+    },
+    {
+      "id": "de-bochum",
+      "name": "Bochum",
+      "lat": 51.4819,
+      "lon": 7.2158,
+      "population": 360000,
+      "country": "DE"
+    },
+    {
+      "id": "de-wuppertal",
+      "name": "Wuppertal",
+      "lat": 51.2667,
+      "lon": 7.1833,
+      "population": 360000,
+      "country": "DE"
+    },
+    {
+      "id": "de-bielefeld",
+      "name": "Bielefeld",
+      "lat": 52.0211,
+      "lon": 8.5347,
+      "population": 330000,
+      "country": "DE"
+    },
+    {
+      "id": "de-bonn",
+      "name": "Bonn",
+      "lat": 50.7353,
+      "lon": 7.1022,
+      "population": 330000,
+      "country": "DE"
+    },
+    {
+      "id": "de-muenster",
+      "name": "Münster",
+      "lat": 51.9625,
+      "lon": 7.6256,
+      "population": 320000,
+      "country": "DE"
+    },
+    {
+      "id": "de-karlsruhe",
+      "name": "Karlsruhe",
+      "lat": 49.0092,
+      "lon": 8.404,
+      "population": 310000,
+      "country": "DE"
+    },
+    {
+      "id": "de-mannheim",
+      "name": "Mannheim",
+      "lat": 49.4878,
+      "lon": 8.4661,
+      "population": 310000,
+      "country": "DE"
+    },
+    {
+      "id": "de-augsburg",
+      "name": "Augsburg",
+      "lat": 48.3689,
+      "lon": 10.8978,
+      "population": 300000,
+      "country": "DE"
+    },
+    {
+      "id": "de-kassel",
+      "name": "Kassel",
+      "lat": 51.3158,
+      "lon": 9.4979,
+      "population": 200000,
+      "country": "DE"
+    }
+  ]
+}
