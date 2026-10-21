@@ -1,4 +1,4 @@
-import { allowedOrigin, caps, liveEnabled } from './config.ts';
+import { aiEnabled, allowedOrigin, caps, liveEnabled } from './config.ts';
 import type { WorkerEnv } from './config.ts';
 import { API_VERSION, HttpError, inputObject, json, problem, readJson } from './http.ts';
 
@@ -34,14 +34,16 @@ export async function handleWorkerRequest(request: Request, env: WorkerEnv, now 
   if (request.method === 'OPTIONS') return finish(new Response(null, { status: 204 }));
   if (url.search !== '') return finish(problem(400, 'QUERY_NOT_ALLOWED', 'Use the documented path and JSON body; URL parameters are not supported.'));
   if (url.pathname === '/health') return finish(request.method === 'GET'
-    ? json({ ok: true, version: API_VERSION, liveEnabled: liveEnabled(env), caps: caps(env) })
+    ? json({ ok: true, version: API_VERSION, liveEnabled: liveEnabled(env), aiEnabled: aiEnabled(env), caps: caps(env) })
     : problem(405, 'METHOD_NOT_ALLOWED', 'Use GET.'));
   const internal = ({ '/do-check': '/health', '/api/demo': '/demo', '/api/demo/audit': '/demo/audit',
-    '/api/live': '/live', '/api/live/search': '/search' } as Record<string, string>)[url.pathname];
+    '/api/live': '/live', '/api/live/search': '/search', '/api/ai/live': '/ai/live' } as Record<string, string>)[url.pathname];
   if (internal === undefined) return finish(problem(404, 'NOT_FOUND', 'No such API route.'));
-  const live = internal === '/live' || internal === '/search';
+  const ai = internal === '/ai/live';
+  const live = internal === '/live' || internal === '/search' || ai;
   if (request.method !== (live ? 'POST' : 'GET')) return finish(problem(405, 'METHOD_NOT_ALLOWED', live ? 'Use POST.' : 'Use GET.'));
   if (live && !liveEnabled(env)) return finish(problem(503, 'LIVE_DISABLED', 'Live mode is disabled; the labelled demo remains available.'));
+  if (ai && !aiEnabled(env)) return finish(problem(503, 'AI_DISABLED', 'AI Rescue live mode is disabled; saved demo transcripts remain available.'));
   try {
     const headers = new Headers();
     let body: string | undefined;
@@ -52,7 +54,7 @@ export async function handleWorkerRequest(request: Request, env: WorkerEnv, now 
       }
       const input = await readJson(request);
       // Projection and exact field validation happen again in the DO before any reservation.
-      inputObject(input, internal === '/search' ? ['query'] :
+      inputObject(input, ai ? ['baseRunId', 'policy', 'additionalBudgetMinorUnits'] : internal === '/search' ? ['query'] :
         ['scenarioId', 'targetArtistId', 'comparisonArtistIds', 'controlArtistId', 'policy', 'additionalBudgetMinorUnits']);
       body = JSON.stringify(input);
       headers.set('Content-Type', 'application/json');
@@ -60,7 +62,7 @@ export async function handleWorkerRequest(request: Request, env: WorkerEnv, now 
     }
     const stub = env.UNIT_LEDGER.get(env.UNIT_LEDGER.idFromName(LEDGER_NAME));
     const forwarded = new Request(`https://unit-ledger.internal${internal}`, {
-      method: live ? 'POST' : 'GET', headers, ...(body === undefined ? {} : { body }),
+      method: live ? 'POST' : 'GET', headers, signal: request.signal, ...(body === undefined ? {} : { body }),
     });
     return finish(await stub.fetch(forwarded));
   } catch (error) {

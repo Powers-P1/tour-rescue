@@ -151,6 +151,12 @@ Except in the AI Rescue mode (PR6), an LLM may only summarize already computed e
 
 These are logical delivery increments, not GitHub pull-request numbers. The promoter sheet follows the comparison front end so it can reuse the selected option and the audit without delaying PR4. Maintainers supply private Qloo probes and the OSRM freeze, review contract assumptions, configure secrets, deploy and merge. No implementation PR claims a live probe or deployment that has not been performed.
 
+## PR6 implementation boundary
+
+The implemented **AI Rescue (Pro)** view researches a private server-recorded live Qloo context with the exact `claude-sonnet-5-5` model, or replays one of two explicitly authored synthetic transcripts without provider calls. It proposes 2–4 replacement/detour leads; each is deterministically checked and requires explicit acceptance to replace the corresponding comparison card. Day off, the frozen city set, directed road evidence and four locked shows stay fixed. Public venue research leaves booking facts UNKNOWN. An incomplete AI run cannot be accepted.
+
+Research sources and acceptance history use a separate versioned envelope around the existing decision audit. The agent streams public tool summaries, has persistent daily session limits and bounded steps/output tokens/web calls/time. Exact contracts, limits and the unverified live-provider boundary are specified in [AI_RESCUE](AI_RESCUE.md). “Pro” names the proposed tier; billing is outside this PR.
+
 ## Synthetic scenario
 
 `fixtures/synthetic/tour__five-dates__one-cancelled.json` is a small application-level example: five Polish dates, the middle Warsaw show cancelled, four immutable dates, Radom as the labelled replacement, Kielce as the labelled detour, and a day-off candidate.

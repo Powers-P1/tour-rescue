@@ -9,6 +9,11 @@ export class ScenarioInputError extends Error {
 
 const ISO_WITH_OFFSET = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})([+-])(\d{2}):(\d{2})$/;
 const IANA_NAME = /^[A-Za-z][A-Za-z0-9._+-]*(?:\/[A-Za-z0-9._+-]+)*$/;
+// Intl formatters own comparatively expensive native ICU state. A decision audit
+// revisits the same zones thousands of times; retain only a small bounded set.
+// These private instances never leave this module or cache calculation results.
+const FORMATTER_CACHE_LIMIT = 32;
+const formatterCache = new Map<string, Intl.DateTimeFormat>();
 
 type CalendarParts = {
   year: number;
@@ -20,23 +25,34 @@ type CalendarParts = {
 };
 
 export function assertTimeZone(value: string, path = 'timeZone'): void {
-  if (typeof value !== 'string' || !IANA_NAME.test(value)) {
-    throw new ScenarioInputError(path, 'must be a valid IANA time-zone identifier, not a numeric offset');
-  }
-  try {
-    new Intl.DateTimeFormat('en-GB', { timeZone: value }).format(0);
-  } catch {
-    throw new ScenarioInputError(path, 'must be a valid IANA time-zone identifier');
-  }
+  formatter(value, path);
 }
 
-function formatter(timeZone: string): Intl.DateTimeFormat {
-  assertTimeZone(timeZone);
-  return new Intl.DateTimeFormat('en-GB', {
-    timeZone, calendar: 'gregory', numberingSystem: 'latn',
-    year: 'numeric', month: '2-digit', day: '2-digit', era: 'short',
-    hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
-  });
+function formatter(timeZone: string, path = 'timeZone'): Intl.DateTimeFormat {
+  if (typeof timeZone !== 'string' || !IANA_NAME.test(timeZone)) {
+    throw new ScenarioInputError(path, 'must be a valid IANA time-zone identifier, not a numeric offset');
+  }
+  const cached = formatterCache.get(timeZone);
+  if (cached !== undefined) {
+    // Refresh insertion order so commonly reused tour zones survive eviction.
+    formatterCache.delete(timeZone);
+    formatterCache.set(timeZone, cached);
+    return cached;
+  }
+  let created: Intl.DateTimeFormat;
+  try {
+    created = new Intl.DateTimeFormat('en-GB', {
+      timeZone, calendar: 'gregory', numberingSystem: 'latn',
+      year: 'numeric', month: '2-digit', day: '2-digit', era: 'short',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
+    });
+  } catch {
+    // Invalid zones are never retained: each caller keeps its own error path.
+    throw new ScenarioInputError(path, 'must be a valid IANA time-zone identifier');
+  }
+  if (formatterCache.size >= FORMATTER_CACHE_LIMIT) formatterCache.delete(formatterCache.keys().next().value!);
+  formatterCache.set(timeZone, created);
+  return created;
 }
 
 function assertEpoch(value: number, path = 'epochSeconds'): void {

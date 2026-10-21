@@ -10,9 +10,11 @@ import type { QlooClientOptions, QlooResult } from '../../src/qloo/client.ts';
 import { QLOO_ENTITY_ID } from '../../src/qloo/normalize.ts';
 import { loadCityCells } from '../../src/qloo/geo.ts';
 import type { WorkerEnv } from './config.ts';
-import { liveEnabled } from './config.ts';
+import { aiEnabled, liveEnabled } from './config.ts';
 import { API_VERSION, HttpError, inputObject, json, problem, readJson } from './http.ts';
 import { RateDenied, UsageLedger } from './ledger.ts';
+import { handleAiLive, rememberAiBase } from './ai-routes.ts';
+import type { runAiSession } from './ai-agent.ts';
 
 interface LiveInput {
   targetArtistId: string;
@@ -41,6 +43,7 @@ export interface UnitDependencies {
   readonly now?: () => number;
   readonly runId?: () => string;
   readonly probeStorage?: () => Promise<void>;
+  readonly runAi?: typeof runAiSession;
 }
 
 function entity(value: unknown): string {
@@ -135,6 +138,12 @@ export function createUnitHandler(deps: UnitDependencies): (request: Request) =>
         return path === '/demo' ? json(result) : json(result.audit, 200,
           { 'Content-Disposition': 'attachment; filename="tour-rescue-demo-audit.json"' });
       }
+      if (path === '/ai/live' && request.method === 'POST') {
+        return await handleAiLive(request, { env: deps.env, ledger: deps.ledger, now, runId,
+          ...(deps.fetch === undefined ? {} : { fetch: deps.fetch }),
+          ...(deps.runAi === undefined ? {} : { runAi: deps.runAi }),
+        });
+      }
       if ((path !== '/live' && path !== '/search') || request.method !== 'POST') {
         return problem(404, 'NOT_FOUND', 'No such internal operation.');
       }
@@ -148,6 +157,9 @@ export function createUnitHandler(deps: UnitDependencies): (request: Request) =>
         const query = searchInput(body);
         await deps.ledger.reserveSession(clientHash);
         const result = await qloo().searchArtists({ queryId: `${runId()}:search`, query });
+        if (result.status === 'success' && aiEnabled(deps.env)) {
+          for (const artist of result.value) await deps.ledger.cachePut(`ai-artist-name:${artist.id}`, artist.name);
+        }
         return result.status === 'success'
           ? json({ mode: 'live', artists: result.value, queries: [result.evidence] })
           : json({ mode: 'live', error: result.error, queries: [result.evidence] }, failedStatus(result.error.code),
@@ -204,6 +216,7 @@ export function createUnitHandler(deps: UnitDependencies): (request: Request) =>
         artists: { target: { id: input.targetArtistId }, comparisons: input.comparisonArtistIds.map(id => ({ id })),
           control: { id: input.controlArtistId } }, audit,
       };
+      if (aiEnabled(deps.env)) await rememberAiBase(deps.ledger, clientHash, result);
       return json(result);
     } catch (error) {
       if (error instanceof HttpError) return problem(error.status, error.code, error.message);

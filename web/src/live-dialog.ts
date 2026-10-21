@@ -92,7 +92,7 @@ export function openLiveDialog(
   const resultList = el('div', 'live-results');
   resultList.setAttribute('aria-label', 'Artist search results');
   const comparisonNote = el('p', 'live-comparison-note');
-  const limits = el('p', 'live-limits', 'Daily limits: up to 30 live actions globally and 10 per network address. Each search and rescue uses one action. Checking availability is free.');
+  const limits = el('p', 'live-limits', 'Default daily allowance: 150 live actions in total and 25 per network address. Each search and rescue uses one action. Checking availability is free.');
   const footer = el('footer', 'live-dialog-footer');
   const runButton = button('Run live rescue', () => { void runRescue(); }, 'button button-primary');
   footer.append(button('Keep current result', dismiss, 'button button-secondary'), runButton);

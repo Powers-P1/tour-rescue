@@ -10,7 +10,9 @@ export interface LedgerNamespace {
 export interface WorkerEnv {
   readonly UNIT_LEDGER: LedgerNamespace;
   readonly QLOO_API_KEY?: string;
+  readonly ANTHROPIC_API_KEY?: string;
   readonly LIVE_ENABLED?: string;
+  readonly AI_ENABLED?: string;
   readonly ALLOWED_ORIGIN?: string;
   readonly LIVE_DAILY_CAP?: string;
   readonly LIVE_IP_CAP?: string;
@@ -18,6 +20,8 @@ export interface WorkerEnv {
   readonly DAILY_LIVE_LIMIT?: string;
   readonly DAILY_PER_IP_LIMIT?: string;
   readonly QLOO_MONTHLY_LIMIT?: string;
+  readonly DAILY_AI_LIMIT?: string;
+  readonly DAILY_AI_PER_IP_LIMIT?: string;
 }
 
 export const DEFAULT_LIVE_DAILY_CAP = 150;
@@ -37,12 +41,20 @@ export function ledgerOptions(env: WorkerEnv, now: () => number): LedgerOptions 
     monthlyQlooRequests: positiveInteger(env.QLOO_MONTHLY_LIMIT, 50_000, 50_000),
     dailyLiveRequests: positiveInteger(env.LIVE_DAILY_CAP ?? env.DAILY_LIVE_LIMIT, DEFAULT_LIVE_DAILY_CAP, MAX_LIVE_DAILY_CAP),
     dailyPerClientRequests: positiveInteger(env.LIVE_IP_CAP ?? env.DAILY_PER_IP_LIMIT, DEFAULT_LIVE_IP_CAP, MAX_LIVE_IP_CAP),
+    dailyAiSessions: positiveInteger(env.DAILY_AI_LIMIT, 10, 30),
+    dailyAiPerClientSessions: positiveInteger(env.DAILY_AI_PER_IP_LIMIT, 3, 10),
     cacheTtlMs: 6 * 60 * 60 * 1000, cacheMaxEntries: 128, cacheMaxEntryBytes: 512 * 1024,
   };
 }
 
 export function liveEnabled(env: WorkerEnv): boolean {
   return env.LIVE_ENABLED === 'true' && typeof env.QLOO_API_KEY === 'string' && env.QLOO_API_KEY.trim().length > 0;
+}
+
+/** AI researches a server-recorded live fit run; both kill switches must permit it. */
+export function aiEnabled(env: WorkerEnv): boolean {
+  return liveEnabled(env) && env.AI_ENABLED === 'true'
+    && typeof env.ANTHROPIC_API_KEY === 'string' && env.ANTHROPIC_API_KEY.trim().length > 0;
 }
 
 export function allowedOrigin(env: WorkerEnv): string {

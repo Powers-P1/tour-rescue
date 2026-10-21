@@ -4,6 +4,7 @@ import './promoter.css';
 import './evidence.css';
 import './breakpoint.css';
 import './live-dialog.css';
+import './ai.css';
 import { createDemoResult, recomputeResult } from './data.ts';
 import type { ApiDecisionResult, DecisionChanges } from './data.ts';
 import { cancelledShow, decisionStatus, fitDisplay, formatDate, formatDistance, formatDuration,
@@ -15,6 +16,9 @@ import { renderEvidence, renderAudit } from './evidence.ts';
 import { renderBreakpointView } from './breakpoint-view.ts';
 import { renderPromoterSheet, downloadPromoterPng } from './promoter.ts';
 import { openLiveDialog } from './live-dialog.ts';
+import { createAiRescueView } from './ai-view.ts';
+import { acceptAiProposal, createAiAuditEnvelope, safeAiSourceUrl } from '../../src/ai/tools.ts';
+import type { AiAcceptance, AiSessionResult, AiValidatedProposal } from '../../src/ai/types.ts';
 import type { ConstraintCheck } from '../../src/core/travel-constraints.ts';
 import type { EvaluatedRepairOption } from '../../src/core/repair-types.ts';
 
@@ -22,7 +26,7 @@ declare const __WORKER_ORIGIN__: string;
 
 const pages = ['route', 'options', 'breakpoint', 'evidence', 'audit'] as const;
 const labels = ['Route', 'Options', 'Breakpoint', 'Evidence', 'Audit'];
-type Page = typeof pages[number] | 'promoter';
+type Page = typeof pages[number] | 'promoter' | 'ai';
 const app = document.getElementById('app')!;
 const promoter = document.getElementById('promoter-view')!;
 let baseline: ApiDecisionResult;
@@ -30,10 +34,15 @@ let current: ApiDecisionResult;
 let selectedId = '';
 let busy = false;
 let decisionRevision = 0;
+let liveBaseRunId: string | undefined;
+let aiView: ReturnType<typeof createAiRescueView> | undefined;
+let aiSession: AiSessionResult | undefined;
+let aiAcceptances: AiAcceptance[] = [];
+const acceptedSessions = new Map<string, AiSessionResult>();
 
 function page(): Page {
   const value = location.hash.slice(1);
-  return value === 'promoter' || pages.includes(value as typeof pages[number]) ? value as Page : 'route';
+  return value === 'promoter' || value === 'ai' || pages.includes(value as typeof pages[number]) ? value as Page : 'route';
 }
 
 function navigate(destination: Page): void {
@@ -56,9 +65,81 @@ function useResult(result: ApiDecisionResult): void {
   app.removeAttribute('aria-busy');
   baseline = result;
   current = result;
+  liveBaseRunId = result.mode === 'live' ? result.audit.runId : undefined;
+  aiView?.dispose();
+  aiView = undefined;
+  aiSession = undefined;
+  aiAcceptances = [];
+  acceptedSessions.clear();
   selectedId = selectedRecommendation(result)?.id ?? result.audit.analysis.repairs.options[0]?.id ?? '';
   navigate('options');
   announce(`${result.mode === 'demo' ? 'Demo' : 'Live Qloo'} decision ready. ${recommendedSummary(result)}.`);
+}
+
+function acceptResearch(session: AiSessionResult, proposal: AiValidatedProposal): void {
+  const sameArtists = JSON.stringify([current.artists.target.id, ...current.artists.comparisons.map(row => row.id), current.artists.control.id])
+    === JSON.stringify([session.baseResult.artists.target.id, ...session.baseResult.artists.comparisons.map(row => row.id), session.baseResult.artists.control.id]);
+  const resetContext = current.mode !== session.mode || !sameArtists;
+  const source = resetContext ? session.baseResult : current;
+  const generatedAt = new Date(Math.max(Date.now(), Date.parse(source.audit.generatedAt), Date.parse(session.completedAt))).toISOString();
+  const acceptance = acceptAiProposal(source.audit, session, proposal.draft.id, {
+    generatedAt, runId: `browser-ai-${crypto.randomUUID()}`,
+  });
+  decisionRevision += 1;
+  busy = false;
+  app.removeAttribute('aria-busy');
+  if (resetContext) { aiAcceptances = []; acceptedSessions.clear(); }
+  aiSession = session;
+  aiAcceptances = [...aiAcceptances.filter(row => row.optionId !== acceptance.optionId), acceptance];
+  acceptedSessions.set(session.sessionId, session);
+  for (const id of acceptedSessions.keys()) {
+    if (!aiAcceptances.some(row => row.sessionId === id)) acceptedSessions.delete(id);
+  }
+  current = { ...source, audit: acceptance.audit };
+  baseline = current;
+  selectedId = acceptance.optionId;
+  // New research must start from a fresh server context, not quietly discard accepted cards.
+  liveBaseRunId = undefined;
+  navigate('options');
+  announce(`${proposal.draft.venueName} accepted into comparison. All checks and breakpoints were recomputed. No booking was made.`);
+}
+
+function aiScreen(): HTMLElement {
+  aiView ??= createAiRescueView({
+    workerOrigin: __WORKER_ORIGIN__, getCurrentResult: () => current,
+    getLiveBaseRunId: () => liveBaseRunId,
+    onAccept: acceptResearch,
+    onStartLiveSetup: () => openLiveDialog(__WORKER_ORIGIN__, current, useResult),
+  });
+  aiView.refresh();
+  return aiView.element;
+}
+
+function researchEvidence(): HTMLElement | undefined {
+  if (!aiSession || aiAcceptances.length === 0) return undefined;
+  const panel = el('section', 'panel accepted-research');
+  panel.append(el('h2', '', 'Accepted AI research'), el('p', 'muted',
+    `${aiSession.mode === 'demo' ? 'Synthetic transcript' : 'Claude Sonnet 5.5 research'} · ${aiAcceptances.length} accepted comparison card${aiAcceptances.length === 1 ? '' : 's'}. Public research does not confirm a booking.`));
+  const sources = new Map<string, AiSessionResult['sources'][number]>();
+  for (const acceptance of aiAcceptances) {
+    for (const source of acceptedSessions.get(acceptance.sessionId)?.sources ?? []) {
+      if (acceptance.sourceIds.includes(source.id)) sources.set(`${acceptance.sessionId}:${source.id}`, source);
+    }
+  }
+  const list = el('ul', 'research-source-list');
+  for (const source of sources.values()) {
+    const item = el('li');
+    const url = safeAiSourceUrl(source.url);
+    if (url) {
+      const link = el('a', '', source.title);
+      link.href = url; link.target = '_blank'; link.rel = 'noopener noreferrer';
+      item.append(link);
+    } else item.append(el('span', '', source.title));
+    item.append(el('small', '', `${source.provenance === 'synthetic' ? 'Synthetic evidence' : source.kind} · ${source.retrievedAt}`));
+    list.append(item);
+  }
+  panel.append(list, button('Review research session', () => navigate('ai'), 'text-button'));
+  return panel;
 }
 
 function header(): HTMLElement {
@@ -82,7 +163,9 @@ function header(): HTMLElement {
   const modeLabel = badge(current.mode === 'demo' ? 'unknown' : 'pass', current.mode === 'demo' ? 'DEMO' : 'LIVE QLOO');
   const live = button('Try live', () => openLiveDialog(__WORKER_ORIGIN__, current, useResult), 'live-button');
   live.prepend(el('span', 'live-dot'));
-  mode.append(modeLabel, live, el('span', 'mode-note', 'Daily limits apply'));
+  const ai = button('Rescue with AI (Pro)', () => navigate(page() === 'ai' ? 'options' : 'ai'), 'ai-mode-button');
+  ai.setAttribute('aria-pressed', String(page() === 'ai'));
+  mode.append(modeLabel, live, ai, el('span', 'mode-note', 'Daily limits apply'));
   node.append(brand, nav, mode);
   return node;
 }
@@ -101,7 +184,7 @@ function provenanceNote(): HTMLElement {
   note.append(el('span', 'data-dot'));
   note.append(el('span', '', current.mode === 'demo'
     ? 'Synthetic taste data and fictional bookings. Recorded OSRM road snapshot. No live requests.'
-    : `${hasUsableFit() ? 'Live Qloo fit available.' : 'Live Qloo attempt; cultural-fit evidence UNKNOWN. See the audit.'} The Germany route and venue facts are still fictional; venue availability is not verified.`));
+    : `${hasUsableFit() ? 'Live Qloo fit available.' : 'Live Qloo attempt; cultural-fit evidence UNKNOWN. See the audit.'} ${aiAcceptances.length ? 'Fictional Germany tour. Researched venues remain unconfirmed; inspect the source links and UNKNOWN checks.' : 'The Germany route and venue facts are still fictional; venue availability is not verified.'}`));
   if (current.mode === 'live') note.append(button('Return to demo', () => useResult(createDemoResult()), 'text-button'));
   return note;
 }
@@ -214,7 +297,9 @@ function optionCard(option: EvaluatedRepairOption): HTMLElement {
   card.append(travel);
   const venueFee = option.kind === 'day-off' ? 'N/A - no replacement venue' : option.venue.status === 'known'
     ? knowledgeText(option.venue.value.fee, formatMoney) : 'UNKNOWN';
-  card.append(el('p', 'fee-line', `Venue fee: ${venueFee}${option.kind === 'day-off' ? '' : ' · fictional'}`));
+  const researched = aiAcceptances.some(row => row.optionId === option.id);
+  card.append(el('p', 'fee-line', `Venue fee: ${venueFee}${option.kind === 'day-off' ? '' : researched ? ' · verify with venue' : ' · fictional'}`));
+  if (researched) card.append(el('p', 'ai-card-note', 'Accepted from AI research · checks recomputed'));
   const list = el('ul', 'option-checks');
   const feasibility = el('li', 'check-row');
   feasibility.append(badge(option.status), el('span', '', 'Declared route and venue checks'));
@@ -269,6 +354,8 @@ function optionsScreen(): HTMLElement {
     announce(`${optionTitle(current, id)} selected.`);
   }));
   node.append(el('p', 'fine-print', 'All travel differences are against the day-off route. Fit is a weighted within-query percentile index, not ticket demand or an attendance forecast.'));
+  const evidence = researchEvidence();
+  if (evidence) node.append(evidence);
   return node;
 }
 
@@ -318,16 +405,19 @@ function footer(): HTMLElement {
   if (page() !== 'route' && page() !== 'audit') actions.append(button(page() === 'evidence' ? 'Open audit' : 'See evidence', () => navigate(page() === 'evidence' ? 'audit' : 'evidence'), 'button button-secondary'));
   if (page() === 'audit') {
     const download = button('Download audit (JSON)', () => {
-      downloadJson(current.audit, `tour-rescue-${current.mode}-${current.audit.runId.replace(/[^a-zA-Z0-9_-]/g, '_')}.json`);
+      const payload = aiSession && aiAcceptances.length ? createAiAuditEnvelope(aiSession, aiAcceptances, current.audit,
+        new Date(Math.max(Date.now(), Date.parse(current.audit.generatedAt))).toISOString(),
+        [...acceptedSessions.values()].filter(row => row.sessionId !== aiSession!.sessionId)) : current.audit;
+      downloadJson(payload, `tour-rescue-${current.mode}-${current.audit.runId.replace(/[^a-zA-Z0-9_-]/g, '_')}.json`);
       announce('Audit JSON download started.');
     }, 'button button-primary');
     download.prepend(icon('download'));
     actions.append(download, button('Copy summary', () => { void copySummary(); }, 'button button-secondary'));
   }
-  if (page() !== 'route') actions.append(button(`Promoter sheet · ${optionLetter(current, selectedId)}`, () => navigate('promoter'), 'button button-secondary'));
+  if (page() !== 'route' && page() !== 'ai') actions.append(button(`Promoter sheet · ${optionLetter(current, selectedId)}`, () => navigate('promoter'), 'button button-secondary'));
   const source = el('p', 'footer-source', `${current.mode === 'demo' ? 'Synthetic taste fixtures' : 'Taste requests: Qloo'} · Roads: OSRM snapshot`);
   source.append(el('span', '', current.mode === 'demo' ? 'Demo taste profiles are synthetic. No booking is made.'
-    : `${hasUsableFit() ? 'Live fit available.' : 'Taste evidence UNKNOWN.'} Availability and fees remain fictional.`));
+    : `${hasUsableFit() ? 'Live fit available.' : 'Taste evidence UNKNOWN.'} ${aiAcceptances.length ? 'Researched booking facts remain UNKNOWN.' : 'Availability and fees remain fictional.'}`));
   node.append(actions, source);
   return node;
 }
@@ -336,7 +426,7 @@ async function copySummary(): Promise<void> {
   const text = `${current.artists.target.name ?? current.artists.target.id} | ${recommendedSummary(current)} | ${current.mode.toUpperCase()}\n`
     + `Generated: ${current.audit.generatedAt}\nZero violations gate: ${current.audit.zeroViolationsGate.status} (declared checks only)\n`
     + `Selected for promoter: ${optionTitle(current, selectedId)} | ${decisionStatus(current, selectedId)}\n`
-    + 'Cultural fit is not attendance. Venue facts in this scenario are fictional.';
+    + `Cultural fit is not attendance. ${aiAcceptances.length ? 'Researched venues are unconfirmed; review UNKNOWN checks and source links.' : 'Venue facts in this scenario are fictional.'}`;
   try { await navigator.clipboard.writeText(text); announce('Decision summary copied.'); showToast('Decision summary copied.'); }
   catch { showToast('Clipboard unavailable. Download the audit JSON for the full decision.'); }
 }
@@ -391,16 +481,18 @@ function render(focusHeading = false): void {
   const main = el('main', 'main-content');
   main.id = 'main-content';
   const active = page();
-  const content = active === 'route' ? routeScreen() : active === 'options' ? optionsScreen() : active === 'breakpoint' ? breakpointScreen()
+  const content = active === 'ai' ? aiScreen() : active === 'route' ? routeScreen() : active === 'options' ? optionsScreen() : active === 'breakpoint' ? breakpointScreen()
     : (() => {
       const node = el('div');
       if (active === 'evidence') node.append(hero(`Why ${optionCity(current, selectedId)}?`, 'Trace the fit. Test the artists. Keep uncertainty visible.'), renderEvidence(current, selectedId));
       else node.append(hero('A decision you can check.', 'Every declared constraint, source and changed stop. Download the record and replay it.'), routeStrip(), assumptions(true), renderAudit(current, selectedId));
+      const evidence = researchEvidence();
+      if (evidence) node.append(evidence);
       return node;
     })();
   main.append(content, provenanceNote(), footer());
   app.replaceChildren(header(), main);
-  document.title = `${labels[pages.indexOf(active as typeof pages[number])]} - Tour Rescue`;
+  document.title = `${active === 'ai' ? 'AI Rescue (Pro)' : labels[pages.indexOf(active as typeof pages[number])]} - Tour Rescue`;
   if (focusHeading) { window.scrollTo(0, 0); main.querySelector('h1')?.focus({ preventScroll: true }); }
 }
 
