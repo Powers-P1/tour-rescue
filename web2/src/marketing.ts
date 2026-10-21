@@ -33,8 +33,9 @@ function footer(judges:boolean):string {
 }
 
 function journeyDiagram(model:PublicSiteModel, compact=false):string {
- const recommendation=model.landing.recommendedOptionId.status==='known'
-   ? model.rescue.options.find(row=>row.id===model.landing.recommendedOptionId.value) : undefined;
+ const recommendationId=model.landing.recommendedOptionId;
+ const recommendation=recommendationId.status==='known'
+   ? model.rescue.options.find(row=>row.id===recommendationId.value) : undefined;
  const pivot=recommendation?.kind!=='day-off'&&recommendation?recommendation:model.rescue.options.find(x=>x.kind!=='day-off');
  const city=pivot?.cityName??'Proposed city';
  const proposedLine=pivot?
