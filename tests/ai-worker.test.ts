@@ -148,7 +148,7 @@ test('AI kill switch, missing secret and untrusted origins never start the runne
 });
 
 test('provider failure consumes one reserved session, returns a safe stream error and respects daily cap', async () => {
-  const s = setup({ DAILY_AI_LIMIT: '1' }, async () => { throw new Error(`Provider leaked ${KEY}`); });
+  const s = setup({ AI_DAILY_CAP: '1' }, async () => { throw new Error(`Provider leaked ${KEY}`); });
   const base = await live(s);
   const rows = await events(await s.send(post('/api/ai/live', { baseRunId: base.audit.runId })));
   assert.deepEqual(rows, [{ type: 'error', error: { code: 'AI_SERVICE_UNAVAILABLE',
@@ -186,4 +186,20 @@ test('a disconnect during the quota transaction spends the reservation but start
   assert.equal(response.status, 499);
   assert.equal(s.calls.length, 0);
   assert.equal((s.storage.data.get('tour-rescue:ai-quotas:v1') as { sessions: number }).sessions, 1);
+});
+
+test('/health exposes AI caps and today\'s recorded tokens and estimated cost; the input stop is passed to the runner', async () => {
+  const s = setup({ AI_MAX_INPUT_TOKENS: '120000' }, async options => ({ ...emptyResult(options),
+    usage: { inputTokens: 50_000, outputTokens: 1_000, modelCalls: 2, toolCalls: 3, webSearchCalls: 1, webFetchCalls: 0, estimatedCostUsd: 0.12 } }));
+  const base = await live(s);
+  const health = async () => (await (await s.send(new Request(`${API}/health`))).json()) as
+    { caps: { aiDaily: number; aiPerClientDaily: number }; aiToday: { reservedSessions: number; recordedSessions: number; inputTokens: number; outputTokens: number; estimatedCostUsd: number } };
+  const before = await health();
+  assert.equal(before.caps.aiDaily, 40); assert.equal(before.caps.aiPerClientDaily, 5);
+  assert.equal(before.aiToday.estimatedCostUsd, 0);
+  await events(await s.send(post('/api/ai/live', { baseRunId: base.audit.runId })));
+  assert.equal(s.calls[0]!.maxInputTokens, 120000);
+  const after = await health();
+  assert.deepEqual([after.aiToday.reservedSessions, after.aiToday.recordedSessions, after.aiToday.inputTokens, after.aiToday.outputTokens, after.aiToday.estimatedCostUsd],
+    [1, 1, 50000, 1000, 0.12]);
 });

@@ -46,7 +46,10 @@ function usage(value: unknown): AiUsage {
   if (!object(value)) throw invalid();
   return { inputTokens: integer(value.inputTokens, 10_000_000), outputTokens: integer(value.outputTokens, 8_000),
     modelCalls: integer(value.modelCalls, 6), toolCalls: integer(value.toolCalls, 128),
-    webSearchCalls: integer(value.webSearchCalls, 6), webFetchCalls: integer(value.webFetchCalls, 6) };
+    webSearchCalls: integer(value.webSearchCalls, 6), webFetchCalls: integer(value.webFetchCalls, 6),
+    ...(typeof value.estimatedCostUsd === 'number' && Number.isFinite(value.estimatedCostUsd) && value.estimatedCostUsd >= 0 && value.estimatedCostUsd < 1000
+      ? { estimatedCostUsd: value.estimatedCostUsd } : {}),
+    ...(typeof value.costBasis === 'string' ? { costBasis: value.costBasis.slice(0, 300) } : {}) };
 }
 
 function context(value: unknown, mode: 'demo' | 'live'): AiDecisionContext {

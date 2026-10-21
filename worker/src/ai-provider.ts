@@ -4,7 +4,7 @@ export const ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages';
 export const AI_PROVIDER_LIMITS = {
   maxRequestBytes: 131_072,
   maxResponseBytes: 524_288,
-  maxTokensPerRequest: 2_000,
+  maxTokensPerRequest: 1_500,
   requestTimeoutMs: 40_000,
 } as const;
 

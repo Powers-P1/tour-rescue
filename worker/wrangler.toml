@@ -11,9 +11,12 @@ ALLOWED_ORIGIN = "https://tour-rescue.pages.dev"
 LIVE_DAILY_CAP = "150"
 LIVE_IP_CAP = "25"
 QLOO_MONTHLY_LIMIT = "50000"
-AI_ENABLED = "false"
-DAILY_AI_LIMIT = "10"
-DAILY_AI_PER_IP_LIMIT = "3"
+# AI Rescue ON. To disable: set to "false" and run `npx wrangler deploy --config worker/wrangler.toml`.
+AI_ENABLED = "true"
+# AI sessions per UTC day: global and per client hash (hard ceilings 200 / 20). Input-token stop per session.
+AI_DAILY_CAP = "40"
+AI_CLIENT_CAP = "5"
+AI_MAX_INPUT_TOKENS = "150000"
 
 [[durable_objects.bindings]]
 name = "UNIT_LEDGER"
