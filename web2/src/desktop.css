@@ -165,3 +165,12 @@
  .taste-mobile-key span{display:inline-flex;align-items:center;gap:6px}
  .taste-mobile-key b{font-size:15px;color:var(--accent)}
 }
+
+/* Desktop Review needs a visible in-flow Back (mobile keeps its own header). */
+.desktop-centered .desktop-review-back { display: none; }
+@media (min-width: 980px) {
+  .desktop-centered .desktop-review-back {
+    display: inline-flex; align-items: center; min-height: 48px;
+    color: var(--muted); margin-top: 14px; margin-bottom: 0;
+  }
+}

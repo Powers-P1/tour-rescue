@@ -33,7 +33,7 @@ npm run web:build
 npm run web:preview
 ```
 
-`check` runs strict TypeScript checking for the core, Worker and browser, plus Node's built-in test runner. Tests use synthetic fixtures and injected HTTP/storage doubles; they need no Qloo key, Cloudflare account or LLM. There are no core or frontend runtime dependencies. `web:build` bundles the plain TypeScript landing page and app into `web/dist` with esbuild. GitHub Actions runs the checks, Pages build and `worker:build` (Wrangler **without deploying**). `worker:dev` starts the optional local Worker and SQLite Durable Object.
+`check` runs strict TypeScript checking for the core, Worker and browser, plus Node's built-in test runner. Tests use synthetic fixtures and injected HTTP/storage doubles; they need no Qloo key, Cloudflare account or LLM. There are no core or frontend runtime dependencies. `web:build` bundles the v2 landing page, judges page and application from `web2/` into `web/dist` with esbuild. GitHub Actions runs checks, local bundle builds, browser screenshot evidence and `worker:build` (Wrangler **without deploying**). `worker:dev` starts the optional local Worker and SQLite Durable Object.
 
 Open **`http://localhost:4173`** for the landing page, or **`http://localhost:4173/app`** for the five-screen demo: Route, Options, Breakpoint, Evidence and Audit. Both evaluate the bundled synthetic fixture locally without a provider request. The landing table and exact **350 → 354.097 km** breakpoint come from the same core result as the app; this changes the extra-distance preference, not the daily-driving limit. Existing root hash links such as `/#options` forward to `/app#options`. Select an option and open its **Promoter sheet** for A4 print/Save PDF or a canvas PNG download. Demo includes two comparison artists; the third sheet slot is explicitly UNKNOWN.
 
@@ -145,8 +145,8 @@ Map context uses a small [Natural Earth](https://www.naturalearthdata.com/about/
 
 ## Front-end v2 (PR-D)
 
-The default Pages build now serves `web2/` through the existing `web/dist` output:
+The `tour-rescue` Pages project is **direct-upload**, not Git-integrated: it has no configured Cloudflare build command or automatic deploy on merge. The repository's **local** `npm run web:build` command produces `web/dist` from `web2/` for a separately authorised manual `wrangler pages deploy` upload:
 `/` = new landing; `/judges/` = concise Qloo judges entry; `/app/` = the Tour Rescue workspace.
-Launch the ready rescue case at `/app/#rescue`. No sign-in or Qloo call is needed for the visibly synthetic saved demo. Fresh live artist evidence is an explicit, rate-limited action. `npm run web:build` is the Pages build; `npm run web2:build` targets the isolated preview; `npm run web:legacy-build` restores the previous frontend build locally if needed.
+Launch the ready rescue case at `/app/#rescue`. No sign-in or Qloo call is needed for the visibly synthetic saved demo. Fresh live artist evidence is an explicit, rate-limited action. `npm run web:build` is the local v2 bundle step, not a Cloudflare build setting; `npm run web2:build` targets the isolated preview. To roll back, run `npm run web:legacy-build` and manually upload the resulting `web/dist` with Wrangler. Merges to `main` cannot deploy to this direct-upload Pages project.
 
 The original `web/` files remain in the repository until post-launch acceptance. Review `docs/DEPLOY.md#front-v2-deployment-switch-pr-d` before any Cloudflare production deployment. Generated screenshots are uploaded as GitHub Actions artifacts, not substituted for manual reviewer confirmation. Public marketing uses two Unsplash-licensed editorial photos, credited in `web2/README.md`. The photo subjects are **not** claimed as the fictional Northbound band, supplier or tour manager.

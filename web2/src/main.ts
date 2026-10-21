@@ -371,7 +371,8 @@ function desktopInner(): string {
   return '<div class="desktop-centered"><div class="desktop-mini-header"><strong>' + HTML(projection.title) +
     '</strong><span>' + badge(projection.mode === 'demo' ? 'Sample scenario' : 'Live Qloo taste · sample tour') + '</span></div>' +
     (isExtensionScreen(screen) ? renderExtension(screen, extensionContext())
-      : screen === 'options' ? shortlist() : screen === 'detail' ? details() :
+      : screen === 'options' ? shortlist() :
+        screen === 'detail' ? '<button type="button" class="text-button desktop-review-back" data-action="back">← Back to rescue directions</button>'+details() :
         screen === 'draft' ? '<button type="button" class="text-button desktop-proposal-back" data-action="back">← Back to checked route</button>'+draft() :
       screen === 'crew' ? crew() : unbuilt()) + '</div>';
 }
@@ -438,6 +439,12 @@ function focusFirstHeading(scope: Element): void {
 function focusedDialog(): HTMLElement | null {
   return root!.querySelector<HTMLElement>('[role="dialog"][aria-modal="true"]');
 }
+/** A hidden responsive copy can match data-action but cannot actually receive focus. */
+function tryRestoreFocus(node: HTMLElement | null): boolean {
+  if (!node || node.hasAttribute('disabled') || node.getClientRects().length === 0) return false;
+  node.focus();
+  return document.activeElement === node;
+}
 function render(): void {
   const focus = previousFocus();
   const priorDialog = focusedDialog();
@@ -471,17 +478,14 @@ function render(): void {
   if (layout) layout.inert = dialog !== null; // real background tab suppression
   if (dialog) {
     const restored = previouslyInDialog && focus ? findPreviousTarget(focus, dialog) : null;
-    if (restored && !restored.hasAttribute('disabled')) restored.focus();
-    else focusFirstHeading(dialog);
+    if (!tryRestoreFocus(restored)) focusFirstHeading(dialog);
   } else if (priorDialog && dialogReturnAction) {
     const opener = root!.querySelector<HTMLElement>('[data-action="' + dialogReturnAction + '"]');
     dialogReturnAction = null;
-    if (opener) opener.focus();
-    else focusFirstHeading(root!.querySelector('#main') ?? root!);
-  } else if (previouslyRendered) {
-    const restored = focus ? findPreviousTarget(focus, root!) : null;
-    if (restored && !restored.hasAttribute('disabled')) restored.focus();
-    else if (focus) focusFirstHeading(root!.querySelector('#main') ?? root!);
+    if (!tryRestoreFocus(opener)) focusFirstHeading(root!.querySelector('#main') ?? root!);
+  } else if (previouslyRendered && focus) {
+    const restored = findPreviousTarget(focus, root!);
+    if (!tryRestoreFocus(restored)) focusFirstHeading(root!.querySelector('#main') ?? root!);
   }
 }
 desktopMedia.addEventListener('change', () => render());

@@ -246,3 +246,20 @@ a{text-decoration:none}
 .sos-photo{background:var(--surface) url('/assets/drum-fallback.svg') center/cover no-repeat}
 .hero-picture img,.sos-photo img{opacity:0;transition:opacity .2s ease}
 .hero-picture img.photo-ready,.sos-photo img.photo-ready{opacity:1}
+
+/* PR #19 accessibility review - CSP-compatible missing-page navigation. */
+.not-found-page { padding-top: clamp(56px, 12vh, 170px); padding-bottom: 12vh; }
+.not-found-page h1 { font-size: clamp(42px, 5vw, 76px); margin-bottom: 22px; }
+.not-found-description { color: var(--muted); max-width: 51ch; line-height: 1.55; }
+.not-found-links { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; margin-top: 26px; }
+.not-found-links a {
+  display: inline-flex; align-items: center; min-height: 48px; padding: 10px 0;
+  color: var(--amber); font-weight: 690; text-decoration: underline; text-underline-offset: 5px;
+}
+.not-found-links a:hover { color: var(--fg); }
+/* Judges page sources use the same >=48px minimum target as regular links. */
+.judges-external-link {
+  display: inline-flex; align-items: center; min-height: 48px;
+  padding: 10px 0; text-decoration: underline; text-underline-offset: 5px;
+}
+.judges-external-link:hover { color: var(--amber); }

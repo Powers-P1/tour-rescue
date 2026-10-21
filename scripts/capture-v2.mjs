@@ -35,6 +35,8 @@ try{
   {name:'08-landing-mobile.png',path:'/',width:390,height:844},
   {name:'09-judges-desktop.png',path:'/judges/',width:1536,height:1024},
   {name:'09-judges-mobile.png',path:'/judges/',width:390,height:844},
+  {name:'404-desktop.png',path:'/404.html',width:1280,height:800},
+  {name:'404-mobile.png',path:'/404.html',width:390,height:844},
   {name:'01-today-mobile.png',path:'/app/',width:390,height:844},
   {name:'01-rescue-options-mobile.png',path:'/app/#rescue',width:390,height:844},
   {name:'04-command-desktop.png',path:'/app/',width:1536,height:1024},
@@ -57,6 +59,30 @@ try{
      ]);
    });
    if(shot.path.includes('/app/#rescue'))await page.locator('[data-action="select-option"]').first().waitFor();
+   if(shot.path==='/404.html'){
+     const report=await page.evaluate(()=>{
+       const links=[...document.querySelectorAll('.not-found-links a')].map(a=>{
+         const style=getComputedStyle(a);
+         return {label:a.textContent?.trim(),height:a.getBoundingClientRect().height,
+           color:style.color,underline:style.textDecorationLine,display:style.display};
+       });
+       const main=document.querySelector('.not-found-page');
+       return {links,mainTop:main?.getBoundingClientRect().top ?? 0,
+         inlineStyles:document.querySelectorAll('[style]').length};
+     });
+     if(report.links.length!==3||report.links.some(link=>link.height<48||
+         !link.underline.includes('underline')||link.display!=='inline-flex')||
+         report.mainTop<50||report.inlineStyles!==0)
+       throw new Error(shot.name+' has inaccessible 404 recovery or inline style: '+JSON.stringify(report));
+   }
+   if(shot.path==='/judges/'){
+     const targets=await page.locator('.judges-external-link').evaluateAll(anchors=>
+       anchors.map(anchor=>({text:anchor.textContent?.trim(),
+         height:anchor.getBoundingClientRect().height,
+         display:getComputedStyle(anchor).display})));
+     if(targets.length!==2||targets.some(link=>link.height<48||link.display!=='inline-flex'))
+       throw new Error(shot.name+' has undersized public-source/agent-contract links: '+JSON.stringify(targets));
+   }
    const layout=await page.evaluate(()=>{
      const ids=[...document.querySelectorAll('[id]')].map(x=>x.id);
      return {width:document.documentElement.scrollWidth,viewport:window.innerWidth,
@@ -242,6 +268,37 @@ try{
    const text=await page.locator('.intro').textContent();
    if(!text?.includes('ⓘ Unavailable - run fresh Qloo first'))
      throw new Error('Live-agent setup unavailable text lacks icon');
+   await page.close();
+ }
+ // Regression: the promoter draft Back must never move keyboard focus to BODY
+ // via its hidden mobile-only twin. Review also exposes a visible desktop Back.
+ for(const width of [980,1280,1536]){
+   const page=await browser.newPage({viewport:{width,height:800}});
+   const problems=[];
+   page.on('pageerror',error=>problems.push(error.message));
+   await page.goto(origin+'/app/#rescue',{waitUntil:'domcontentloaded',timeout:30000});
+   await page.locator('[data-action="review"]').waitFor({state:'visible'});
+   await page.locator('[data-action="review"]').click();
+   await page.locator('[data-action="prepare"]').click();
+   const draftBack=page.locator('.desktop-proposal-back');
+   if(!await draftBack.isVisible())
+     throw new Error('Desktop proposal Back hidden at '+width);
+   await draftBack.focus();
+   await draftBack.click();
+   const reviewBack=page.locator('.desktop-review-back');
+   if(!await reviewBack.isVisible())
+     throw new Error('Desktop Review has no visible Back at '+width);
+   const state=await page.evaluate(()=>{
+     const node=document.activeElement;
+     return {tag:node?.tagName,action:node?.getAttribute('data-action'),
+       visible:Boolean(node&&node instanceof HTMLElement&&node.getClientRects().length>0),
+       reviewHeading:document.querySelector('#main h1')?.textContent??''};
+   });
+   if(!state.visible||state.tag==='BODY'||!state.reviewHeading.trim()||problems.length)
+     throw new Error('Draft->Review keyboard focus lost at '+width+': '+JSON.stringify({state,problems}));
+   await reviewBack.click();
+   const next=await page.evaluate(()=>document.activeElement?.tagName);
+   if(next==='BODY')throw new Error('Review->options keyboard focus lost at '+width);
    await page.close();
  }
  // Check mobile/tablet breakpoints on the actual landing and judges DOM.

@@ -1,6 +1,6 @@
 # Deploy (Cloudflare free tier)
 
-`web/` contains the plain TypeScript/HTML/CSS landing page and Pages app. `npm run web:build` creates the deployable **`web/dist`** directory; no frontend runtime framework is required. The existing `worker/` supplies live decisions, a JSON audit and private state in the SQLite Durable Object. Deployment and secrets remain maintainer operations; building or opening this PR does not deploy anything.
+`web2/` contains the current TypeScript/HTML/CSS landing, judges page and Tour Rescue app; `web/` is retained as the legacy frontend for rollback. `npm run web:build` locally creates the deployable **`web/dist`** directory; it does not deploy. The `tour-rescue` Cloudflare Pages project is **direct-upload** (verified `source: null`, no Git integration or remote build command). Its contents change only after an explicit maintainer-run `wrangler pages deploy` upload. The existing `worker/` supplies live decisions, an audit and private SQLite Durable Object state; deploying the frontend never changes Worker configuration.
 
 ## Local checks
 
@@ -19,7 +19,7 @@ npm run worker:dev
 
 Open `http://localhost:4173` for the landing page or `http://localhost:4173/app` for the app after `npm run web:preview`. `npm run web:dev` builds once and starts the same static preview; after edits, rebuild and reload. Both pages evaluate the bundled synthetic fixtures and deterministic core in the browser. They need no Worker, account, Qloo key, LLM or external font/map request. Loading the landing page does not initialize the app or contact providers.
 
-The build emits physical `index.html` and `app/index.html` pages, with absolute `/landing.js`, `/landing.css`, `/app.js` and `/app.css` asset paths. `/index.html` is a landing alias; `/app`, `/app/` and `/app/index.html` resolve to the app (Pages can canonicalize the index paths). A top-level `404.html` prevents unknown paths from falling back to the landing page as a single-page app. The build command, output directory and Worker configuration stay unchanged.
+The build emits physical `index.html` and `app/index.html` pages, with absolute `/landing.js`, `/landing.css`, `/app.js` and `/app.css` asset paths. `/index.html` is a landing alias; `/app`, `/app/` and `/app/index.html` resolve to the app (Pages can canonicalize the index paths). A top-level `404.html` prevents unknown paths from falling back to the landing page as a single-page app. The deployable output directory and Worker configuration stay unchanged; Pages itself runs no build command.
 
 App hash routes are `#route`, `#options`, `#breakpoint`, `#evidence`, `#audit`, `#promoter` and `#ai`. Old root links such as `/#breakpoint` redirect to the fixed same-origin `/app#breakpoint`; landing anchors such as `#how-it-works`, `#the-decision`, `#judges` and `#faq` stay on the landing. Compatibility redirects retain only a single supported `tour=start` or `tour=resume` query. A root URL with that explicit tour request and no recognized app hash opens `/app?tour=start#route` (or `resume`); arbitrary destinations and other query parameters are not forwarded.
 
@@ -32,7 +32,7 @@ npm run web:preview
 
 Set the Worker's `ALLOWED_ORIGIN` to `http://localhost:4173` for that local session, or to the exact Pages origin for deployment. CORS remains enforced; the frontend does not proxy around it. Local live requests still need the trusted identity contract described below. No secrets belong in `PUBLIC_WORKER_ORIGIN`, HTML, browser storage or Pages environment variables. The build validates the origin and emits a matching `connect-src` policy in `web/dist/_headers`.
 
-For Cloudflare Pages Git integration, use repository root, **build command `npm run web:build`**, **output directory `web/dist`**, and **Node 24**. `npm run check` checks both the core/Worker and browser TypeScript; CI also builds Pages and performs the Worker dry run. Build output is git-ignored.
+Cloudflare Pages is **not Git-integrated**: `tour-rescue` has a direct-upload source and no configured Cloudflare-side build command. Build locally or in CI with **Node 24** using `npm run web:build`, then use the resulting `web/dist` directory for an explicitly authorised `wrangler pages deploy` upload. `npm run check` validates core/Worker and browser TypeScript; GitHub Actions builds and captures screenshots but never deploys. The generated output remains git-ignored.
 
 The Live dialog checks `/health`, then searches only on explicit submission and calls `/api/live` after users select distinct artist identities. Each search and evaluation consumes an action; there is no invented remaining-quota counter. Disabled mode, network/CORS failures, 429 and HTTP200 results with UNKNOWN evidence stay visible. No live failure silently switches to demo. Local breakpoint adjustments reuse the accepted rank-only audit and preserve query acquisition timestamps; they spend no provider quota.
 
@@ -124,7 +124,7 @@ Cloudflare documents separate [Worker limits](https://developers.cloudflare.com/
 
 ## Front v2 deployment switch (PR-D)
 
-The existing Cloudflare Pages Git integration requires **no dashboard configuration change**. From PR-D onward, the repository-level `npm run web:build` builds the **new** `web2/` frontend and emits the same physical **`web/dist`** directory the Pages project already uses. The old source `web/` is preserved for rollback and can be built with `npm run web:legacy-build` (this overwrites `web/dist` locally, so rebuild v2 before deploy). `npm run web2:build` still makes an isolated `web2/dist` local preview.
+The existing `tour-rescue` Cloudflare Pages project is **direct-upload**, with `source: null`, no Git repository connection and no Cloudflare-side build command. The repository-level `npm run web:build` builds the **new** `web2/` frontend locally into **`web/dist`**, without changing Pages until a maintainer deliberately uploads it. The legacy `web/` source remains available; `npm run web:legacy-build` creates the legacy bundle in `web/dist` for a manual rollback upload. `npm run web2:build` still targets isolated `web2/dist` for local preview. No Cloudflare dashboard build setting or Git integration must be modified.
 
 The v2 output has `/index.html` (product landing, board 08), `/app/index.html` (interactive Tour Rescue), `/judges/index.html` (judges page, board 09) and a strict `404.html`. All pages share the graphite/amber tokens. The judges header explicitly says **Judges · Start here** above the fold. Primary judge CTA opens `/app/#rescue` (precomputed synthetic decision); live Qloo/AI research remains a separate user action. The default landing and judges pages compute the synthetic decision directly from the maintained core; no provider request is made just to load either page.
 
@@ -141,7 +141,7 @@ npm run web:preview
 npx wrangler pages deploy web/dist --project-name tour-rescue --branch main
 ```
 
-Building or merging the PR does **not** itself call the deployment command. The existing Pages project's connected-Git deployment may deploy on a main push if enabled, so maintainers should review that setting before merging. Do not claim public v2 availability until a hosted smoke test confirms it. For rollback, restore the previous package build command to `node web/build.mjs` and redeploy.
+**Merging or pushing to GitHub cannot deploy this Pages project.** Its direct-upload configuration has no Git trigger, and neither CI workflow deploys it. Only an explicitly authorised maintainer upload using `npx wrangler pages deploy web/dist --project-name tour-rescue --branch main` changes production. Do not claim public v2 availability until that upload and a hosted smoke test succeed. For rollback, run `npm run web:legacy-build` to rebuild the old `web/` site into `web/dist`, then manually upload that directory using the same Wrangler command. Restore v2 by running `npm run web:build` and manually uploading again. A rollback requires no package.json or Cloudflare build setting changes.
 
 ### Screenshot evidence
 The `visual-v2.yml` workflow builds the actual `web/dist` output, captures desktop/mobile screenshots from a local static preview with Playwright, and uploads an Actions artifact called `tour-rescue-v2-screenshots`. It does not perform Cloudflare production deployment. The capture script also checks for console/CSP errors, horizontal overflow and duplicate IDs at the specified viewports.

@@ -3,7 +3,8 @@ import { PUBLIC_REPOSITORY, PUBLIC_LICENSE, PUBLIC_API_DOCS, PUBLIC_AGENT_DOCS, 
 
 const escape=(v:unknown):string=>String(v??'').replace(/[&<>"']/g,x=>
  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[x]??x);
-const ext=(href:string,label:string)=>'<a target="_blank" rel="noopener noreferrer" href="'+escape(href)+'">'+escape(label)+'</a>';
+const ext=(href:string,label:string,className='')=>'<a'+(className?' class="'+escape(className)+'"':'')+
+  ' target="_blank" rel="noopener noreferrer" href="'+escape(href)+'">'+escape(label)+'</a>';
 const link=(href:string,label:string,cls='text-link')=>'<a class="'+cls+'" href="'+escape(href)+'">'+escape(label)+'</a>';
 const badge=(message:string,variant='neutral')=>'<span class="m-badge m-badge-'+variant+'">'+escape(message)+'</span>';
 const wordmark='<a class="site-brand" href="/"><span class="site-brand-arrow" aria-hidden="true">↱</span> TOUR RESCUE</a>';
@@ -167,7 +168,7 @@ export function judgesMarkup(model:PublicSiteModel):string{
  '<h1>Leipzig canceled.<span>Keep the tour moving.</span></h1>'+
  '<p>A tour-rescue agent that combines cultural fit, road constraints and a promoter-ready plan.</p>'+
  '<div class="hero-actions">'+link(model.appHref,'Rescue Leipzig →','m-button')+
- ext(PUBLIC_REPOSITORY,'Public source & licence ↗')+'</div>'+
+ ext(PUBLIC_REPOSITORY,'Public source & licence ↗','judges-external-link')+'</div>'+
  '<p class="mini-disclosure">ⓘ '+escape(model.rescue.cancelledDate)+
   ' · Synthetic taste fixture · Frozen OSRM · Not a booking</p></div>'+proposalPreview(model)+'</section>'+
  '<section id="steps" class="site-shell judge-steps">'+
@@ -197,7 +198,7 @@ export function judgesMarkup(model:PublicSiteModel):string{
    '<strong>'+escape(e.label)+'</strong><span>'+escape(e.detail)+'</span><b>↗</b></a>').join('')+'</div>'+
  '<div class="judge-tools"><button type="button" id="download-synthetic-audit" class="m-button m-button-quiet">Download saved demo audit ↓</button>'+
  link('/app/#rescue','Open app · then explicitly run live Qloo','text-link')+
- ext(PUBLIC_AGENT_DOCS,'Agent contract ↗')+'</div>'+
+ ext(PUBLIC_AGENT_DOCS,'Agent contract ↗','judges-external-link')+'</div>'+
  '<p class="mini-disclosure">Saved demo is generated from openly available, explicitly synthetic artist inputs; a fresh Qloo evaluation requires a separate user action and a live Worker.</p>'+
  '</section>'+
  scopeTable()+
