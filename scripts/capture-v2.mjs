@@ -67,7 +67,7 @@ try{
            color:style.color,underline:style.textDecorationLine,display:style.display};
        });
        const main=document.querySelector('.not-found-page');
-       return {links,mainTop:main?.getBoundingClientRect().top ?? 0,
+       return {links,mainTop:main?.querySelector('h1')?.getBoundingClientRect().top ?? 0,
          inlineStyles:document.querySelectorAll('[style]').length};
      });
      if(report.links.length!==3||report.links.some(link=>link.height<48||
