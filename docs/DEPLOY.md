@@ -61,6 +61,10 @@ Daily/monthly boundaries are UTC **application policy**. Qloo's exact provider r
 
 For the first deployed live check, maintainers set the secret and enable the switch, resolve real artist IDs through `/api/live/search`, then submit the bounded example in [API](API.md). Check the returned query sources/timestamps and city completeness rather than accepting HTTP 200 alone: evaluation returns a valid UNKNOWN audit when Qloo fails. Direct provider access from deployed Cloudflare and full heatmap coverage remain UNKNOWN until this check is performed. Turning the switch off blocks both live endpoints immediately after the configuration deployment; demo stays available.
 
+## Worker secret names
+
+Secrets set on `tour-rescue-api` (names only): `QLOO_API_KEY` (live Qloo requests), `ANTHROPIC_API_KEY` (reserved for the future AI mode; unused by the current code). Neither is in `wrangler.toml` or the repository.
+
 ## Platform budgets
 
 Cloudflare documents separate [Worker limits](https://developers.cloudflare.com/workers/platform/limits/) and [Durable Object limits](https://developers.cloudflare.com/durable-objects/platform/limits/). The free outer Worker has a 10 ms CPU budget; putting core calculation inside the DO avoids depending on that small budget. SQLite-backed DOs are the backend supported on the free plan. The private cache and small demo memoization reduce repeated provider and computation work, but provider quotas do not exempt requests from Cloudflare platform limits. Local smoke checks establish runtime compatibility, not measured production capacity.
