@@ -3,10 +3,10 @@
  * Pure selectors are shared with the renderer and tested without a browser dependency.
  */
 export interface FocusIdentity {
-  readonly id?: string;
-  readonly action?: string;
-  readonly dataId?: string;
-  readonly dataIndex?: string;
+  readonly id?: string | undefined;
+  readonly action?: string | undefined;
+  readonly dataId?: string | undefined;
+  readonly dataIndex?: string | undefined;
 }
 
 export function hadMountedScreen(root: { readonly querySelector: (selector: string) => unknown }): boolean {
