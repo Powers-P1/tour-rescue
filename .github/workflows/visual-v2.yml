@@ -4,6 +4,7 @@ on:
     paths:
       - 'web2/**'
       - 'scripts/capture-v2.mjs'
+      - 'scripts/verify-polish.mjs'
       - 'package.json'
       - '.github/workflows/visual-v2.yml'
   workflow_dispatch:
@@ -28,6 +29,8 @@ jobs:
           npx playwright install --with-deps chromium
       - run: npm run web:build
       - run: node scripts/capture-v2.mjs
+      - name: Verify all v2 ARIA and responsive polish
+        run: node scripts/verify-polish.mjs
       - name: Upload real browser screenshots
         if: always()
         uses: actions/upload-artifact@v4

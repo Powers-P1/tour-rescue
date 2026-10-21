@@ -127,7 +127,7 @@ export function landingMarkup(model:PublicSiteModel):string{
  '<p class="mini-disclosure">ⓘ Sample tour · No sign-up to explore · Never a booked show</p></div>'+
  '<div class="hero-visual"><figure class="hero-picture" role="img" aria-label="Illustrative backstage loading scene with a parked van and road cases">'+
  '<img src="'+heroPhoto+'" alt="Photograph of a production team behind the scenes, illustrative of backstage work" width="1200" height="900" fetchpriority="high"/>'+
- '<figcaption>Backstage illustration · editorial photo when available</figcaption></figure>'+
+ '<figcaption>Backstage scene · illustrative</figcaption></figure>'+
  miniaturePhone(model)+'</div></section>'+
  '<section id="how-it-works" class="landing-section site-shell rescue-section"><div class="landing-map">'+
  journeyDiagram(model)+'</div><div class="section-copy"><p class="eyebrow">01 / DATE RESCUE · CORE</p>'+
@@ -158,6 +158,26 @@ export function landingMarkup(model:PublicSiteModel):string{
  '<h2>Open the demo.<span>Try to overturn it.</span></h2><p>A short, reproducible route from cancellation to checked proposal.</p>'+
  link(model.judgesHref,'Judges · Start here ↗','m-button')+'</section>'+
  '</main>'+footer(false);
+}
+function knownLimitsSection():string {
+  const limits=[
+    ['Taste fit is not attendance',
+      'Relative cultural affinity is not a count of listeners, sold tickets or forecast revenue.'],
+    ['Live Qloo has quotas and possible evidence gaps',
+      'Live mode needs resolved artist identities, a properly configured Worker and available provider evidence. Searches and evaluations consume bounded quotas; incomplete city coverage stays UNKNOWN, not zero.'],
+    ['City mapping and reference weights are application-owned',
+      'Heatmap-to-city normalization and combining reference artists are our methods, not venue signals from Qloo. One influential comparison artist can change a ranking; review the source audit and sensitivity checks.'],
+    ['Road and booking evidence have separate limits',
+      'The default OSRM matrix is a frozen driving snapshot, not live traffic. Room capacity, availability, fees and contracts still require independent confirmation.'],
+    ['A proposal is not a confirmation',
+      'The saved default uses synthetic profiles. Promoter sheets and local SOS approval previews neither book nor contact anyone. Live AI suggestions remain subject to deterministic checks and human review.'],
+  ] as const;
+  return '<section id="known-limits" class="judge-limits"><div class="site-shell">'+
+    '<div class="section-title"><p class="eyebrow">BOUNDARIES & UNKNOWNS</p>'+
+    '<h2>Known limits.</h2><p>What this demonstrator establishes - and what remains unverified.</p></div>'+
+    '<div class="judge-limits-grid">'+limits.map(([heading,detail])=>
+      '<article><h3>'+escape(heading)+'</h3><p>'+escape(detail)+'</p></article>').join('')+
+    '</div></div></section>';
 }
 export function judgesMarkup(model:PublicSiteModel):string{
  const evidence=linkedEvidence(model);
@@ -201,6 +221,7 @@ export function judgesMarkup(model:PublicSiteModel):string{
  ext(PUBLIC_AGENT_DOCS,'Agent contract ↗','judges-external-link')+'</div>'+
  '<p class="mini-disclosure">Saved demo is generated from openly available, explicitly synthetic artist inputs; a fresh Qloo evaluation requires a separate user action and a live Worker.</p>'+
  '</section>'+
+ knownLimitsSection()+
  scopeTable()+
  '<section class="site-shell judge-last"><p class="eyebrow">CAN YOU CHANGE THE OUTCOME?</p>'+
  '<h2>Change one assumption.</h2>'+breakpoint(model)+
