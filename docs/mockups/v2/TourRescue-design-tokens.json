@@ -1,0 +1,93 @@
+{
+  "project": "Tour Rescue",
+  "version": "2026-10-21",
+  "status": "Design intent for implementation; generated raster previews are approximate.",
+  "colors": {
+    "background": "#121A20",
+    "surface": "#1C2831",
+    "border": "#344550",
+    "text": "#F4F6F8",
+    "muted": "#AEBCC6",
+    "accent": "#F3B65B",
+    "onAccent": "#121A20",
+    "danger": "#E78B82",
+    "success": "#91C4AE",
+    "paper": "#E9E6DF"
+  },
+  "typography": {
+    "family": "Inter, IBM Plex Sans, system-ui, sans-serif",
+    "mobileHeading": 30,
+    "desktopHeading": 40,
+    "body": 16,
+    "emphasizedBody": 18,
+    "caption": 14,
+    "headingLineHeight": 1.15,
+    "bodyLineHeight": 1.5,
+    "numbers": "tabular"
+  },
+  "spacing": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    48,
+    64
+  ],
+  "radius": {
+    "control": 8,
+    "panel": 12
+  },
+  "borderWidth": 1,
+  "interaction": {
+    "minimumTouchTarget": 48,
+    "mobileGutter": 24,
+    "desktopGutter": 40,
+    "primaryActionsPerFocusedScreen": 1
+  },
+  "navigation": {
+    "mobile": [
+      "Today",
+      "Route",
+      "Crew"
+    ],
+    "mobileFocusedFlow": "Back + contextual title; SOS remains available; omit bottom tabs while resolving a specific incident.",
+    "desktopArtist": [
+      "Overview",
+      "Route",
+      "Audience",
+      "Crew",
+      "Documents"
+    ],
+    "desktopAgency": [
+      "Overview",
+      "Tours",
+      "Team",
+      "Documents"
+    ]
+  },
+  "principles": [
+    "Progressive disclosure instead of smaller text.",
+    "Primary buttons use a flat amber color, without gradients or glow.",
+    "Status has a text label and icon, not color alone.",
+    "Keep cultural affinity, declared interest and paid sales as separate sources.",
+    "No fabricated availability, confirmed booking, provider verification or runtime evidence.",
+    "Main incident view prioritizes one next decision."
+  ],
+  "sourceLabels": [
+    "Sample",
+    "Estimate",
+    "Unknown",
+    "Proposed",
+    "Draft",
+    "Not sent",
+    "Awaiting reply",
+    "Confirmed",
+    "Failed"
+  ],
+  "languages": {
+    "visuals": "en",
+    "handoff": "pl"
+  }
+}

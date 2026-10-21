@@ -1,0 +1,386 @@
+TOUR RESCUE — ImageGen prompt set
+21.10.2026. All visuals generated with the built-in ImageGen tool.
+The first exploration was revised following Damian's feedback that the screens were too dense. The selected deliverable is 01-Mobile-Rescue-v2.png; the initial dense exploration is not included in the final archive.
+
+Mobile rescue — initial exploration, superseded by simplified v2
+
+Use case: ui-mockup.
+Create an exceptionally polished, calm and actionable MOBILE APP design presentation for a NEW product called TOUR RESCUE. Landscape canvas around 2304x1536 or 1536x1024, exactly THREE large flat mobile screens side by side, equal 390x844 proportions, almost full image height. Very thin dark phone outlines, no bulky 3D hardware. Dark graphite presentation backdrop. Small understated board title "TOUR RESCUE" top left, "MOBILE / 01" top right. Outside captions below screens "01 / The next move", "02 / Three viable directions", "03 / A promoter-ready proposal".
+This app is a touring band's calm manager at 2 am: it rescues canceled dates using cultural taste, road feasibility and promoter outreach. It must be fast, clear and reassuring under stress. All UI copy in ENGLISH, exceptionally legible. This is a NEW brand, NOT a fashion app.
+
+VISUAL SYSTEM: matte near-black graphite #121A20 background, slightly lighter #1C2831 surfaces, fine #344550 separators, warm white #F4F6F8 primary text, readable muted #AEBCC6 secondary text, warm amber #F3B65B primary action and route highlights, restrained dusty red #E78B82 ONLY for canceled status, soft sage #91C4AE for checks. NO gradients, neon glow, tiny gray text, gratuitous data widgets, nested cards, excessive shadows, background photography behind forms, giant pill controls or sci-fi visuals. Humanist sans like IBM Plex Sans / Inter for all typography, large clear 30–34px bold mobile headings, 16–18px body, tabular numerals for times. Thin simple purposeful icons. Radius about 12px. Touch targets at least 48px. Amber buttons have near-black text, not white. The wordmark "TOUR RESCUE" is compact bold sans with one small amber road-turn arrow. The same four simple bottom tabs on app screens: "Today", "Route", "Audience", "Crew". A separate clearly named amber-outline "SOS" is available at top right. No maps of individual people.
+
+SAMPLE CONTEXT: fictional indie band NORTHBOUND, Europe 2026, Berlin 11 Nov → Leipzig 12 Nov canceled → Munich 13 Nov. All values are clearly SAMPLE DATA, not real bookings or API results. Travel numbers illustrate a design and must be marked as sample. Audience affinity is RELATIVE CULTURAL FIT, never a listener count or ticket sales. Venue/date confirmation remains explicit.
+
+SCREEN 1 / TODAY:
+Status 09:41. Top "TOUR RESCUE", small "SOS" right. Small current-tour line "NORTHBOUND / EUROPE 2026". Large heading "Here's the plan."
+One restrained dusty-red outlined incident panel, no flashing alarm: small label "NEEDS A DECISION", bold "Leipzig canceled.", smaller "Tomorrow, 12 Nov · next stop Munich". One full-width amber primary action "Rescue this date →".
+Below heading "Today in Berlin" with small "Local time". Clear open chronological crew schedule with fine left timing line: "14:30  Leave hotel", "16:00  Load-in", "17:30  Soundcheck", "20:00  Show". One unobtrusive row with small ticket icon "94 sold / 160 planned" and short "Share today's promo kit →". Small lower outline link "Open crew day sheet". Bottom nav Today active. Tiny "Sample tour" label. The cancellation decision is visually first; not ten equal-priority blocks.
+
+SCREEN 2 / REPLACEMENT CITIES:
+Status 09:42. Back arrow "Rescue 12 Nov", small "SOS". Large heading "Three ways forward." Smaller line "Berlin → replacement → Munich".
+Exactly THREE spacious open option sections, with thin horizontal separators:
+1 "Erfurt", small amber-outline label "Best route balance". A small minimalist road diagram rather than giant map. Two short route lines "From Berlin  3h 30m" and "To Munich  3h 50m". Compact data "Audience fit: high · Rooms 300–600". Short why "Strong taste fit. Both drives stay under 5h." Small neutral "Venue date unconfirmed". Selected radio at right.
+2 "Dresden", lines "From Berlin  2h 20m" / "To Munich  4h 45m"; "Audience fit: high · Rooms 300–500"; short why "A stronger audience signal, a longer next drive." Small "Venue date unconfirmed".
+3 "Halle", lines "From Berlin  2h 00m" / "To Munich  4h 40m"; "Audience fit: medium · Rooms 300–500"; short why "Shortest first drive. Demand needs a closer look." Small "Venue date unconfirmed".
+Bottom amber CTA "Prepare Erfurt proposal →". Tiny readable note "Sample estimates · taste fit is not ticket demand." Do NOT show all candidates already booked, a false 98% success score or actual fan counts.
+
+SCREEN 3 / PROMOTER DRAFT:
+Status 09:43. Back "Erfurt proposal". Small label "DRAFT / NOT SENT". Large heading "Ready to start a conversation."
+An elegant plain dark document preview with readable short sections, not a dense wall of text:
+"NORTHBOUND"
+"Erfurt · Thu 12 Nov"
+"Indie / 5-piece / 300–600 cap."
+"Why Erfurt"
+"Strong audience fit, realistic travel between Berlin and Munich."
+"Proposed terms"
+"Venue and fee to discuss. Date not confirmed."
+Below preview clear recipient row "Promoter" / "Choose a contact →". Small line "English draft · editable". Primary amber action "Review message →". Secondary quiet link "Export one-page proposal". Bottom nav Route active. Tiny "Sample proposal". There is no sent/checkmark confirmation and no unsolicited outreach; this is a draft for human review.
+The board should convey thoughtful high-end emergency operations UX: big plain words, clear next action, breathing room and genuinely useful context.
+
+========================================================================
+
+Mobile rescue — final simplified version after density feedback
+
+Use case: ui-mockup redesign.
+Create a much CALMER and LESS DENSE version of the attached TOUR RESCUE mobile app concept. The input image is the visual-system reference, but the user explicitly finds it too crowded for a stressed tour manager. Redesign the content hierarchy using progressive disclosure. Do not just shrink text or make the same dense content smaller. The key design improvement is much less visible content, larger breathing spaces, strong readable type and ONE meaningful next action per screen.
+
+Landscape presentation 1536x1024 or larger. Exactly THREE large flat mobile screens side by side, same proportions and thin device outlines, graphite backdrop. Outside top tiny "TOUR RESCUE" left and "MOBILE / SIMPLIFIED" right. Outside bottom captions "01 / One problem, one next move", "02 / Compare only what matters", "03 / Details after the choice".
+Preserve the established brand: matte graphite #121A20, slightly lighter #1C2831 surfaces, subtle #344550 lines, warm white #F4F6F8, readable muted #AEBCC6, FLAT warm amber #F3B65B primary actions with near-black text. NO gradients, glow, giant bright boxes, tiny labels, nested cards or extra dashboard widgets. Modern highly legible IBM Plex Sans / Inter-style typography, bold 30–34px mobile headings, 16–18px body, generous 24px gutters, generous vertical whitespace. Thin purposeful icons, amber road-turn-arrow wordmark "TOUR RESCUE". All copy English. Small bottom nav with just THREE entries "Today", "Route", "Crew" on the home screen; focused rescue screens can omit bottom nav and use a clear top back arrow. SOS always reachable in the top right.
+ALL values illustrate a fictional SAMPLE TOUR, no real availability or live API claim. Cultural fit is not ticket demand.
+
+SCREEN 1: HOME / THE NEXT MOVE
+Status 09:41. TOUR RESCUE left, small outlined "SOS" right.
+Small line "Northbound · Berlin".
+Large heading "Here's the plan."
+ONE calm compact incident area on slightly lighter graphite, with a single thin dusty-red left rule (not a huge glowing red box). Bold "Leipzig canceled." Smaller "Tomorrow, 12 Nov". ONE full-width flat amber CTA "Rescue this date →".
+A LARGE BREATHING SPACE before the next section.
+Small heading "Next up". Very large clear time "16:00", bold "Load-in", one short muted line "Tonight's venue · Berlin". Simple outline text action "Open today's sheet →".
+Near bottom tiny low-emphasis "Sample tour · local time".
+Three-item bottom nav Today active, Route, Crew.
+Do NOT show the full day's schedule, presale counts, promo buttons, hotel details, secondary alerts or extra widgets. This screen offers one rescue action plus one next time to orient a person under stress.
+
+SCREEN 2: SELECT A CITY / SHORTLIST ONLY
+Status 09:42. Back arrow and short "12 Nov", SOS right.
+Large heading "Three ways forward."
+Small muted line "Berlin → replacement → Munich".
+Exactly THREE roomy open selection rows, each around 145px tall, separated by fine rules, with NO map, NO mini road diagram, NO room-capacity data, NO repeated availability sentences, NO multi-line mini explanations:
+Erfurt, small subtle amber word "Suggested" to right, selected radio. One short plain reason "Strong fit. Balanced drives." Then TWO simple tabular-numeral times in one line "3h 30m in  ·  3h 50m onward".
+Dresden, empty radio. One short reason "Stronger fit. Longer onward drive." Then "2h 20m in  ·  4h 45m onward".
+Halle, empty radio. One short reason "Shortest first drive." Then "2h 00m in  ·  4h 40m onward".
+Enough whitespace between rows to compare instantly. Bottom a single full-width amber CTA "Review Erfurt →".
+One quiet tiny line at bottom "Sample estimates · dates unconfirmed".
+No bottom tab bar on this focused choice screen. Do not add more copy.
+
+SCREEN 3: SELECTED CITY / DETAIL ON DEMAND
+Status 09:43. Back "Options", SOS right.
+Large heading "Erfurt."
+One concise supporting line "A sensible next stop."
+A clean large TWO-ROW factual block:
+"Travel" / "Berlin 3h 30m · Munich 3h 50m"
+"Audience fit" / "High · cultural affinity"
+Fine divider.
+One short clear explanation under medium heading "Why this option"
+"Both drives fit your 5h limit. The audience signal is strong enough to explore a room."
+A simple compact status row with a small neutral clock icon "Venue and date still to confirm."
+Substantial whitespace; no full email document, no map, no budget breakdown, no venue list.
+Near bottom full-width flat amber CTA "Prepare promoter proposal →".
+Below small quiet secondary link "See evidence & assumptions".
+Tiny note "Sample scenario · affinity is not ticket sales".
+No bottom nav, clear back control at top. Generous breathing room and a very obvious next step.
+This redesign should feel demonstrably simpler than the reference, respectful of cognitive load and excellent for a hurried person using one hand. Match brand quality while removing at least half the visible content.
+
+========================================================================
+
+Mobile local SOS
+
+Use case: ui-mockup.
+Create a superb calm TOUR RESCUE mobile SOS user-story presentation. Exactly THREE large flat phone screens side by side, landscape 1536x1024 or greater. Use the attached SIMPLIFIED MOBILE reference as the strict brand and cognitive-density specification. Match graphite #121A20, subdued lighter surfaces #1C2831, readable warm white and gray-blue typography, thin outlines and flat amber #F3B65B primary buttons with dark text. Modern clean sans type, bold 30px titles, 16–18px body, minimum 48px touch targets, generous whitespace. The user has specifically rejected dense screens. Keep each screen to ONE task and only 2–3 key facts, with details accessible by a quiet link. Do not fill empty space. No gradients, neon, giant maps, data grids, multi-step explanatory text, nested cards, popups, notification clutter or tiny disclaimers.
+Small outer board title TOUR RESCUE and "MOBILE / LOCAL SOS". External captions "01 / Say what happened", "02 / Shortlist, not a directory", "03 / One clear approval".
+All visible UI text ENGLISH. These are sample suppliers and sample quotes, not real recommendations. Tiny "Sample incident" marker on each screen. The scenario is a touring band's broken kick drum head in Ho Chi Minh City, with a supplier quote in Vietnamese dong and local time. No medical emergency content.
+
+SCREEN 1 / PROBLEM:
+14:10 status. Back arrow and small "Tour SOS".
+Large heading "What went wrong?"
+A spacious clean textarea with actual text "22-inch kick drum head split. Need a replacement fitted by 16:00." Small unobtrusive microphone icon in lower corner.
+Two SIMPLE open input rows below, each separated by a fine rule:
+"Where" / "Ho Chi Minh City" / edit chevron.
+"Needed by" / "Today, 16:00" / "Venue local time · UTC+7" in smaller gray.
+A short single-line budget row "Budget cap" / "2,000,000 VND".
+Lots of breathing space.
+Primary flat amber full-width button "Find local help →".
+Tiny line "Sample incident". No category selector grid, full-screen map, long description, onboarding or mandatory extra form fields. No bottom nav in focused SOS.
+
+SCREEN 2 / OPTIONS:
+14:11. Back "SOS", small quiet "Ho Chi Minh City".
+Large heading "Two local options."
+Tiny subtitle "A head, fitting and delivery." 
+Exactly TWO very spacious open provider option areas separated with thin rules, with a simple tool icon instead of people portraits:
+"Minh Backline", selected radio, quiet trust line "Crew reference". Two primary facts on their own clean row: "Est. 1,800,000 VND" and "Travel ~35 min". Small muted "Stock and timing to confirm."
+"Saigon Stage Supply", empty radio. Two facts "Est. 1,950,000 VND" and "Travel ~50 min". Small muted "Stock and timing to confirm."
+No fake verified status, no invented star ratings, no five-detail rows, no business descriptions. A quiet link "See supplier details" under the options.
+Large breathing space beneath.
+Bottom one flat amber CTA "Get a quote →".
+Small secondary text link "I'll call myself".
+Tiny footer "Sample suppliers · estimates only". This is a shortlist for an urgent decision, not a directory.
+
+SCREEN 3 / CONCRETE APPROVAL:
+14:18 status. Back "Your solution".
+Large heading "Ready to confirm."
+One clear supplier line "Minh Backline".
+Two roomy open factual rows with subtle rules:
+"Solution" / "22-inch head + fitting".
+"Arrival" / "Today, 15:40" with tiny "Local time".
+Then the total cost in beautifully large tabular numerals "1,800,000 VND" and small label "Supplier quote, including delivery".
+Below small subtle sage line "Within your 2,000,000 VND cap."
+One quiet link "See quote & conversation →".
+Plenty of space, one main flat amber button at the bottom "Confirm 1,800,000 VND".
+Small clear line below "Nothing is booked until you confirm."
+Tiny "Sample quote" footer. No false payment-completed state, no provider already en route, no fake call logs.
+This should look like a mature high-trust field tool: the assistant can collect and translate quotes, but the human sees a concrete price, scope and arrival before committing. Reduce visual noise aggressively while keeping large text.
+
+========================================================================
+
+Mobile planning, financial decision and public fan page
+
+Use case: ui-mockup.
+Create a coordinated TOUR RESCUE mobile design presentation with exactly THREE large flat phone screens side by side, landscape 1536x1024 or greater. Attached SIMPLIFIED reference governs the visual system and low cognitive density: dark graphite #121A20, quiet #1C2831 surfaces, warm white, readable blue-gray secondary type, flat amber #F3B65B actions with dark text, large humanist sans headings and comfortable body type, fine outlines, spacious 24px gutters, generous breathing room. NO gradients, excessive cards, dashboards, tiny gray labels, multi-chart screens or fill for empty space. Each screen has one job. All copy English.
+Tiny external header TOUR RESCUE and "MOBILE / PLAN · DECIDE · INVITE". Captions "01 / Plan in your own words", "02 / A decision, not a spreadsheet", "03 / Let fans raise their hands".
+All numerical examples are explicitly samples. Qloo affinity must not be presented as a listener count, paid ticket demand or actual attendance.
+
+SCREEN 1 / NATURAL-LANGUAGE PLAN:
+9:41 status. TOUR RESCUE header, small SOS right. Small tour line "Northbound · 5-piece indie".
+Large heading "Let's build a route."
+One spacious native textarea with exact content "12 shows in November. Germany and Poland. Van. Max 4h driving a day. Clubs for 300–600. No Mondays." Small microphone icon inside lower corner.
+Below ONE open summary row "Your touring rules" / "No night drives · Club shows" and a quiet "Edit band profile →" link.
+Large intentional breathing space.
+One primary flat amber full-width button "Build a draft route →".
+Small line "Dates and venues will still need confirmation."
+Bottom simple three-tab nav Today, Route ACTIVE, Crew. Tiny "Sample brief" label. No form wizard or rows of ten filters.
+
+SCREEN 2 / VIABILITY DECISION:
+9:41 status. Back arrow "Erfurt · 12 Nov". 
+Large heading "Close call."
+One short sentence "This date needs better terms."
+Large very legible tabular-numeral scenario range "-€420 to +€420". Label just above or below "Estimated show result".
+Fine horizontal rule, TWO spacious factual rows:
+"Attendance assumption" / "120–180".
+"Break-even" / "150 tickets".
+A small honest line "Your assumptions, not a sales forecast."
+Another fine rule. One quiet link "View assumptions & costs →".
+Lots of whitespace before a single flat amber primary button "Review the terms →".
+Small "Sample scenario" label.
+Do not show a pie chart, revenue table, tiny cost breakdown or probability. The hidden scenario uses ticket price €20, 70% artist share and costs €2,100; 120–180 attendees yields exactly -€420 to +€420 and 150-ticket break-even. Keep those detailed assumptions behind the link, not all visible.
+
+SCREEN 3 / PUBLIC FAN PAGE:
+9:41 status. Compact TOUR RESCUE header only; no SOS, manager navigation or crew information on this PUBLIC fan route. Tiny subtle "Sample artist page".
+A wide beautiful editorial photograph near top, about 25% of screen: fictional five-piece indie band seen as silhouettes from behind at a warm amber-lit club show, authentic atmosphere, no recognizable real artist and no brand logos.
+Large beautifully clear heading "Bring Northbound
+to Gdańsk."
+One short supporting sentence "Tell the band you'd come to a show here."
+One simple email field with label "Email for updates · optional".
+Primary flat amber full-width button "I'd come to this show".
+Below one clear quiet sentence "Interest only. This does not reserve a ticket."
+Large breathing space, then tiny footer "Tour Rescue · Fan interest". No fabricated fan count, no payment or seat selection, no consent pre-ticked, no maps of individual fans.
+The result should demonstrate simple coherent product thinking across planning, financial judgement and audience input, with each screen intentionally edited and uncluttered.
+
+========================================================================
+
+Desktop command center
+
+Use case: ui-mockup.
+Create one impeccably polished TOUR RESCUE DESKTOP COMMAND CENTER screenshot, landscape 1536x1024, full-screen application, no monitor frame or surrounding presentation board. Attached simplified MOBILE design is the exact brand and low-density UX reference. Translate it into a spacious desktop control table for a tour manager, not a crowded analytics dashboard. User explicitly rejects visual chaos, too many KPIs, tiny type and dense screens.
+Brand: matte graphite #121A20, restrained #1C2831 surfaces, fine #344550 separators, warm white #F4F6F8 and readable muted blue-gray #AEBCC6, flat warm amber #F3B65B for the next action. Dark text on amber buttons. Bold clean humanist sans typography with 42px page title and 16–18px body. Crisp layout, generous 40–48px gutters, only a few meaningful icon shapes. No gradients, glows, fake scores, repetitive card grids, charts, top KPI blocks or background photography. All text English.
+
+Fictional SAMPLE TOUR: Northbound · Europe 2026, Berlin 11 Nov, Leipzig 12 Nov canceled, Munich 13 Nov. Dates and booking statuses shown are sample data. No live API evidence claimed.
+
+LEFT SIDEBAR, narrow about 190px: TOUR RESCUE wordmark with small amber turn-arrow top. Vertical nav "Overview" active, "Route", "Audience", "Crew", "Documents". Below a divider an amber-outline "Tour SOS" button. Bottom small switcher "Northbound" and quiet "Agency view →". No extra account widgets.
+
+HEADER in main: large clear "Northbound." with quiet subtitle "Europe 2026 · 11–23 Nov". Top right two modest actions "Crew day sheet" outlined and small share icon + "Share". Small "Sample tour" indicator.
+
+ONE calm horizontal incident bar across main, thin dusty red left rule, text "Leipzig canceled · tomorrow, 12 Nov". At far right exactly one primary amber "Rescue this date →". No more alert cards.
+
+BODY is a generous 62% / 33% split, two open regions:
+LEFT: large simple dark map panel headed "The next three stops". Dark simplified Germany road map, geographically plausible: Berlin north-east, Leipzig below-left of Berlin, Erfurt west of Leipzig, Munich far south. Show only FOUR named cities, no dozens of street labels. Confirmed route in muted pale line Berlin → canceled Leipzig → Munich, Leipzig marked a restrained small red X. Proposed detour Berlin → Erfurt → Munich in dashed amber. Erfurt labeled "Proposal", not booked. One small legend at bottom "Solid: current plan   Dashed: proposal". A quiet small text link below the map "Explore audience fit →". The map is functional and sparse, no glowing heatmap or decorative pins.
+
+RIGHT: large heading "What needs you." Exactly THREE open clean rows separated by thin rules:
+1. Small amber dot, bold "Choose a replacement city", muted "12 Nov · 3 options prepared", arrow.
+2. Small neutral dot, bold "Today's load-in", muted "Berlin · 16:00 local time", arrow.
+3. Small neutral dot, bold "Presale needs a push", muted "94 sold / 160 planned", arrow.
+Very generous spacing, no dense explanatory paragraphs.
+Below these, small "Next confirmed show" heading and bold "Munich · 13 Nov" with small "Venue details →".
+
+BOTTOM below main regions one shallow open three-stop chronological strip: "11 Nov / Berlin / Confirmed"; "12 Nov / Leipzig / Canceled"; "13 Nov / Munich / Confirmed". Keep status labels as text plus small icon, not color alone.
+Tiny footer "Sample scenario · proposals do not confirm venue availability".
+This should feel like a calm operations desk: one incident, one route, three next decisions. Important information is immediately legible, with room to breathe, not a cockpit with every feature visible.
+
+========================================================================
+
+Desktop audience map
+
+Use case: ui-mockup.
+Create one TOUR RESCUE desktop AUDIENCE DISCOVERY screen, landscape 1536x1024, full-screen web application without a device frame. Input is the approved spacious desktop command center: preserve its exact sidebar, wordmark, matte graphite, warm white and readable gray-blue typography, warm amber accent, fine lines, large clean sans-serif headings and generous gutters. Low cognitive density is a strict requirement. No KPI grid, no all-purpose dashboard, no ten map overlays, no glow, no gradients, no individual fan locations, no fake live API trace.
+
+LEFT SIDEBAR identical brand and geometry: TOUR RESCUE top, Overview, Route, Audience ACTIVE, Crew, Documents; divider, Tour SOS outline; Northbound artist switcher and Agency view at bottom.
+
+HEADER: large simple heading "Find your next audience." Subline "Northbound · based on your taste references". Top right a quiet source link "View sources →". Small visible "Sample data" label.
+
+Below header one clean two-tab source selector: "Cultural fit · Qloo" ACTIVE and "Fan requests". Under tabs a short precise line "Relative affinity, not listener counts or ticket sales." It should be obvious these are different data sources. Do not show ticket sales as part of Qloo.
+
+MAIN layout 65% / 30%, with plenty of space:
+LEFT a large sophisticated dark geographic map of Germany with a little adjacent Poland. Simplified but geographically plausible named locations Berlin, Erfurt, Dresden, Halle and Munich only; no street detail, only faint major roads and country outlines. Around Erfurt, Dresden and Halle show restrained flat amber-toned circular regions indicating RELATIVE cultural fit. No individual people dots, no glowing sci-fi heatmap, no percentage or fan-count labels. Erfurt is selected with a fine amber ring. Map legend bottom left "Relative cultural fit  Low — High" using a tiny simple tonal scale. Small map control zoom plus/minus bottom right. Large airy map region is the visual focal point.
+
+RIGHT: clean heading "Worth a closer look." Exactly THREE open city rows with fine rules, each a bold city, plain-language fit and one short reason:
+"Erfurt" / "High fit" / "A match for your reference artists." selected with small amber dot.
+"Dresden" / "High fit" / "A second audience worth exploring."
+"Halle" / "Medium fit" / "A quieter signal to test."
+These are illustrative, not real reported results. No scores out of 100 and no made-up audience sizes.
+Below a fine divider, one compact section "What this tells you" / "Where to investigate a show. Capacity, availability and travel still need checks."
+Near bottom one dominant flat amber button "Try Erfurt in a route →".
+Small secondary link "Inspect the taste evidence".
+Tiny footer "Design concept · sample affinity shown · live Qloo data to connect".
+This screen should make cultural intelligence central and legible while preserving honesty about what taste data can and cannot say. One map, one shortlist, one next action; no clutter.
+
+========================================================================
+
+Desktop what-if simulation
+
+Use case: ui-mockup.
+Create one spacious, polished TOUR RESCUE desktop WHAT-IF SIMULATION screenshot, landscape 1536x1024, full-screen app. Input is the command center visual reference. Preserve exact matte dark graphite brand, amber next action with dark text, fine separators, readable light type and large clean sans typography, same narrow sidebar. This is a calm planning tool. Low density is mandatory: one proposed change, one clear check, one save action. No giant dashboard, financial spreadsheet, dense table, extra charts, tiny labels, decorative icons, glow or gradients. All text English.
+
+LEFT SIDEBAR identical reference: TOUR RESCUE, Overview, Route ACTIVE, Audience, Crew, Documents; Tour SOS outline; Northbound and Agency view at bottom.
+
+HEADER: large "What if: Erfurt." Subtitle "Replace Leipzig on 12 Nov". Small low-emphasis pill "DRAFT SCENARIO". Top right quiet "Close scenario".
+Below a simple two-tab bar "Route" ACTIVE and "Budget" with a tiny amber dot indicating it needs review. Small line "Changes affect this draft only."
+
+MAIN split into two generous open regions about 55% / 40%:
+
+LEFT heading "The proposed route". At top one small quiet baseline line "Current plan: Berlin → Leipzig → Munich". Then one beautifully simple THREE-STOP VERTICAL itinerary with a thin line:
+"11 Nov" / bold "Berlin" / "Existing date".
+Between stops a small van icon and "3h 30m".
+"12 Nov" / bold "Erfurt" / small amber word "Proposed", with one discreet "Change city" link.
+Between stops "3h 50m".
+"13 Nov" / bold "Munich" / "Existing date".
+No full map on this screen; we already have a map elsewhere. No editable controls on every label. Plenty of whitespace.
+At bottom of left area two quiet open summary values separated by a fine vertical rule: "Total driving" / "7h 20m"; "Versus current plan" / "+35 min". No KPI card grid.
+
+RIGHT heading "Fits the road plan." One short supporting sentence "Both legs stay under your 5h limit."
+A fine separator, then exactly THREE clean check rows:
+sage check icon "Longest drive" / "3h 50m · under 5h".
+neutral clock icon "Room capacity" / "300–600 target · room to choose".
+neutral clock icon "Venue and date" / "Not confirmed".
+Fine separator.
+One understated amber text link "Budget still needs review →". No made-up break-even chart or confidence score; the Budget tab provides details later.
+Large deliberate whitespace.
+One main full-width flat amber button "Save draft scenario".
+Under it a quiet secondary link "Preview promoter proposal →".
+
+Tiny footer "Sample travel values · live road checks to connect · no booking is made by saving".
+This should demonstrate responsible simulation: route feasibility, booking status and financial review are separate, and the UI never silently changes confirmed dates or confuses a proposal with a booking. Extremely readable, calm and simple, with no redundant map or repeated metrics.
+
+========================================================================
+
+Desktop agency operations
+
+Use case: ui-mockup.
+Create one extremely clear TOUR RESCUE DESKTOP AGENCY OPERATIONS screen, landscape 1536x1024. This is the view for an agency managing multiple artists at once. Use the attached command center as the exact brand reference: matte dark graphite #121A20, slightly lighter surfaces, fine dividers, warm white, readable blue-gray copy, warm flat amber next actions with dark text, clean large bold sans typography. Low visual density, large typography, intentional whitespace. No map, no KPI grid, no sales chart, no overcrowded roster table, no gradients or glow. The goal is to see what needs an owner and a decision. All English. Fictional sample artists only.
+
+LEFT SIDEBAR: same TOUR RESCUE wordmark and narrow dark geometry. Context label "AGENCY". Navigation "Overview" ACTIVE, "Tours", "Team", "Documents". Divider and "Tour SOS" amber outline. Bottom small agency switcher "Roadline Agency" and text link "Artist view →".
+
+HEADER: large heading "Your team's next moves." A smaller line "Agency overview · 4 active tours". Top right modest outline action "Share overview". A small "Sample agency" marker.
+
+Below header two plain text filter tabs "Needs attention 3" ACTIVE and "All tours 4". Fine horizontal line. Very small useful note "Times use each venue's local zone."
+
+MAIN CONTENT is exactly THREE VERY SPACIOUS open horizontal decision rows, not panels nested in panels. Use generous 130–155px row height and 32px gaps; show only four columns with a small muted header "Artist", "Needs a decision", "Owner / deadline", "Next action". Minimal separators. No photo tiles; small typographic artist initials are optional.
+
+ROW 1:
+Artist bold "Paper Satellites", small "Vietnam leg".
+Decision bold "Replacement drum head needed", small "Ho Chi Minh City · fitting and delivery".
+Owner "Marta", deadline "Today, 16:00 · ICT".
+One amber primary action "Open SOS →".
+Subtle small amber priority dot only.
+
+ROW 2:
+Artist bold "Northbound", small "Europe 2026".
+Decision bold "Leipzig canceled", small "Three replacement cities to review".
+Owner "You", deadline "12 Nov · CET".
+Restrained outline action "Rescue date →".
+Small restrained dusty-red cancel icon, no whole-row alarm flood.
+
+ROW 3:
+Artist bold "Night Ferry", small "Germany dates".
+Decision bold "Presale below plan", small "Decide on a local promo push".
+Owner clear "Unassigned", deadline "Today · CET".
+Restrained outline action "Assign owner →".
+Neutral small dot.
+
+Below the list a generous unfilled region, then one quiet compact line with a sage check "The fourth tour has no open issues." and a simple link "See all tours →". Do not invent numerical revenue or a false all-good status for the three open issues. Tiny footer "Sample data · proposed agency workspace".
+The screen should demonstrate mature operations UX: one prioritized queue, clear ownership, explicit venue time zones, human decisions and easy switching into a single artist's workspace. Excellent spacing, calmly readable, no duplicated details or visual clutter.
+
+========================================================================
+
+Product landing
+
+Use case: ui-mockup.
+Create an outstanding, distinctive TOUR RESCUE complete DESKTOP LANDING PAGE design screenshot on a portrait canvas approximately 1536x2304 or 1024x1536. This is a polished new brand for working tour managers, artists and booking agencies, matching the attached mobile app's graphite and amber identity. Full-width desktop page, no browser chrome or physical monitor. Bold purposeful humanist sans-serif typography, huge but carefully edited headings, clear reading rhythm, mature professional tone, generous whitespace, excellent contrast. Palette graphite #121A20, warm white #F4F6F8, muted blue-gray, flat amber #F3B65B primary buttons with dark text. A single warm off-white roadbook-like band is permitted near the bottom for deliberate section rhythm. Do NOT make it a fashion page, glossy gaming UI or generic AI SaaS template. No gradients, neon, fake metrics, award badges, testimonials, logos of real bands, partner logos or made-up success percentages. All English. Page must feel calm, reliable and practical at 2 am.
+
+HEADER: compact TOUR RESCUE wordmark with small amber turn-arrow left. Right simple links "How it works", "For agencies", a visibly distinguished outline link "Judges · Start here ↗", and a compact amber button "Try the rescue demo".
+
+SECTION 1 / HERO, about top 38%.
+Asymmetric 48/48 split with a crisp gutter; no text over detailed photographs.
+LEFT very large beautiful bold sans heading exactly "A canceled date.
+A way forward." Warm white on plain graphite. Short supporting copy "Plan where your audience fits. Rescue the show when the route, people or gear let you down." One dominant amber button "Rescue a sample date →". Quiet secondary text link "Explore the product". Tiny line "Sample tour. No setup to explore."
+RIGHT an exquisite realistic editorial photograph: blue-hour backstage loading bay at a club, parked touring van, a few neatly arranged road cases, warm amber light from an open venue door, a competent female tour manager around 35 in a practical dark jacket calmly looking at her phone. Realistically professional, not glamorous, no frantic crowd or branded vehicle. Van is PARKED, not driving at night. Natural gritty textures and beautiful controlled light.
+A SINGLE clean phone inset overlaps only lower photo edge, showing the simplified Tour Rescue "Leipzig canceled" screen with obvious amber "Rescue this date". No collage of many phones.
+
+SECTION 2 / DATE RESCUE, about next 23%.
+Graphite continues, fine horizontal rule. LEFT a large simple dark Germany map with Berlin, Leipzig canceled, Erfurt proposed and Munich, amber dashed proposed detour. Place the map in a crisp purposeful rectangle. Small label "Illustrative route".
+RIGHT large heading "Three cities.
+One next move." Short line "Compare cultural fit and realistic travel. Pick a direction. Prepare a one-page proposal for the promoter." Three short open text markers separated by fine rules "Taste fit · Qloo", "Road and timing checks", "Draft outreach, ready to review". No data table, ungrounded fan count or booked-venue claim.
+
+SECTION 3 / LOCAL SOS, about next 22%.
+A slightly lighter graphite band with reversed emphasis. LEFT large heading "Broken gear.
+Local help." One short paragraph "Say what happened, where you are and when it is needed. Review a concrete solution, arrival time and price before you commit." One understated amber text link "See a local rescue →".
+RIGHT a highly legible single phone or app panel preview from the same brand, showing only "Ready to confirm", fictional "Minh Backline", "22-inch head + fitting", "Today, 15:40", "1,800,000 VND" and amber "Confirm". Small label "Sample quote". Surrounding visual is a minimal warm natural-light close-up of a technician changing a drum head, no brand logos; don't overcrowd it.
+
+SECTION 4 / AGENCY AND FOOTER, about final 17%.
+A clean WARM OFF-WHITE #E9E6DF roadbook-like band for visual contrast. LEFT bold dark sans headline "One calm desk.
+Every tour." RIGHT short concise copy "A clear queue of decisions, a named owner and venue-local deadlines. Switch from agency view to the artist in one step." Plain dark link "Explore the agency workspace →". No fake financial charts.
+Then return to graphite for a slim footer: TOUR RESCUE left, links "For artists", "For agencies", "For judges", "Public code" right. Small honest line "Design concept · taste affinity is not ticket sales · live integrations to connect".
+Beautiful original imagery, obvious practical value, no visual noise, all sections complete and comfortably legible. Keep the page designed around a real rescue story, not a long list of every possible feature.
+
+========================================================================
+
+Dedicated Qloo judges entry
+
+Use case: ui-mockup.
+Create an outstanding separately distinguished TOUR RESCUE FOR JUDGES landing page, one complete desktop webpage on portrait canvas around 1536x2304 or 1024x1536. Input is the Tour Rescue command center brand reference. Keep matte graphite #121A20, warm white, readable blue-gray, thin rules, flat amber #F3B65B action buttons with dark text, bold purposeful humanist sans type. The page must be calm, highly scannable and respectful of judges with many entries. Not a long marketing feature catalog or dense analytics dashboard. All ENGLISH, large clear type, excellent whitespace. No video is required by this hackathon, so prioritize the functional demo and public source. This is a VISUAL DESIGN, not proof an API implementation or public repo is already available. No fake run IDs, benchmark numbers, verified badges, awards, sponsor endorsements, source URLs or invented license choice.
+
+TOP a slim warm-amber utility line with dark text "Qloo Agentic Hackathon" left and "Judges · Start here" right. Main header TOUR RESCUE left; short navigation "Try the rescue", "Why Qloo", "Source & license". No irrelevant signup, upgrade or app store links.
+
+HERO, about top 34%, a spacious 50/45 split:
+LEFT huge bold readable headline exactly "Leipzig canceled.
+Keep the tour moving." Short supporting sentence "A tour-rescue agent that combines cultural fit, road constraints and a promoter-ready plan." Primary flat amber button "Rescue Leipzig →". Secondary plain underlined link "Public source & license ↗". Small note "Sample tour. No sign-up to begin."
+RIGHT a crisp product preview in the same dark UI, not a physical phone: small heading "Three ways forward", a simple Germany map with Berlin, canceled Leipzig, proposed Erfurt and Munich, plus three VERY SIMPLE open candidate rows "Erfurt · Balanced drives", "Dresden · Strong taste fit", "Halle · Short first leg". One selected Erfurt dot and tiny "Illustrative demo preview". Do not cram in a tiny full dashboard.
+
+NEXT REGION, about 22%: large heading "One rescue. Three steps." Exactly three open numbered columns separated by whitespace, no giant cards:
+"01 / Open the canceled date" — "Start from the Berlin–Munich gap."
+"02 / Compare feasible cities" — "Review cultural fit and travel checks."
+"03 / Review the proposal" — "A one-page promoter draft, not a booking."
+Each has one small clear simple icon, no extra paragraphs. A subtle text link "Open the guided scenario →".
+
+NEXT REGION, about 25%: a slightly lighter graphite horizontal band titled "Why Qloo changes the decision."
+Three open aligned explanatory columns:
+"Qloo" / bold "Where taste fits." / "Cultural affinity for places and audiences, grounded in the artist's taste references."
+"Constraint checks" / bold "What can work." / "Road time, daily limits and room requirements. Availability remains explicit."
+"Agent workflow" / bold "What happens next." / "A clear rationale and a promoter draft ready for human review."
+Below one clean simple diagram: "Taste evidence + route checks" → "City shortlist" → "Promoter proposal".
+Small clear honest line "Taste affinity is not a listener count or a ticket-sales forecast."
+
+FINAL REGION, about 19%: heading "Inspect the evidence." Three very clean open rows with fine separators and arrows:
+"Taste evidence" — "Qloo inputs, returned data and ranking"
+"Feasibility" — "Road source, constraints and open questions"
+"Public source" — "Repository, setup and open-source license"
+Below a concise visible scope note "Hackathon core: rescue a canceled date. Additional concepts: local SOS, route planning, agency operations."
+One simple footer row TOUR RESCUE left; "Product", "For agencies", "Public code" right. Small line "Submission representative: Damian". Tiny honest final line "Design concept · live application, evidence and public repository to connect".
+The visitor must immediately understand why Qloo matters, what to click, what is a proposal versus confirmation, and where to inspect source and evidence. It should look like a crafted professional tour-management product, not a hacker console and not an inflated pitch deck.

@@ -1,0 +1,119 @@
+TOUR RESCUE — BRIEF PRODUKTOWY I UX DLA WDROŻENIA
+21.10.2026. Projekt i wizualizacje ImageGen, bez implementacji aplikacji.
+Reprezentant zgłoszenia: Damian. Plan wewnętrzny: 29.10.2026.
+
+KIERUNEK
+Tour Rescue jest spokojnym tour managerem w kieszeni. W kryzysie pokazuje następny sensowny ruch. Na desktopie daje zespołowi operacyjny przegląd, przypisaną odpowiedzialność i symulacje.
+Marka: nocny grafit, ciepły bursztyn, mocna czytelna typografia, naturalne światła backstage'u. Fotografia służy stronie produktu; formularze i decyzje mają czyste tło.
+Po uwadze Damiana o zbyt dużej gęstości uprościliśmy układ. Docelowa plansza startowa to 01-Mobile-Rescue-v2.png. Pierwsza gęstsza wersja nie jest częścią paczki.
+
+ZASADA NAJWAŻNIEJSZA: NIE ZMNIEJSZAĆ TEKSTU, ŻEBY ZMIEŚCIĆ WIĘCEJ
+Jeden problem i jedna główna akcja na ekranie rozwiązywania incydentu. Szczegóły po wyborze.
+Widok Dziś: problem wymagający decyzji oraz najbliższy punkt dnia. Pełna rozpiska pod osobnym wejściem.
+Lista miast: miasto, krótki powód, dwa przejazdy. Pełne źródła i ograniczenia w szczegółach.
+SOS: problem → krótka lista dostawców → konkretna oferta do zatwierdzenia.
+Mapa publiczności, koszty, symulacja i pulpit agencji są osobnymi widokami.
+Min. 48 px celu dotykowego, treść 16–18 px, jasne etykiety stanu wraz z ikoną. Kolor nie wystarcza jako komunikat.
+Podczas ratunku na mobile ukryć dolne menu; zostawić powrót, kontekst i SOS. W podstawowej aplikacji trzy zakładki: Today, Route, Crew.
+
+PRIORYTET HACKATHONOWY
+Doprowadzić jeden pełny scenariusz do działającego demo: odwołany Lipsk między Berlinem i Monachium → rzeczywiste dane kulturowe Qloo → walidacja dróg i ograniczeń → maks. trzy sensowne kierunki → wybór miasta → jednostronicowa propozycja promotorska.
+Mapa gustów jest istotną częścią wyboru, a nie ozdobą obok zwykłych rekomendacji modelu.
+SOS lokalny, pełny planer, głosy fanów i agencja są zaprojektowanym rozszerzeniem produktu. Na stronie jurora zakres wdrożony i koncepcyjny muszą być rozróżnione zgodnie z rzeczywistym stanem w dniu zgłoszenia.
+
+ROLE I NAWIGACJA
+Artysta / tour manager: Today, Route, Crew; Audience i Documents dostępne w kontekście trasy na mobile oraz osobno na desktopie.
+Agencja: Overview, Tours, Team, Documents. Przejście do wybranego artysty w jednym kroku.
+Ekipa: rozpiska dnia z lokalnymi godzinami, adresem i osobą kontaktową; zakres uprawnień według roli.
+Publiczny fan: osobna prosta strona miasta i artysty, bez dostępu do danych ekipy.
+Wyróżnione wejście Judges / Start here prowadzi do osobnej angielskiej ścieżki.
+
+1. RATOWANIE DATY
+Na start gotowa przykładowa trasa Northbound, bez obowiązkowego logowania i długiego onboardingu.
+Wybór miasta nie potwierdza sali, daty ani honorarium. Formularz może rozróżniać sprawdzony przejazd i nadal niepotwierdzony termin sali.
+W szkicu zachować poprzedni oraz następny potwierdzony punkt trasy. Nie zastępować koncertu w produkcyjnym kalendarzu bez świadomej decyzji.
+Propozycja dla promotora zawiera: artystę, proponowane miasto i datę, wymagania sali, krótki powód wyboru i warunki do ustalenia.
+Przed wysłaniem: konkretny adresat, pełna treść i jasna akcja wysłania. Wygenerowanie dokumentu nie oznacza kontaktu z promotorem.
+Stany: nowy incydent → szukanie → propozycje → wybrany kierunek → szkic → wysłane → oczekiwanie → potwierdzone / odrzucone / nieaktualne. Wysyłkę i odpowiedź pokazywać wyłącznie wtedy, gdy naprawdę wystąpiły.
+
+2. CO POCHODZI Z JAKICH DANYCH
+Qloo: względne dopasowanie kulturowe na podstawie prawdziwie rozwiązanych encji lub sygnałów gustu. Profil fikcyjnego nowego zespołu może bazować na rzeczywistych, zweryfikowanych referencjach artystycznych; nie tworzyć fikcyjnego Qloo ID.
+Deklaracje fanów: własne dobrowolne zgłoszenia użytkowników, agregowane niezależnie.
+Sprzedaż: osobna integracja biletowa lub dane wprowadzone przez uprawnioną osobę.
+Drogi: osobny serwis routingu i aktualny plan przejazdu. Qloo nie jest źródłem czasu jazdy.
+Sala, pojemność, stock, dostępność, cena i termin: odpowiednie źródła obiektu lub dostawcy, z datą sprawdzenia i statusem.
+Wizualizacje zawierają przykładowe wartości. Żadna z map ani kwot z PNG nie jest wynikiem wykonania API.
+
+3. WALIDACJA TRASY
+Przed oznaczeniem przejazdu jako zgodnego sprawdzić trasę drogową, limit dzienny, kolejny koncert i dostępny czas.
+Twarde ograniczenia odrzucają niewykonalne warianty. Preferencje gustu pomagają uporządkować pozostałe.
+Brak informacji daje stan Unknown / To confirm. Nie zamieniać go w zielone potwierdzenie.
+Na przykładzie ratunkowym limit wynosi 5 h; nowy brief planera ma 4 h. Nowy brief ma jawnie ustawiać ograniczenia nowego szkicu, a nie po cichu zmieniać istniejącą trasę.
+Na mapie propozycja jest linią przerywaną i ma etykietę Proposed. Potwierdzone odcinki pozostają osobnym stanem.
+W dowodach dla jurora przechować użyte źródła, region, parametry i wynik walidacji; nie ujawniać sekretów.
+
+4. SOS LOKALNY
+Minimalne wejście: problem i specyfikacja, miejsce, termin w lokalnej strefie, ewentualny limit wydatku.
+Pokazać krótki shortlist, domyślnie dwie najlepsze opcje. Szersza lista i referencje są dostępne na żądanie.
+Travel estimate nie jest potwierdzoną godziną przyjazdu. Cena orientacyjna nie jest ofertą od dostawcy.
+Agent może zebrać i przetłumaczyć zapytania oraz wynegocjować konkretną propozycję w ramach mandatu użytkownika. Potwierdzenie wydatku pokazuje dostawcę, zakres, całkowitą cenę, walutę, termin i warunki.
+Przykład na planszy: 22-calowa membrana + montaż, dostawa 15:40 czasu lokalnego, 1 800 000 VND, limit 2 000 000 VND. To fikcyjny scenariusz.
+Nic nie jest zarezerwowane, dopóki użytkownik tego nie zatwierdzi albo nie udzieli wcześniej konkretnego mandatu do samodzielnego zamówienia.
+Stany procesu i rzeczywiste działanie asystenta muszą być czytelne. Nie pokazywać pozorowanych telefonów, negocjacji ani statusu In transit.
+
+5. PLANOWANIE I PROFIL
+Jeden naturalny opis trasy, zapamiętany profil zespołu oraz krótki podgląd reguł. Nie zaczynać od rozbudowanego konfiguratora.
+Przykład: 12 koncertów w listopadzie, Niemcy i Polska, van, max 4 h jazdy dziennie, sale 300–600, bez poniedziałków.
+Profil może obejmować skład, gatunek i referencje gustu, preferowane miasta oraz zakaz jazdy nocą.
+Wynikiem jest szkic, z wyróżnionymi słabymi ogniwami i niewiadomymi, nie fikcyjne rezerwacje.
+
+6. OPŁACALNOŚĆ
+Na głównym ekranie tylko werdykt, zakres możliwego wyniku i próg opłacalności. Szczegóły kosztów i edycja założeń po rozwinięciu.
+Spójny przykład: bilet 20 EUR, udział artysty 70%, koszty 2100 EUR, frekwencja przyjęta przez użytkownika 120–180. Wynik = liczba widzów × 14 EUR − 2100 EUR, czyli od −420 do +420 EUR. Próg = 150 biletów.
+To scenariusz z założeń, nie prognoza sprzedaży wyprowadzona bezpośrednio z Qloo.
+W produkcie zdefiniować zakres kosztów, udziałów i opłat; puste dane nie mogą wyglądać jak wyliczony zysk.
+
+7. AGENCJA I DZIEŃ EKIPY
+Kolejka spraw pokazuje artystę, problem, właściciela i termin z lokalną strefą miejsca. Brak właściciela ma być widoczny.
+Nie wpychać wszystkich artystów, tras i finansów na jedną mapę.
+Rozpiska dnia powinna mieć godziny, adresy, kontakt i znacznik ostatniej aktualizacji. Przy braku sieci zachować ostatni zapis z czytelną datą synchronizacji.
+Błąd pojedynczego zapytania nie powinien zasłaniać całej trasy. Zostawić dostęp do zapisanego planu i jawny stan ponowienia.
+
+8. FANI
+Publiczna akcja „I'd come to this show” zapisuje zainteresowanie, nie płatność, miejsce na sali ani sprzedaż biletu.
+Email opcjonalny, do osobno opisanych aktualizacji. Dane w mapie zbiorcze, bez lokalizacji pojedynczych osób.
+Głos jest własnym źródłem; nie podmienia affinity w Qloo i nie może być przedstawiany jako kupiony bilet.
+
+STRONA PRODUKTU I JURORA
+Landing tłumaczy dwa problemy: odwołaną datę i lokalną awarię. Fotografia przedstawia pracę ekipy, nie celebrytów.
+Juror zaczyna od gotowego przypadku „Leipzig canceled”. Ma dostęp do rzeczywistego demo, dowodów Qloo i repozytorium. Połączenia i wyniki w projekcie graficznym są miejscem do podpięcia, nie dowodem gotowej implementacji.
+Domyślna krótka ścieżka może użyć jawnie opisanych zapisanych danych; musi być jasne, kiedy uruchamiane jest nowe zapytanie. Nie podszywać wygenerowanych makiet pod wyniki Qloo.
+
+PLIKI
+01-Mobile-Rescue-v2.png — Dziś, shortlist miast, szczegóły wybranej opcji.
+02-Mobile-SOS.png — problem, dostawcy, konkretna zgoda na wydatek.
+03-Mobile-Plan-Decide-Fans.png — planer, opłacalność, publiczne zainteresowanie fanów.
+04-Desktop-Command.png — pulpit pojedynczej trasy.
+05-Desktop-Audience.png — mapa gustów i oddzielne deklaracje fanów.
+06-Desktop-Simulation.png — wariant zastępczej daty, reguły i zapis szkicu.
+07-Desktop-Agency.png — kolejka spraw wielu artystów.
+08-Landing.png — strona produktu.
+09-Judges.png — osobne wyróżnione wejście konkursowe.
+TourRescue-design-tokens.json — docelowe kolory, typografia, odstępy i nawigacja.
+TourRescue-prompts.txt — prompty ImageGen, z historią uproszczenia pierwszej planszy.
+
+KONKURS — SPRAWDZONE 21.10.2026
+Qloo wymaga działającego publicznie hostowanego demo, rzeczywistej integracji agentowej z Qloo oraz publicznego repo z kodem, zasobami i instrukcją. Plik licencji open source musi być rozpoznany i widoczny w About repozytorium. Materiały angielskie lub z angielskim tłumaczeniem; film nie jest obowiązkowy. Utrzymać dostęp przez okres oceniania.
+Deadline: 30.10.2026 23:45 EDT = 31.10.2026 04:45 Europe/Warsaw. Plan wewnętrzny Damiana: 29.10.
+Nie wybrano tu licencji ani nie utworzono repo — pozostaje to do wykonania w projekcie kodowym.
+
+ŹRÓDŁA
+Hackathon i szczegółowe wymagania:
+https://qloo.devpost.com/
+https://qloo.devpost.com/rules
+Oficjalna dokumentacja Insights API:
+https://github.com/qloo/docs-public/blob/main/reference/insights-api-deep-dive.md
+Możliwości Qloo:
+https://www.qloo.com/capabilities
+Wybrane zapytania, dostępność danych i ograniczenia używanego klucza trzeba sprawdzić na rzeczywistym API przed ogłoszeniem funkcji jako działających.
+
