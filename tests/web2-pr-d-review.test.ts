@@ -24,7 +24,7 @@ test('404 uses only stylesheet classes and distinct accessible navigation',()=>{
 test('judges links expose both targets as >=48px controls',()=>{
  const html=judgesMarkup(publicSiteModel());
  assert.equal((html.match(/class="judges-external-link"/g)??[]).length,2);
- for(const label of ['Public source & licence ↗','Agent contract ↗']){
+ for(const label of ['Public source &amp; licence ↗','Agent contract ↗']){
    assert.ok(html.includes(label));
  }
  const css=marketingCSS.match(/\.judges-external-link\s*\{([^}]+)\}/)?.[1]??'';

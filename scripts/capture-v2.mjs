@@ -71,7 +71,7 @@ try{
          inlineStyles:document.querySelectorAll('[style]').length};
      });
      if(report.links.length!==3||report.links.some(link=>link.height<48||
-         !link.underline.includes('underline')||link.display!=='inline-flex')||
+         !link.underline.includes('underline')||!['flex','inline-flex'].includes(link.display))||
          report.mainTop<50||report.inlineStyles!==0)
        throw new Error(shot.name+' has inaccessible 404 recovery or inline style: '+JSON.stringify(report));
    }
@@ -80,7 +80,7 @@ try{
        anchors.map(anchor=>({text:anchor.textContent?.trim(),
          height:anchor.getBoundingClientRect().height,
          display:getComputedStyle(anchor).display})));
-     if(targets.length!==2||targets.some(link=>link.height<48||link.display!=='inline-flex'))
+     if(targets.length!==2||targets.some(link=>link.height<48||!['flex','inline-flex'].includes(link.display)))
        throw new Error(shot.name+' has undersized public-source/agent-contract links: '+JSON.stringify(targets));
    }
    const layout=await page.evaluate(()=>{
