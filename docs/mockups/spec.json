@@ -1,0 +1,91 @@
+{
+  "project": "Tour Rescue",
+  "source": "User supplied Fable request in this chat,21Oct2026. No other Fable files or conversations accessed.",
+  "output": "5desktop screens, mobile screen2, plus alternate no-breakpoint state of screen3",
+  "mode": "Static imagegen visual mockups, not implemented interactive app",
+  "fixture_disclaimer": "All venues, artist profiles, scores, route metrics, costs and API logs are synthetic demo examples. No actual Qloo or OSRM queries.",
+  "fixed_dates": [
+    [
+      "Hamburg",
+      "2026-11-10",
+      "Nordlicht Halle",
+      "confirmed_locked"
+    ],
+    [
+      "Berlin",
+      "2026-11-12",
+      "Spreewerk",
+      "confirmed_locked"
+    ],
+    [
+      "Lipsk",
+      "2026-11-14",
+      "Kranhalle",
+      "cancelled"
+    ],
+    [
+      "Monachium",
+      "2026-11-16",
+      "Isarwerk",
+      "confirmed_locked"
+    ],
+    [
+      "Kolonia",
+      "2026-11-18",
+      "Rheinraum",
+      "confirmed_locked"
+    ]
+  ],
+  "assumptions": [
+    "Dates12/16Nov chosen between supplied endpoints10/18Nov and cancelled14Nov",
+    "C has no new city:50is neutral control explicitly not a Qloo city score; still three scatter points as requested",
+    "B incomplete route metrics use lower bounds, not complete known totals",
+    "Driving-limit sensitivity holds the illustrative leg/day plan fixed"
+  ],
+  "options": {
+    "A": {
+      "city": "Drezno",
+      "fit_percentile": 87,
+      "extra_km": 180,
+      "extra_minutes": 130,
+      "max_daily_minutes": 335,
+      "nearest_active_market_km": 165,
+      "cost_eur": 1850,
+      "rank": 1
+    },
+    "B": {
+      "city": "Ingolstadt",
+      "fit_percentile": 74,
+      "extra_km_lower_bound": 60,
+      "extra_minutes_lower_bound": 50,
+      "missing_leg": "Berlin–Ingolstadt",
+      "nearest_market_km": 70,
+      "cost": "UNKNOWN",
+      "rank": 3
+    },
+    "C": {
+      "city": null,
+      "fit_control": 50,
+      "fit_is_city_measurement": false,
+      "extra_km": 0,
+      "extra_minutes": 0,
+      "max_daily_minutes": 290,
+      "cost": "UNKNOWN",
+      "rank": 2
+    }
+  },
+  "breakpoint": {
+    "variable": "max_daily_driving_minutes",
+    "from": 360,
+    "to": 300,
+    "threshold": 335,
+    "new_ranking": [
+      "C",
+      "A_excluded",
+      "B_excluded"
+    ],
+    "remaining_dates_changed": false
+  },
+  "immutable_footer": "dane o gustach: Qloo; przejazdy: OSRM; demo działa do16.11",
+  "user_geoapify_steering": "Work on Geoapify deferred until Codex usage limit renews; no project implementation now."
+}
