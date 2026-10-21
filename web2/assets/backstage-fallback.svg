@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="Illustrative parked touring van at a backstage loading door">
+<defs>
+  <linearGradient id="night" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#152731"/><stop offset="1" stop-color="#0b151d"/></linearGradient>
+  <linearGradient id="venue" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#76563c"/><stop offset=".55" stop-color="#f3b65b"/><stop offset="1" stop-color="#7d5737"/></linearGradient>
+  <radialGradient id="glow" cx=".72" cy=".44" r=".5"><stop stop-color="#f3b65b" stop-opacity=".37"/><stop offset="1" stop-color="#f3b65b" stop-opacity="0"/></radialGradient>
+  <linearGradient id="van" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#70828c"/><stop offset="1" stop-color="#273b47"/></linearGradient>
+  <filter id="shadow"><feGaussianBlur stdDeviation="18"/></filter>
+</defs>
+<rect width="1200" height="900" fill="url(#night)"/>
+<path d="M0 90 L400 60 L550 180 L1200 135 V730 H0Z" fill="#253740"/>
+<path d="M0 146 H1200 M0 188 H1200 M0 272 H1200 M0 323 H1200" stroke="#334a55" stroke-width="6" opacity=".6"/>
+<rect x="688" y="152" width="354" height="547" fill="#101b23" stroke="#51616b" stroke-width="7"/>
+<rect x="727" y="191" width="276" height="473" fill="url(#venue)"/>
+<path d="M740 199 H996 V657 H740Z" fill="#f3b65b" opacity=".34"/>
+<rect x="667" y="131" width="388" height="30" fill="#334753"/>
+<rect x="692" y="123" width="341" height="17" fill="#435965"/>
+<rect width="1200" height="900" fill="url(#glow)"/>
+<path d="M0 657 L1200 677 V900 H0Z" fill="#17262e"/>
+<path d="M0 793 Q550 758 1200 826" stroke="#344d56" stroke-width="13" fill="none"/>
+<path d="M0 862 L1200 870" stroke="#677985" stroke-width="4" opacity=".4"/>
+<g opacity=".48" filter="url(#shadow)"><ellipse cx="360" cy="714" rx="320" ry="50" fill="#000"/><ellipse cx="893" cy="725" rx="170" ry="47" fill="#000"/></g>
+<!-- PARKED TOURING VAN -->
+<g>
+<path d="M93 466 Q96 425 142 414 L416 394 Q467 392 491 429 L565 465 Q594 484 599 517 L613 665 L82 672Z" fill="url(#van)" stroke="#8fa3ad" stroke-width="7"/>
+<path d="M115 471 L396 448 Q435 447 448 469 L452 528 H113Z" fill="#21323e"/>
+<path d="M467 476 L542 491 L562 534 H463Z" fill="#16252f"/>
+<path d="M110 551 H589 V644 H105Z" fill="#3d505b"/>
+<path d="M134 560 H555" stroke="#879da8" stroke-width="5" opacity=".53"/>
+<rect x="496" y="553" width="26" height="33" rx="4" fill="#18272d"/>
+<rect x="72" y="565" width="45" height="24" rx="7" fill="#f3b65b" opacity=".8"/>
+<rect x="586" y="563" width="19" height="28" rx="6" fill="#e78b82"/>
+<circle cx="189" cy="658" r="67" fill="#0d1820" stroke="#7d8c94" stroke-width="10"/>
+<circle cx="189" cy="658" r="30" fill="#3b525e"/>
+<circle cx="498" cy="658" r="67" fill="#0d1820" stroke="#7d8c94" stroke-width="10"/>
+<circle cx="498" cy="658" r="30" fill="#3b525e"/>
+<rect x="322" y="537" width="100" height="5" rx="3" fill="#a0abb0" opacity=".7"/>
+</g>
+<!-- FLIGHT CASES -->
+<g>
+ <rect x="597" y="568" width="137" height="137" rx="9" fill="#182730" stroke="#75828b" stroke-width="7"/>
+ <path d="M601 607 H733 M630 569V706" stroke="#627783" stroke-width="6"/>
+ <circle cx="622" cy="707" r="11" fill="#101820" stroke="#8a9ea7" stroke-width="4"/><circle cx="707" cy="707" r="11" fill="#101820" stroke="#8a9ea7" stroke-width="4"/>
+ <rect x="750" y="613" width="118" height="96" rx="7" fill="#1b2b35" stroke="#8695a0" stroke-width="6"/>
+ <path d="M752 643H867" stroke="#657983" stroke-width="5"/>
+</g>
+<!-- TOUR MANAGER LOOKING AT PHONE - stylized silhouette, no likeness -->
+<g>
+<ellipse cx="984" cy="428" rx="30" ry="37" fill="#283942"/>
+<path d="M945 459 Q983 442 1022 465 L1046 650 H930Z" fill="#14242e"/>
+<path d="M948 488 L902 544 L926 558 L978 520" stroke="#15252f" stroke-width="24" stroke-linecap="round" fill="none"/>
+<rect x="889" y="534" width="25" height="42" rx="5" fill="#52636c" transform="rotate(-19 900 553)"/>
+<path d="M959 649 L955 729 M1016 650 L1024 733" stroke="#101c24" stroke-width="27" stroke-linecap="round"/>
+</g>
+<circle cx="909" cy="210" r="19" fill="#f3b65b" opacity=".85"/>
+<ellipse cx="915" cy="316" rx="118" ry="172" fill="#f3b65b" opacity=".08"/>
+<g fill="#556b75" opacity=".5"><circle cx="90" cy="270" r="4"/><circle cx="187" cy="255" r="3"/><circle cx="1073" cy="345" r="4"/></g>
+</svg>

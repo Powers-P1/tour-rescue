@@ -91,3 +91,7 @@ Board **07** shows three fictitious agency issues and a fourth issue-free sample
 ### Design deviations
 
 The static boards illustrate Leipzig 12 November and Erfurt/Dresden/Halle with 5-hour limits. Per maintainer decision, the deployed application and public landing use **the unchanged validated core**: Leipzig 14 November, Nuremberg/Frankfurt/day off, six-hour limit. The marketing photo has backstage production crew instead of a specifically staged van/tour manager and a real drummer adjusting a snare instead of the fictional 22-inch kick repair; photo licensing and representation are honest. SOS, agency, plan, fan features remain sample/demo-only. AI/Worker provider access is not proved by build-only screenshots. The judges page never marks synthetic artist evidence as a live Qloo recording.
+
+### Offline artwork fallback
+
+The two Unsplash editorial photographs are optional. Local vector illustrations in `web2/assets/` depict a parked tour van at a backstage loading door and a technician adjusting a drum head. If a screenshot runner or offline viewer cannot reach `images.unsplash.com`, these illustrations prevent blank photography panels. They are openly described as illustrations, not photos or genuine staff/suppliers.

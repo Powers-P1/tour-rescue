@@ -240,3 +240,9 @@ a{text-decoration:none}
  .judges-utility{font-size:13px}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+
+/* Local artwork keeps offline marketing screens visually complete. */
+.hero-picture{background:var(--surface) url('/assets/backstage-fallback.svg') center/cover no-repeat}
+.sos-photo{background:var(--surface) url('/assets/drum-fallback.svg') center/cover no-repeat}
+.hero-picture img,.sos-photo img{opacity:0;transition:opacity .2s ease}
+.hero-picture img.photo-ready,.sos-photo img.photo-ready{opacity:1}

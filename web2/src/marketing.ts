@@ -124,9 +124,9 @@ export function landingMarkup(model:PublicSiteModel):string{
  '<div class="hero-actions">'+link(model.appHref,'Rescue a sample date →','m-button')+
  link('#how-it-works','Explore the product ↗')+'</div>'+
  '<p class="mini-disclosure">ⓘ Sample tour · No sign-up to explore · Never a booked show</p></div>'+
- '<div class="hero-visual"><figure class="hero-picture">'+
+ '<div class="hero-visual"><figure class="hero-picture" role="img" aria-label="Illustrative backstage loading scene with a parked van and road cases">'+
  '<img src="'+heroPhoto+'" alt="Photograph of a production team behind the scenes, illustrative of backstage work" width="1200" height="900" fetchpriority="high"/>'+
- '<figcaption>Editorial production photography · illustration only</figcaption></figure>'+
+ '<figcaption>Backstage illustration · editorial photo when available</figcaption></figure>'+
  miniaturePhone(model)+'</div></section>'+
  '<section id="how-it-works" class="landing-section site-shell rescue-section"><div class="landing-map">'+
  journeyDiagram(model)+'</div><div class="section-copy"><p class="eyebrow">01 / DATE RESCUE · CORE</p>'+
@@ -140,8 +140,8 @@ export function landingMarkup(model:PublicSiteModel):string{
  '<p>Say what happened, where you are and when it is needed. Review a concrete scope, arrival estimate and price before approving any spend.</p>'+
  link('/app/#sos','See a sample local rescue →','text-amber')+
  '<p class="mini-disclosure">No supplier is contacted. Quote and travel values are fictional.</p></div>'+
- '<figure class="sos-photo"><img src="'+drumPhoto+'" alt="Editorial photograph of a drummer adjusting a drum in a rehearsal setting" loading="lazy" width="1200" height="760"/>'+
- '<figcaption>Editorial photo · not the example supplier</figcaption>'+
+ '<figure class="sos-photo" role="img" aria-label="Illustrative drum fitting, not a real supplier visit"><img src="'+drumPhoto+'" alt="Editorial photograph of a drummer adjusting a drum in a rehearsal setting" loading="lazy" width="1200" height="760"/>'+
+ '<figcaption>Illustrative drum setup · not the sample supplier</figcaption>'+
  '<div class="sos-card"><small>SAMPLE QUOTE · NOT RECEIVED</small><h3>Ready to review.</h3><p>Minh Backline</p>'+
  '<div><strong>22-inch head + fitting</strong><span>Today, 15:40 · estimate</span></div>'+
  '<strong class="sos-money">1,800,000 VND</strong>'+

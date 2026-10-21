@@ -17,6 +17,7 @@ if (!['https:', 'http:'].includes(origin.protocol) || origin.username || origin.
 await rm(destUrl, {recursive:true,force:true});
 await mkdir(new URL('app/',destUrl),{recursive:true});
 await mkdir(new URL('judges/',destUrl),{recursive:true});
+await mkdir(new URL('assets/',destUrl),{recursive:true});
 const built=await build({
   absWorkingDir:root,
   entryPoints:{
@@ -33,6 +34,10 @@ await Promise.all([
   writeFile(new URL('app/index.html',destUrl),await readFile(new URL('./index.html',import.meta.url))),
   writeFile(new URL('judges/index.html',destUrl),await readFile(new URL('./judges.html',import.meta.url))),
   writeFile(new URL('404.html',destUrl),await readFile(new URL('./404.html',import.meta.url))),
+  writeFile(new URL('assets/backstage-fallback.svg',destUrl),
+    await readFile(new URL('./assets/backstage-fallback.svg',import.meta.url))),
+  writeFile(new URL('assets/drum-fallback.svg',destUrl),
+    await readFile(new URL('./assets/drum-fallback.svg',import.meta.url))),
 ]);
 await writeFile(new URL('_headers',destUrl),`/*
   Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com; connect-src 'self' ${origin.origin}; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'

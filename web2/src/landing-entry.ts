@@ -9,7 +9,12 @@ if(legacyHashes.has(current)){
 }else{
   const root=document.getElementById('site-root');
   if(root){
-    try{root.innerHTML=landingMarkup(publicSiteModel());}
+    try{root.innerHTML=landingMarkup(publicSiteModel());
+    // A blocked editorial photo must not hide the original local illustration.
+    for(const photo of document.querySelectorAll<HTMLImageElement>('.hero-picture img, .sos-photo img')){
+      const ready=()=>{if(photo.naturalWidth>0)photo.classList.add('photo-ready');};
+      if(photo.complete)ready();else photo.addEventListener('load',ready,{once:true});
+    }}
     catch{
       root.innerHTML='<main class="site-shell"><h1>Tour Rescue</h1><p>The saved preview could not load.</p>'+
         '<p><a href="/app/">Open the rescue workspace</a> · <a href="/judges/">Judges, start here</a></p></main>';
