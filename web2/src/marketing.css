@@ -279,3 +279,15 @@ a{text-decoration:none}
   .judge-limits{padding-top:56px;padding-bottom:68px}
   .judge-limits-grid{grid-template-columns:minmax(0,1fr);gap:0}
 }
+
+/* On narrow phones the actual mockup is taller than its minimum height.
+   Keep the deliberate lower-edge overlap, but take it into normal flow so the
+   top-left caption cannot be obscured by an unexpectedly tall phone panel. */
+@media(max-width:450px){
+  .hero-visual{display:flex;flex-direction:column;min-height:0;padding-bottom:0}
+  .hero-visual .hero-picture{height:380px;flex:0 0 auto}
+  .hero-visual .phone-preview{
+    position:relative;align-self:flex-end;flex:0 0 auto;
+    margin:-94px 0 0;bottom:auto;right:auto;min-height:320px
+  }
+}
