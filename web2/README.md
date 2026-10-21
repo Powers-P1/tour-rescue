@@ -66,3 +66,14 @@ The public `#fan` screen participates in focus restoration through its `#main` e
 keyboard focus policy has a CPU assertion for retained fan action targets.
 The sample planner now displays three unverified corridor segments and explicit weak links.
 AI progress / completion / failure use an icon plus text; evidence links have a 48px minimum target.
+
+## PR-C - Desktop 05 Audience / 06 Simulation / 07 Agency
+
+Desktop pages are rendered via the existing graphite/amber shell in `web2/`.
+Board **05** has a Qloo cultural-fit map from the *current audited, frozen German candidate set*, with selectable nominated and discovery cities. Only nominated options can open checked route simulations. A separate Fan requests tab says no recorded declarations are available; it neither invents crowd sizes nor recycles Qloo data. Relative rank circles are schematic (no people tracking).
+
+Board **06** uses `recomputeResult` from the existing pure core when a user adjusts the permitted extra-distance preference (0–500 km, metre increments). Locked shows remain unchanged, failed checks remain visible, venue/contract uncertainty remains UNKNOWN. Saving creates only a **device-local versioned draft** keyed to this evidence context; it never updates the live tour, a venue or a promoter. A promoter preview builds the same one-page draft from the actual simulation audit, without dispatch.
+
+Board **07** shows three fictitious agency issues and a fourth issue-free sample tour. Owner assignment changes only in-memory display; opening the SOS / rescue cases returns to the already labelled existing demo flows. Local time zones are written explicitly. Share copies a **sample** overview rather than contacting the agency.
+
+**Deviations from boards 05–07:** the screenshot map has designed Erfurt/Dresden/Halle regions but the frozen core nominates Nuremberg/Frankfurt (as approved), so cities and relative evidence come from actual audit instead. Fan requests have no collector and therefore a truthful empty state rather than fake declarations. The map uses fixture geography, not a rendered basemap. The 06 simulation may be FAIL/UNKNOWN under actual rules rather than artificially PASS and does not assume a 5-hour limit (actual 6h). The 07 sample agency is intentionally not a real connected task system. No deploy switch before PR-D.

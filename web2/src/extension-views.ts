@@ -48,6 +48,8 @@ function routeHub(ctx: ExtensionContext): string {
     '<h2>Leipzig canceled.</h2><p>Options are evaluated by the existing Qloo / OSRM core.</p>' +
     action('Rescue this date →','rescue',true) + '</div>' +
     '<div class="extension-links">' +
+    '<button data-action="open-sim" type="button">Test a replacement route <span>What-if simulation →</span></button>' +
+    '<button data-action="concept-audience" type="button">Find your audience <span>Relative fit / fan requests →</span></button>' +
     '<button data-action="open-plan" type="button">Build a draft route <span>Sample planner →</span></button>' +
     '<button data-action="open-economics" type="button">Can this date pay off? <span>Sample economics →</span></button>' +
     '<button data-action="open-fan" type="button">Invite fan interest <span>Public concept →</span></button>' +

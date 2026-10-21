@@ -1,4 +1,5 @@
 import './styles.css';
+import './desktop.css';
 import { createDemoResult, createApiClient } from '../../web/src/data.ts';
 import type { ApiDecisionResult, ArtistChoice, LiveSelection } from '../../web/src/data.ts';
 import { buildPromoterModel } from '../../web/src/promoter-model.ts';
@@ -14,11 +15,15 @@ import type { ExtensionContext, ExtensionScreen } from './extension-views.ts';
 import { createAiDemoSession } from '../../src/ai/demo.ts';
 import { createAiClient } from '../../web/src/ai-client.ts';
 import { hadMountedScreen, selectFocusTarget } from './focus-policy.ts';
+import { projectAudience, projectSimulation, loadSimulation, saveSimulation } from './desktop-model.ts';
+import type { AudienceSource, AudienceModel, SimulationModel, AgencyOwner } from './desktop-model.ts';
+import { renderDesktopFeature, isDesktopScreen } from './desktop-views.ts';
+import type { DesktopViewContext, DesktopScreen } from './desktop-views.ts';
 import type { AiSessionResult, AiStep } from '../../src/ai/types.ts';
 
 declare const __WORKER_ORIGIN__: string;
 
-type Screen = 'today' | 'options' | 'detail' | 'draft' | 'crew' | 'not-built' | ExtensionScreen;
+type Screen = 'today' | 'options' | 'detail' | 'draft' | 'crew' | 'not-built' | ExtensionScreen | DesktopScreen;
 type ArtistRole = 'target' | 'comparison' | 'control';
 const api = createApiClient(__WORKER_ORIGIN__);
 const aiApi = createAiClient(__WORKER_ORIGIN__);
@@ -43,6 +48,22 @@ let aiSession: AiSessionResult | null = null;
 let aiSteps: AiStep[] = [];
 let aiAbort: AbortController | null = null;
 let aiGeneration = 0;
+let audienceModel: AudienceModel = projectAudience(result);
+let audienceSource: AudienceSource = 'qloo';
+let selectedAudienceCityId = audienceModel.places[0]?.cityId ?? '';
+let audienceEvidenceOpen = false;
+let audienceZoom = 1;
+let simulationModel: SimulationModel | null = null;
+let simulationTab: 'route' | 'budget' = 'route';
+let simSaved = false;
+let simChooseCity = false;
+let proposalFromSimulation = false;
+let proposalSource: ApiDecisionResult | null = null;
+let agencyFilter: 'attention' | 'all' = 'attention';
+const agencyOwners: Partial<Record<'drum'|'leipzig'|'presale',AgencyOwner>> = {};
+let agencyAssignOpen: 'drum'|'leipzig'|'presale'|null = null;
+let agencyProposedOwner: AgencyOwner = 'Alex';
+let agencyNotice = '';
 let pendingId: string = projection.options.find(option => option.recommended)?.id ?? projection.options[0]?.id ?? '';
 let showEvidence = false;
 let liveOpen = false;
@@ -91,7 +112,7 @@ function header(focused: boolean, context = ''): string {
 }
 function mobileTabs(): string {
   const active = screen === 'crew' ? 'Crew' : isExtensionScreen(screen) && screen !== 'fan' ? 'Route' :
-    ['options', 'detail', 'draft'].includes(screen) ? 'Route' : 'Today';
+    (isDesktopScreen(screen) || ['options', 'detail', 'draft'].includes(screen)) ? 'Route' : 'Today';
   return '<nav class="mobile-tabs" aria-label="Main navigation">' +
     (['Today', 'Route', 'Crew'] as const).map(label =>
       '<button type="button" data-action="tab-' + label.toLowerCase() + '" class="' + (label === active ? 'active' : '') + '">' +
@@ -99,11 +120,26 @@ function mobileTabs(): string {
     '</nav>';
 }
 function sidebar(): string {
+  if (screen === 'agency') {
+    const nav = [
+      { label:'Overview', action:'agency-overview' }, { label:'Tours', action:'agency-all' },
+      { label:'Team', action:'agency-team' }, { label:'Documents', action:'agency-documents' },
+    ];
+    return '<aside class="sidebar" aria-label="Agency workspace">' +
+      '<div class="wordmark brand-desktop"><span class="turn-arrow">↱</span> TOUR RESCUE</div>' +
+      '<p class="eyebrow">AGENCY · SAMPLE</p><nav class="side-nav" aria-label="Agency navigation">' +
+      nav.map(item => '<button type="button" data-action="'+item.action+'"'+
+        (item.label==='Overview'?' class="active" aria-current="page"':'')+'>'+item.label+'</button>').join('')+
+      '</nav><div class="side-spacer"></div>' +
+      '<button class="sos-button wide-sos" type="button" data-action="sos">Tour SOS</button>' +
+      '<div class="side-bottom"><strong>Roadline Agency</strong><span>Fictional roster</span>' +
+      '<button class="text-button" type="button" data-action="agency-artist">Artist view →</button></div></aside>';
+  }
   const nav: { label: string; action: string; selected: boolean }[] = [
     { label: 'Overview', action: 'tab-today', selected: screen === 'today' },
     { label: 'Route', action: 'tab-route', selected: ['options', 'detail', 'draft', 'route', 'plan', 'plan-preview',
-      'economics', 'economics-terms', 'ai'].includes(screen) },
-    { label: 'Audience', action: 'concept-audience', selected: screen === 'not-built' && unbuiltName === 'Audience' },
+      'economics', 'economics-terms', 'ai', 'simulation'].includes(screen) },
+    { label: 'Audience', action: 'concept-audience', selected: screen === 'audience' },
     { label: 'Crew', action: 'tab-crew', selected: screen === 'crew' },
     { label: 'Documents', action: 'documents', selected: screen === 'draft' },
   ];
@@ -314,7 +350,17 @@ function extensionContext(): ExtensionContext {
   return { tabs: mobileTabs(), sos, planBrief, planSummary, showAssumptions: economicsExpanded,
     fanPreviewed, aiBusy, aiNotice, aiMode, aiSteps, aiSession, sourceMode: projection.mode };
 }
+function desktopContext(): DesktopViewContext {
+  return {
+    projection, audience:audienceModel, audienceSource, selectedAudienceCityId,
+    audienceEvidenceOpen, mapZoom:audienceZoom, simulation:simulationModel,
+    simulationTab, savedDraft:simSaved, changeCityOpen:simChooseCity,
+    agencyFilter, agencyOwners, assigningTask:agencyAssignOpen,
+    proposedOwner:agencyProposedOwner, agencyNotice,
+  };
+}
 function desktopInner(): string {
+  if (isDesktopScreen(screen)) return renderDesktopFeature(screen, desktopContext());
   if (screen === 'today') return desktopHome();
   return '<div class="desktop-centered"><div class="desktop-mini-header"><strong>' + HTML(projection.title) +
     '</strong><span>' + badge(projection.mode === 'demo' ? 'Sample scenario' : 'Live Qloo taste · sample tour') + '</span></div>' +
@@ -393,7 +439,11 @@ function render(): void {
   const previouslyRendered = hadMountedScreen(root!);
   document.body.classList.toggle('focused-rescue', isFocusedRescue(incident.phase) && ['options','detail','draft'].includes(screen));
   const desktop = desktopMedia.matches;
-  const mobile = isExtensionScreen(screen) ? renderExtension(screen, extensionContext()) :
+  const mobile = isDesktopScreen(screen)
+    ? '<div class="feature-mobile-top"><button type="button" class="back-button" data-action="feature-back">← Back to tour</button>' +
+      (screen === 'agency' ? '' : '<button type="button" class="sos-button" data-action="sos">SOS</button>') +
+      '</div>' + renderDesktopFeature(screen, desktopContext())
+    : isExtensionScreen(screen) ? renderExtension(screen, extensionContext()) :
     screen === 'today' ? homeMobile() : screen === 'options' ? shortlist() :
     screen === 'detail' ? details() : screen === 'draft' ? draft() : screen === 'crew' ? crew() : unbuilt();
   // One DOM layout. The public fan page never receives private tour navigation or SOS controls.
@@ -407,7 +457,7 @@ function render(): void {
   printRoot!.innerHTML = screen === 'draft' && chosenProposal ? sheetHtml(chosenProposal) : '';
   document.title = 'Tour Rescue · ' + (screen === 'today' ? 'Today' : screen === 'options' ? 'Rescue options' :
     screen === 'detail' ? 'Review' : screen === 'draft' ? 'Promoter draft' : screen === 'crew' ? 'Crew' :
-    isExtensionScreen(screen) ? screen.replace(/-/g, ' ') : unbuiltName);
+    (isExtensionScreen(screen) || isDesktopScreen(screen)) ? screen.replace(/-/g, ' ') : unbuiltName);
 
   const dialog = focusedDialog();
   const layout = root!.querySelector<HTMLElement>('.app-layout');
@@ -461,6 +511,8 @@ function prepare(): void {
     render(); return;
   }
   incident = transitionIncident(incident, { type: 'prepare-draft' });
+  proposalFromSimulation = false;
+  proposalSource = result;
   chosenProposal = buildPromoterModel(result, selected.id);
   proposalMessage = defaultMessage(chosenProposal);
   reviewingMessage = false;
@@ -468,6 +520,7 @@ function prepare(): void {
   render();
 }
 function back(): void {
+  if (isDesktopScreen(screen)) { screen === 'agency' ? goHome() : routeHub(); return; }
   if (screen.startsWith('sos-')) {
     const earlier = sos.stage;
     sos = transitionSosSample(sos, { type: 'back' });
@@ -488,18 +541,23 @@ function back(): void {
     incident = transitionIncident(incident, { type: 'back-to-options' });
     screen = 'options';
   } else if (screen === 'draft') {
-    incident = transitionIncident(incident, { type: 'back-to-choice' });
-    screen = 'detail';
+    if (proposalFromSimulation) {
+      incident = initialIncident(); screen = 'simulation'; proposalFromSimulation = false; proposalSource = null;
+    } else {
+      incident = transitionIncident(incident, { type: 'back-to-choice' });
+      screen = 'detail';
+    }
   } else goHome();
   render();
 }
 function downloadAudit(): void {
-  const value = JSON.stringify(result.audit, null, 2);
+  const audited = screen === 'draft' ? proposalSource ?? result : result;
+  const value = JSON.stringify(audited.audit, null, 2);
   const file = new Blob([value], { type: 'application/json' });
   const url = URL.createObjectURL(file);
   const link = document.createElement('a');
   link.href = url;
-  link.download = 'tour-rescue-' + result.mode + '-' + projection.runId.replace(/[^a-z0-9-]/gi, '_') + '-audit.json';
+  link.download = 'tour-rescue-' + audited.mode + '-' + audited.audit.runId.replace(/[^a-z0-9-]/gi, '_') + '-audit.json';
   document.body.append(link);
   link.click();
   link.remove();
@@ -520,6 +578,65 @@ function routeHub(): void {
   screen = 'route';
   notice = '';
   render();
+}
+function openAudience(): void {
+  audienceModel = projectAudience(result);
+  selectedAudienceCityId = audienceModel.places[0]?.cityId ?? '';
+  audienceSource = 'qloo'; audienceEvidenceOpen = false;
+  screen = 'audience'; notice = '';
+  render();
+}
+function simulationScope(): string {
+  return result.mode === 'demo' ? 'demo:' + result.scenarioId : result.audit.runId;
+}
+function openSimulation(optionId?: string): void {
+  const available = projection.options.filter(option => option.kind !== 'day-off');
+  const previous = (() => {try{return loadSimulation(window.localStorage, simulationScope());}catch{return null;}})();
+  const requested = optionId ?? previous?.optionId ?? available.find(option => option.recommended)?.id ?? available[0]?.id;
+  const chosen = available.some(option => option.id === requested) ? requested : available[0]?.id;
+  if (!chosen) { notice = '× No nominated route is available.'; render(); return; }
+  const cap = previous?.optionId === chosen ? previous.extraKm : result.audit.replay.policy.maxAdditionalDistanceMetres/1000;
+  try {
+    simulationModel = projectSimulation(result, chosen, cap);
+    simSaved = Boolean(previous && previous.optionId === chosen && previous.extraKm === cap);
+    simChooseCity = false; simulationTab = 'route';
+    screen = 'simulation'; notice = '';
+  } catch(err) { notice='× Simulation unavailable: '+(err instanceof Error?err.message:'invalid audit'); }
+  render();
+}
+function saveCurrentSimulation(): void {
+  if (!simulationModel) return;
+  try {
+    saveSimulation(window.localStorage, {
+      schemaVersion:'tour-rescue.web2-sim-draft.v1', baseRunId:simulationScope(),
+      optionId:simulationModel.optionId, extraKm:simulationModel.maxAdditionalDistanceKm,
+    });
+    simSaved = true; notice = '✓ Draft saved on this device only; the existing tour is unchanged.';
+  } catch(err) { notice='× Could not save local draft: '+(err instanceof Error?err.message:'storage disabled'); }
+  render();
+}
+function previewSimulationProposal(): void {
+  if(!simulationModel)return;
+  const source=simulationModel.sourceResult;
+  const selected=source.audit.analysis.decision.options.find(option=>option.optionId===simulationModel!.optionId);
+  if(!selected || selected.status==='FAIL') {
+    notice='× This direction fails declared checks. Review the audit or change the assumption.';
+    render(); return;
+  }
+  incident=transitionIncident(initialIncident(),{type:'start-search'});
+  incident=transitionIncident(incident,{type:'proposals-ready',runId:source.audit.runId,
+    optionIds:source.audit.analysis.repairs.options.map(option=>option.id)});
+  incident=transitionIncident(incident,{type:'choose',optionId:simulationModel.optionId});
+  incident=transitionIncident(incident,{type:'prepare-draft'});
+  proposalFromSimulation=true;
+  proposalSource=source;
+  chosenProposal=buildPromoterModel(source,simulationModel.optionId);
+  proposalMessage=defaultMessage(chosenProposal);
+  reviewingMessage=false; screen='draft'; notice='';
+  render();
+}
+function openAgency():void {
+  screen='agency';agencyFilter='attention';agencyNotice='';notice='';render();
 }
 function closeFan(): void {
   if (window.location.hash === '#fan') window.history.replaceState(null, '', window.location.pathname + window.location.search);
@@ -611,6 +728,9 @@ async function runLive(): Promise<void> {
     chosenProposal = null;
     liveOpen = false;
     screen = 'options';
+    audienceModel=projectAudience(fresh);
+    selectedAudienceCityId=audienceModel.places[0]?.cityId??'';
+    simulationModel=null;
     notice = 'Fresh Qloo run complete. Venue and booking facts remain sample data.';
   } catch (err) {
     incident = priorIncident;
@@ -684,8 +804,70 @@ root!.addEventListener('click', async event => {
     case 'tab-crew': incident = initialIncident(); screen = 'crew'; render(); break;
     case 'documents':
       if (chosenProposal) { screen = 'draft'; render(); } else openConcept('Documents'); break;
-    case 'concept-audience': openConcept('Audience'); break;
-    case 'concept-agency': openConcept('Agency operations'); break;
+    case 'concept-audience': openAudience(); break;
+    case 'concept-agency': openAgency(); break;
+    case 'open-sim': openSimulation(); break;
+    case 'feature-back': routeHub(); break;
+    case 'audience-qloo': audienceSource='qloo';render();break;
+    case 'audience-fans': audienceSource='fans';render();break;
+    case 'audience-select':
+      if(audienceModel.places.some(p=>p.cityId===button.dataset.id))selectedAudienceCityId=button.dataset.id!;
+      render();break;
+    case 'audience-zoom-in':audienceZoom=Math.min(1.45,Math.round((audienceZoom+.15)*100)/100);render();break;
+    case 'audience-zoom-out':audienceZoom=Math.max(1,Math.round((audienceZoom-.15)*100)/100);render();break;
+    case 'audience-evidence':audienceEvidenceOpen=!audienceEvidenceOpen;render();break;
+    case 'audience-try':{
+      const city=audienceModel.places.find(p=>p.cityId===selectedAudienceCityId);
+      if(city?.routeOptionId)openSimulation(city.routeOptionId);
+      else {notice='? Taste lead only - no validated road option for this city.';render();}
+      break;
+    }
+    case 'sim-close':routeHub();break;
+    case 'sim-route-tab':simulationTab='route';render();break;
+    case 'sim-budget-tab':simulationTab='budget';render();break;
+    case 'sim-change-city':simChooseCity=!simChooseCity;render();break;
+    case 'sim-pick':openSimulation(button.dataset.id);break;
+    case 'sim-recheck': {
+      const input=root!.querySelector<HTMLInputElement>('#sim-cap');
+      if(!input||!simulationModel)break;
+      try {
+        simulationModel=projectSimulation(result,simulationModel.optionId,Number(input.value));
+        simSaved=false;notice='✓ Recalculated with the deterministic core; existing tour unchanged.';
+      }catch(err){notice='× Invalid distance cap: '+(err instanceof Error?err.message:'enter 0–500 km');}
+      render();break;
+    }
+    case 'sim-save':saveCurrentSimulation();break;
+    case 'sim-proposal':previewSimulationProposal();break;
+    case 'sim-evidence':
+      notice='× This option fails a check. Inspect the downloaded decision audit.';
+      downloadAudit();render();break;
+    case 'agency-overview':openAgency();break;
+    case 'agency-all':agencyFilter='all';agencyNotice='';render();break;
+    case 'agency-attention':agencyFilter='attention';agencyNotice='';render();break;
+    case 'agency-sos':openSos();break;
+    case 'agency-assign':agencyAssignOpen='presale';agencyProposedOwner=agencyOwners.presale??'Alex';render();break;
+    case 'agency-owner-save': {
+      const input=root!.querySelector<HTMLSelectElement>('#agency-owner');
+      const candidate=input?.value;
+      if(candidate==='Unassigned'||candidate==='Marta'||candidate==='You'||candidate==='Alex'){
+        agencyOwners.presale=candidate;
+        agencyAssignOpen=null;
+        agencyNotice='✓ Sample owner updated locally. Nobody was notified.';
+      }else agencyNotice='× Choose a listed sample owner.';
+      render();break;
+    }
+    case 'agency-share':
+      try{
+        await navigator.clipboard.writeText('Tour Rescue · SAMPLE agency queue\n'+
+          'Paper Satellites: drum head · 16:00 ICT\nNorthbound: Leipzig cancellation · 14 Nov CET\n'+
+          'Night Ferry: presale issue · '+(agencyOwners.presale??'Unassigned')+
+          '\nFictional sample only; no booked shows or sent messages.');
+        agencyNotice='✓ Sample overview copied, not sent.';
+      }catch{agencyNotice='× Clipboard unavailable; nothing was shared.';}
+      render();break;
+    case 'agency-team':agencyNotice='ⓘ Sample owners: Marta, You and Alex. No real staff directory connected.';render();break;
+    case 'agency-documents':agencyNotice='ⓘ Agency documents are planned, not connected to any external service.';render();break;
+    case 'agency-artist':goHome();break;
     case 'concept-presale': openConcept('Presale / ticketing'); break;
     case 'share':
       try { await navigator.clipboard.writeText(window.location.href); notice = 'Preview link copied (not a booking).'; }
