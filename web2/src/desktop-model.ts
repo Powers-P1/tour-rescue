@@ -23,7 +23,7 @@ export interface AudiencePlace {
   readonly routeOptionId: string | null;
 }
 export interface AudienceModel {
-  readonly source: 'live-qloo-percentiles' | 'synthetic-taste-fixture';
+  readonly source: 'live-qloo-percentiles' | 'live-fit-unresolved' | 'synthetic-taste-fixture';
   readonly runId: string;
   readonly scopeLabel: string;
   readonly places: readonly AudiencePlace[];
@@ -69,7 +69,11 @@ export function projectAudience(result: ApiDecisionResult): AudienceModel {
   });
   if (!places.length) throw new Error('Expected nominated cities from the checked core scenario.');
   return {
-    source: result.mode === 'live' ? 'live-qloo-percentiles' : 'synthetic-taste-fixture',
+    source: result.mode === 'demo' ? 'synthetic-taste-fixture' :
+      fitReport.status === 'known' && fitReport.value.cities.some(row => row.value.status === 'known') &&
+      audit.queries.some(query => query.operation === 'artist-heatmap' &&
+        query.source !== 'synthetic' && query.status === 'success')
+        ? 'live-qloo-percentiles' : 'live-fit-unresolved',
     runId: audit.runId, scopeLabel: scenario.tour.region + ' · 24 frozen candidates',
     places, fanCollectionEnabled: false,
   };
@@ -134,10 +138,9 @@ export function projectSimulation(
     dateInZone(show.schedule.startsAt.iso, show.schedule.startsAt.timeZone);
   const extraDistanceCheck = decision.checks.find(check => check.id === 'decision:additional-distance');
   const venueCheck = decision.checks.find(check => check.id === 'venue-availability');
-  const longestLegs = decision.checks.filter(check => check.id.includes('travel:') && check.id.endsWith(':daily-driving'));
-  const worst = (checks: readonly {status:CheckStatus}[]): CheckStatus =>
-    checks.some(check=>check.status==='FAIL')?'FAIL':checks.some(check=>check.status==='UNKNOWN')?'UNKNOWN':checks.length===0?'UNKNOWN':'PASS';
-  const routeStatus = worst(longestLegs);
+  // The core aggregate covers road evidence, arrival windows, daily budgets and spacing.
+  // Passing a subset of daily-driving checks never certifies the whole route.
+  const routeStatus = option.routingStatus;
   const capacity = option.venue.status === 'known' ? option.venue.value.capacityPeople : {status:'unknown' as const,reason:'No venue selected.'};
   const checks: SimCheck[] = [
     { id:'driving', label:'Driving windows / shared daily limit', status:routeStatus,

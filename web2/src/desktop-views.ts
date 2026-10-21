@@ -76,7 +76,7 @@ function audience(ctx:DesktopViewContext):string{
  const isLive=ctx.audience.source==='live-qloo-percentiles';
  return '<section class="feature-page audience-page">'+
    titleRow('Find your next audience.','Northbound · based on your selected taste references',
-     isLive?'Live Qloo · sample tour':'Sample taste evidence',action('View sources →','audience-evidence'))+
+     isLive?'Live Qloo · sample tour':ctx.audience.source==='live-fit-unresolved'?'Live run · fit unknown':'Sample taste evidence',action('View sources →','audience-evidence'))+
    '<div class="feature-tabs" role="tablist" aria-label="Audience data source">'+
    '<button role="tab" type="button" data-action="audience-qloo" aria-selected="'+mode+'">Cultural fit · Qloo</button>'+
    '<button role="tab" type="button" data-action="audience-fans" aria-selected="'+(!mode)+'">Fan requests</button></div>'+
@@ -94,7 +94,7 @@ function audience(ctx:DesktopViewContext):string{
    action(selected.routeOptionId?'Try '+selected.name+' in a route →':'Route not checked for '+selected.name,
      'audience-try',true,!selected.routeOptionId)+
    action('Inspect the taste evidence →','audience-evidence')+
-   fallback('Relative ranking only · '+(isLive?'real Qloo artist queries':'synthetic fixture')+' · venue bookings fictional.')+'</section></div>'
+   fallback('Relative ranking only · '+(isLive?'real Qloo artist queries':ctx.audience.source==='live-fit-unresolved'?'live fit unresolved':'synthetic fixture')+' · venue bookings fictional.')+'</section></div>'
    :'<div class="fan-source-empty"><div class="fan-empty-mark">♡</div><h2>Fan requests are separate.</h2>'+
    '<p>No recorded fan declarations are available in this prototype. The public fan page is a visual preview: its button does not save votes or emails.</p>'+
    '<p class="soft-status">? Collection, consent and aggregation - Unknown / To confirm</p>'+

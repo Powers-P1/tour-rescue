@@ -50,3 +50,16 @@ test('agency statuses and owners are explicitly synthetic and require local assi
   assert.equal(edited[2]?.owner,'Alex');
   assert.equal(tasks[2]?.owner,'Unassigned');
 });
+
+test('failed live artist evidence cannot be labelled a successful Qloo index',()=>{
+  const demo=createDemoResult({generatedAt:'2026-10-21T12:00:00Z',runId:'failed-live'});
+  const unresolved=projectAudience({ ...demo,mode:'live' });
+  assert.equal(unresolved.source,'live-fit-unresolved');
+});
+test('simulation driving summary uses the complete core routing aggregate',()=>{
+  const demo=createDemoResult({generatedAt:'2026-10-21T12:00:00Z',runId:'core-aggregate'});
+  const whatIf=projectSimulation(demo,'detour-frankfurt',350);
+  const core=whatIf.sourceResult.audit.analysis.repairs.options.find(o=>o.id==='detour-frankfurt');
+  assert.ok(core);
+  assert.equal(whatIf.checks.find(c=>c.id==='driving')?.status,core.routingStatus);
+});
