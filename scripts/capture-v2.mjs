@@ -69,6 +69,47 @@ try{
      documentWidth:layout.width,errors:errors.length});
    await page.close();
  }
+ // Capture the decision flows, not just their entry screens.
+ const flows=[
+   {name:'01-rescue-detail-mobile.png',start:'/app/#rescue',width:390,height:844,clicks:['review']},
+   {name:'01-promoter-mobile.png',start:'/app/#rescue',width:390,height:844,clicks:['review','prepare']},
+   {name:'01-promoter-desktop.png',start:'/app/#rescue',width:1536,height:1024,clicks:['review','prepare']},
+   {name:'02-sos-problem-mobile.png',start:'/app/#sos',width:390,height:844,clicks:[]},
+   {name:'02-sos-options-mobile.png',start:'/app/#sos',width:390,height:844,clicks:['sos-find']},
+   {name:'02-sos-quote-mobile.png',start:'/app/#sos',width:390,height:844,clicks:['sos-find','sos-quote']},
+   {name:'03-planner-mobile.png',start:'/app/',width:390,height:844,clicks:['tab-route','open-plan']},
+   {name:'03-planner-draft-mobile.png',start:'/app/',width:390,height:844,clicks:['tab-route','open-plan','plan-build']},
+   {name:'03-economics-mobile.png',start:'/app/',width:390,height:844,clicks:['tab-route','open-economics']},
+   {name:'03-fan-mobile.png',start:'/app/#fan',width:390,height:844,clicks:[]},
+ ];
+ for(const flow of flows){
+   const page=await browser.newPage({viewport:{width:flow.width,height:flow.height},deviceScaleFactor:1});
+   const errors=[];
+   page.on('pageerror',error=>errors.push(error.message));
+   page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});
+   await page.goto(origin+flow.start,{waitUntil:'domcontentloaded',timeout:30000});
+   await page.locator('h1').first().waitFor({state:'visible'});
+   for(const action of flow.clicks){
+     const control=page.locator('[data-action="'+action+'"]').first();
+     await control.waitFor({state:'visible',timeout:10000});
+     await control.click();
+   }
+   if(flow.name==='01-promoter-desktop.png'){
+     const back=page.locator('.desktop-proposal-back');
+     if(!await back.isVisible())throw new Error('Desktop promoter draft has no visible Back button');
+   }
+   const size=await page.evaluate(()=>{
+     const ids=[...document.querySelectorAll('[id]')].map(x=>x.id);
+     return {documentWidth:document.documentElement.scrollWidth,viewport:innerWidth,
+       duplicates:ids.filter((id,i)=>ids.indexOf(id)!==i)};
+   });
+   if(size.documentWidth>size.viewport+2||size.duplicates.length||errors.length)
+     throw new Error(flow.name+' failed browser checks: '+JSON.stringify({size,errors}));
+   await page.screenshot({path:join(out,flow.name),fullPage:true,animations:'disabled'});
+   rows.push({file:flow.name,path:flow.start,viewport:flow.width+'x'+flow.height,
+     documentWidth:size.documentWidth,errors:errors.length,actions:flow.clicks});
+   await page.close();
+ }
  // Check mobile/tablet breakpoints on the actual landing and judges DOM.
  for(const path of ['/','/judges/']){
   for(const width of [320,375,390,768,980,1280,1536]){
