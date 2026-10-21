@@ -1,0 +1,986 @@
+{
+ "schemaVersion": 1,
+ "id": "heatmap-de-synthetic-v1",
+ "dataKind": "synthetic",
+ "metadata": {
+  "synthetic": true,
+  "shape_source": "Qloo Insights heatmap response fields as observed 2026-10-21",
+  "no_raw_api_data": true,
+  "description": "Hand-generated values (deterministic hash plus hand-set regional tilts). Field names mirror the heatmap result entry (location.latitude/longitude/geohash, query.affinity/affinity_rank/popularity); numbers are NOT Qloo data and carry no information about real artists. location holds the city centre from cities_de.json, not a Qloo cell centre. cityId is our own annotation, not a Qloo field. Real Qloo entity ids are resolved at runtime and never stored here.",
+  "candidateSetId": "cities-de-v1"
+ },
+ "queries": [
+  {
+   "queryId": "synthetic-main-act-q1",
+   "label": "The Harbour Lights",
+   "role": "main",
+   "synthetic": true,
+   "entityRef": {
+    "placeholder": true,
+    "resolved_at_runtime": true
+   },
+   "heatmap": [
+    {
+     "cityId": "de-hamburg",
+     "location": {
+      "latitude": 53.55,
+      "longitude": 10.0,
+      "geohash": "u1x0e"
+     },
+     "query": {
+      "affinity": 1.0,
+      "affinity_rank": 1.0,
+      "popularity": 0.435
+     }
+    },
+    {
+     "cityId": "de-berlin",
+     "location": {
+      "latitude": 52.52,
+      "longitude": 13.405,
+      "geohash": "u33dc"
+     },
+     "query": {
+      "affinity": 0.974,
+      "affinity_rank": 0.957,
+      "popularity": 0.608
+     }
+    },
+    {
+     "cityId": "de-leipzig",
+     "location": {
+      "latitude": 51.34,
+      "longitude": 12.375,
+      "geohash": "u30u1"
+     },
+     "query": {
+      "affinity": 0.412,
+      "affinity_rank": 0.478,
+      "popularity": 0.345
+     }
+    },
+    {
+     "cityId": "de-munich",
+     "location": {
+      "latitude": 48.1375,
+      "longitude": 11.575,
+      "geohash": "u281z"
+     },
+     "query": {
+      "affinity": 0.265,
+      "affinity_rank": 0.261,
+      "popularity": 0.429
+     }
+    },
+    {
+     "cityId": "de-cologne",
+     "location": {
+      "latitude": 50.9364,
+      "longitude": 6.9528,
+      "geohash": "u1hcy"
+     },
+     "query": {
+      "affinity": 0.641,
+      "affinity_rank": 0.783,
+      "popularity": 0.363
+     }
+    },
+    {
+     "cityId": "de-frankfurt",
+     "location": {
+      "latitude": 50.1106,
+      "longitude": 8.6822,
+      "geohash": "u0yjj"
+     },
+     "query": {
+      "affinity": 0.443,
+      "affinity_rank": 0.565,
+      "popularity": 0.395
+     }
+    },
+    {
+     "cityId": "de-stuttgart",
+     "location": {
+      "latitude": 48.7775,
+      "longitude": 9.18,
+      "geohash": "u0wt2"
+     },
+     "query": {
+      "affinity": 0.307,
+      "affinity_rank": 0.304,
+      "popularity": 0.4
+     }
+    },
+    {
+     "cityId": "de-duesseldorf",
+     "location": {
+      "latitude": 51.2256,
+      "longitude": 6.7767,
+      "geohash": "u1hg6"
+     },
+     "query": {
+      "affinity": 0.671,
+      "affinity_rank": 0.87,
+      "popularity": 0.417
+     }
+    },
+    {
+     "cityId": "de-dortmund",
+     "location": {
+      "latitude": 51.5139,
+      "longitude": 7.4653,
+      "geohash": "u1jm1"
+     },
+     "query": {
+      "affinity": 0.694,
+      "affinity_rank": 0.913,
+      "popularity": 0.396
+     }
+    },
+    {
+     "cityId": "de-essen",
+     "location": {
+      "latitude": 51.4508,
+      "longitude": 7.0131,
+      "geohash": "u1hux"
+     },
+     "query": {
+      "affinity": 0.4,
+      "affinity_rank": 0.435,
+      "popularity": 0.359
+     }
+    },
+    {
+     "cityId": "de-bremen",
+     "location": {
+      "latitude": 53.0758,
+      "longitude": 8.8072,
+      "geohash": "u1qmb"
+     },
+     "query": {
+      "affinity": 0.642,
+      "affinity_rank": 0.826,
+      "popularity": 0.331
+     }
+    },
+    {
+     "cityId": "de-dresden",
+     "location": {
+      "latitude": 51.05,
+      "longitude": 13.74,
+      "geohash": "u31f2"
+     },
+     "query": {
+      "affinity": 0.542,
+      "affinity_rank": 0.652,
+      "popularity": 0.371
+     }
+    },
+    {
+     "cityId": "de-hanover",
+     "location": {
+      "latitude": 52.3667,
+      "longitude": 9.7167,
+      "geohash": "u1qcv"
+     },
+     "query": {
+      "affinity": 0.529,
+      "affinity_rank": 0.609,
+      "popularity": 0.412
+     }
+    },
+    {
+     "cityId": "de-nuremberg",
+     "location": {
+      "latitude": 49.4539,
+      "longitude": 11.0775,
+      "geohash": "u0zck"
+     },
+     "query": {
+      "affinity": 0.259,
+      "affinity_rank": 0.13,
+      "popularity": 0.37
+     }
+    },
+    {
+     "cityId": "de-duisburg",
+     "location": {
+      "latitude": 51.4347,
+      "longitude": 6.7625,
+      "geohash": "u1hu9"
+     },
+     "query": {
+      "affinity": 0.575,
+      "affinity_rank": 0.696,
+      "popularity": 0.37
+     }
+    },
+    {
+     "cityId": "de-bochum",
+     "location": {
+      "latitude": 51.4819,
+      "longitude": 7.2158,
+      "geohash": "u1jhu"
+     },
+     "query": {
+      "affinity": 0.26,
+      "affinity_rank": 0.174,
+      "popularity": 0.346
+     }
+    },
+    {
+     "cityId": "de-wuppertal",
+     "location": {
+      "latitude": 51.2667,
+      "longitude": 7.1833,
+      "geohash": "u1j5e"
+     },
+     "query": {
+      "affinity": 0.335,
+      "affinity_rank": 0.348,
+      "popularity": 0.345
+     }
+    },
+    {
+     "cityId": "de-bielefeld",
+     "location": {
+      "latitude": 52.0211,
+      "longitude": 8.5347,
+      "geohash": "u1npf"
+     },
+     "query": {
+      "affinity": 0.6,
+      "affinity_rank": 0.739,
+      "popularity": 0.313
+     }
+    },
+    {
+     "cityId": "de-bonn",
+     "location": {
+      "latitude": 50.7353,
+      "longitude": 7.1022,
+      "geohash": "u1j09"
+     },
+     "query": {
+      "affinity": 0.265,
+      "affinity_rank": 0.217,
+      "popularity": 0.333
+     }
+    },
+    {
+     "cityId": "de-muenster",
+     "location": {
+      "latitude": 51.9625,
+      "longitude": 7.6256,
+      "geohash": "u1jrt"
+     },
+     "query": {
+      "affinity": 0.425,
+      "affinity_rank": 0.522,
+      "popularity": 0.329
+     }
+    },
+    {
+     "cityId": "de-karlsruhe",
+     "location": {
+      "latitude": 49.0092,
+      "longitude": 8.404,
+      "geohash": "u0tyz"
+     },
+     "query": {
+      "affinity": 0.213,
+      "affinity_rank": 0.087,
+      "popularity": 0.396
+     }
+    },
+    {
+     "cityId": "de-mannheim",
+     "location": {
+      "latitude": 49.4878,
+      "longitude": 8.4661,
+      "geohash": "u0y18"
+     },
+     "query": {
+      "affinity": 0.081,
+      "affinity_rank": 0.043,
+      "popularity": 0.298
+     }
+    },
+    {
+     "cityId": "de-augsburg",
+     "location": {
+      "latitude": 48.3689,
+      "longitude": 10.8978,
+      "geohash": "u0xep"
+     },
+     "query": {
+      "affinity": 0.0,
+      "affinity_rank": 0.0,
+      "popularity": 0.389
+     }
+    },
+    {
+     "cityId": "de-kassel",
+     "location": {
+      "latitude": 51.3158,
+      "longitude": 9.4979,
+      "geohash": "u1ngb"
+     },
+     "query": {
+      "affinity": 0.346,
+      "affinity_rank": 0.391,
+      "popularity": 0.322
+     }
+    }
+   ]
+  },
+  {
+   "queryId": "synthetic-comparison-act-a-q1",
+   "label": "Comparison Act A",
+   "role": "comparison",
+   "synthetic": true,
+   "entityRef": {
+    "placeholder": true,
+    "resolved_at_runtime": true
+   },
+   "heatmap": [
+    {
+     "cityId": "de-hamburg",
+     "location": {
+      "latitude": 53.55,
+      "longitude": 10.0,
+      "geohash": "u1x0e"
+     },
+     "query": {
+      "affinity": 0.468,
+      "affinity_rank": 0.826,
+      "popularity": 0.663
+     }
+    },
+    {
+     "cityId": "de-berlin",
+     "location": {
+      "latitude": 52.52,
+      "longitude": 13.405,
+      "geohash": "u33dc"
+     },
+     "query": {
+      "affinity": 0.679,
+      "affinity_rank": 0.957,
+      "popularity": 0.818
+     }
+    },
+    {
+     "cityId": "de-leipzig",
+     "location": {
+      "latitude": 51.34,
+      "longitude": 12.375,
+      "geohash": "u30u1"
+     },
+     "query": {
+      "affinity": 0.119,
+      "affinity_rank": 0.217,
+      "popularity": 0.501
+     }
+    },
+    {
+     "cityId": "de-munich",
+     "location": {
+      "latitude": 48.1375,
+      "longitude": 11.575,
+      "geohash": "u281z"
+     },
+     "query": {
+      "affinity": 1.0,
+      "affinity_rank": 1.0,
+      "popularity": 0.63
+     }
+    },
+    {
+     "cityId": "de-cologne",
+     "location": {
+      "latitude": 50.9364,
+      "longitude": 6.9528,
+      "geohash": "u1hcy"
+     },
+     "query": {
+      "affinity": 0.565,
+      "affinity_rank": 0.913,
+      "popularity": 0.537
+     }
+    },
+    {
+     "cityId": "de-frankfurt",
+     "location": {
+      "latitude": 50.1106,
+      "longitude": 8.6822,
+      "geohash": "u0yjj"
+     },
+     "query": {
+      "affinity": 0.541,
+      "affinity_rank": 0.87,
+      "popularity": 0.543
+     }
+    },
+    {
+     "cityId": "de-stuttgart",
+     "location": {
+      "latitude": 48.7775,
+      "longitude": 9.18,
+      "geohash": "u0wt2"
+     },
+     "query": {
+      "affinity": 0.154,
+      "affinity_rank": 0.261,
+      "popularity": 0.56
+     }
+    },
+    {
+     "cityId": "de-duesseldorf",
+     "location": {
+      "latitude": 51.2256,
+      "longitude": 6.7767,
+      "geohash": "u1hg6"
+     },
+     "query": {
+      "affinity": 0.22,
+      "affinity_rank": 0.304,
+      "popularity": 0.566
+     }
+    },
+    {
+     "cityId": "de-dortmund",
+     "location": {
+      "latitude": 51.5139,
+      "longitude": 7.4653,
+      "geohash": "u1jm1"
+     },
+     "query": {
+      "affinity": 0.27,
+      "affinity_rank": 0.391,
+      "popularity": 0.532
+     }
+    },
+    {
+     "cityId": "de-essen",
+     "location": {
+      "latitude": 51.4508,
+      "longitude": 7.0131,
+      "geohash": "u1hux"
+     },
+     "query": {
+      "affinity": 0.263,
+      "affinity_rank": 0.348,
+      "popularity": 0.54
+     }
+    },
+    {
+     "cityId": "de-bremen",
+     "location": {
+      "latitude": 53.0758,
+      "longitude": 8.8072,
+      "geohash": "u1qmb"
+     },
+     "query": {
+      "affinity": 0.1,
+      "affinity_rank": 0.174,
+      "popularity": 0.475
+     }
+    },
+    {
+     "cityId": "de-dresden",
+     "location": {
+      "latitude": 51.05,
+      "longitude": 13.74,
+      "geohash": "u31f2"
+     },
+     "query": {
+      "affinity": 0.462,
+      "affinity_rank": 0.783,
+      "popularity": 0.546
+     }
+    },
+    {
+     "cityId": "de-hanover",
+     "location": {
+      "latitude": 52.3667,
+      "longitude": 9.7167,
+      "geohash": "u1qcv"
+     },
+     "query": {
+      "affinity": 0.44,
+      "affinity_rank": 0.739,
+      "popularity": 0.504
+     }
+    },
+    {
+     "cityId": "de-nuremberg",
+     "location": {
+      "latitude": 49.4539,
+      "longitude": 11.0775,
+      "geohash": "u0zck"
+     },
+     "query": {
+      "affinity": 0.339,
+      "affinity_rank": 0.609,
+      "popularity": 0.462
+     }
+    },
+    {
+     "cityId": "de-duisburg",
+     "location": {
+      "latitude": 51.4347,
+      "longitude": 6.7625,
+      "geohash": "u1hu9"
+     },
+     "query": {
+      "affinity": 0.428,
+      "affinity_rank": 0.696,
+      "popularity": 0.523
+     }
+    },
+    {
+     "cityId": "de-bochum",
+     "location": {
+      "latitude": 51.4819,
+      "longitude": 7.2158,
+      "geohash": "u1jhu"
+     },
+     "query": {
+      "affinity": 0.33,
+      "affinity_rank": 0.565,
+      "popularity": 0.468
+     }
+    },
+    {
+     "cityId": "de-wuppertal",
+     "location": {
+      "latitude": 51.2667,
+      "longitude": 7.1833,
+      "geohash": "u1j5e"
+     },
+     "query": {
+      "affinity": 0.348,
+      "affinity_rank": 0.652,
+      "popularity": 0.508
+     }
+    },
+    {
+     "cityId": "de-bielefeld",
+     "location": {
+      "latitude": 52.0211,
+      "longitude": 8.5347,
+      "geohash": "u1npf"
+     },
+     "query": {
+      "affinity": 0.272,
+      "affinity_rank": 0.435,
+      "popularity": 0.468
+     }
+    },
+    {
+     "cityId": "de-bonn",
+     "location": {
+      "latitude": 50.7353,
+      "longitude": 7.1022,
+      "geohash": "u1j09"
+     },
+     "query": {
+      "affinity": 0.0,
+      "affinity_rank": 0.0,
+      "popularity": 0.491
+     }
+    },
+    {
+     "cityId": "de-muenster",
+     "location": {
+      "latitude": 51.9625,
+      "longitude": 7.6256,
+      "geohash": "u1jrt"
+     },
+     "query": {
+      "affinity": 0.033,
+      "affinity_rank": 0.043,
+      "popularity": 0.469
+     }
+    },
+    {
+     "cityId": "de-karlsruhe",
+     "location": {
+      "latitude": 49.0092,
+      "longitude": 8.404,
+      "geohash": "u0tyz"
+     },
+     "query": {
+      "affinity": 0.278,
+      "affinity_rank": 0.478,
+      "popularity": 0.434
+     }
+    },
+    {
+     "cityId": "de-mannheim",
+     "location": {
+      "latitude": 49.4878,
+      "longitude": 8.4661,
+      "geohash": "u0y18"
+     },
+     "query": {
+      "affinity": 0.048,
+      "affinity_rank": 0.087,
+      "popularity": 0.509
+     }
+    },
+    {
+     "cityId": "de-augsburg",
+     "location": {
+      "latitude": 48.3689,
+      "longitude": 10.8978,
+      "geohash": "u0xep"
+     },
+     "query": {
+      "affinity": 0.08,
+      "affinity_rank": 0.13,
+      "popularity": 0.459
+     }
+    },
+    {
+     "cityId": "de-kassel",
+     "location": {
+      "latitude": 51.3158,
+      "longitude": 9.4979,
+      "geohash": "u1ngb"
+     },
+     "query": {
+      "affinity": 0.285,
+      "affinity_rank": 0.522,
+      "popularity": 0.45
+     }
+    }
+   ]
+  },
+  {
+   "queryId": "synthetic-comparison-act-b-q1",
+   "label": "Comparison Act B",
+   "role": "comparison",
+   "synthetic": true,
+   "entityRef": {
+    "placeholder": true,
+    "resolved_at_runtime": true
+   },
+   "heatmap": [
+    {
+     "cityId": "de-hamburg",
+     "location": {
+      "latitude": 53.55,
+      "longitude": 10.0,
+      "geohash": "u1x0e"
+     },
+     "query": {
+      "affinity": 0.392,
+      "affinity_rank": 0.261,
+      "popularity": 0.341
+     }
+    },
+    {
+     "cityId": "de-berlin",
+     "location": {
+      "latitude": 52.52,
+      "longitude": 13.405,
+      "geohash": "u33dc"
+     },
+     "query": {
+      "affinity": 0.0,
+      "affinity_rank": 0.0,
+      "popularity": 0.387
+     }
+    },
+    {
+     "cityId": "de-leipzig",
+     "location": {
+      "latitude": 51.34,
+      "longitude": 12.375,
+      "geohash": "u30u1"
+     },
+     "query": {
+      "affinity": 0.091,
+      "affinity_rank": 0.043,
+      "popularity": 0.209
+     }
+    },
+    {
+     "cityId": "de-munich",
+     "location": {
+      "latitude": 48.1375,
+      "longitude": 11.575,
+      "geohash": "u281z"
+     },
+     "query": {
+      "affinity": 0.228,
+      "affinity_rank": 0.174,
+      "popularity": 0.31
+     }
+    },
+    {
+     "cityId": "de-cologne",
+     "location": {
+      "latitude": 50.9364,
+      "longitude": 6.9528,
+      "geohash": "u1hcy"
+     },
+     "query": {
+      "affinity": 0.8,
+      "affinity_rank": 0.913,
+      "popularity": 0.272
+     }
+    },
+    {
+     "cityId": "de-frankfurt",
+     "location": {
+      "latitude": 50.1106,
+      "longitude": 8.6822,
+      "geohash": "u0yjj"
+     },
+     "query": {
+      "affinity": 0.527,
+      "affinity_rank": 0.348,
+      "popularity": 0.238
+     }
+    },
+    {
+     "cityId": "de-stuttgart",
+     "location": {
+      "latitude": 48.7775,
+      "longitude": 9.18,
+      "geohash": "u0wt2"
+     },
+     "query": {
+      "affinity": 0.596,
+      "affinity_rank": 0.565,
+      "popularity": 0.279
+     }
+    },
+    {
+     "cityId": "de-duesseldorf",
+     "location": {
+      "latitude": 51.2256,
+      "longitude": 6.7767,
+      "geohash": "u1hg6"
+     },
+     "query": {
+      "affinity": 0.69,
+      "affinity_rank": 0.696,
+      "popularity": 0.293
+     }
+    },
+    {
+     "cityId": "de-dortmund",
+     "location": {
+      "latitude": 51.5139,
+      "longitude": 7.4653,
+      "geohash": "u1jm1"
+     },
+     "query": {
+      "affinity": 0.773,
+      "affinity_rank": 0.826,
+      "popularity": 0.267
+     }
+    },
+    {
+     "cityId": "de-essen",
+     "location": {
+      "latitude": 51.4508,
+      "longitude": 7.0131,
+      "geohash": "u1hux"
+     },
+     "query": {
+      "affinity": 0.738,
+      "affinity_rank": 0.739,
+      "popularity": 0.301
+     }
+    },
+    {
+     "cityId": "de-bremen",
+     "location": {
+      "latitude": 53.0758,
+      "longitude": 8.8072,
+      "geohash": "u1qmb"
+     },
+     "query": {
+      "affinity": 0.566,
+      "affinity_rank": 0.435,
+      "popularity": 0.263
+     }
+    },
+    {
+     "cityId": "de-dresden",
+     "location": {
+      "latitude": 51.05,
+      "longitude": 13.74,
+      "geohash": "u31f2"
+     },
+     "query": {
+      "affinity": 0.113,
+      "affinity_rank": 0.087,
+      "popularity": 0.245
+     }
+    },
+    {
+     "cityId": "de-hanover",
+     "location": {
+      "latitude": 52.3667,
+      "longitude": 9.7167,
+      "geohash": "u1qcv"
+     },
+     "query": {
+      "affinity": 0.679,
+      "affinity_rank": 0.609,
+      "popularity": 0.214
+     }
+    },
+    {
+     "cityId": "de-nuremberg",
+     "location": {
+      "latitude": 49.4539,
+      "longitude": 11.0775,
+      "geohash": "u0zck"
+     },
+     "query": {
+      "affinity": 0.227,
+      "affinity_rank": 0.13,
+      "popularity": 0.247
+     }
+    },
+    {
+     "cityId": "de-duisburg",
+     "location": {
+      "latitude": 51.4347,
+      "longitude": 6.7625,
+      "geohash": "u1hu9"
+     },
+     "query": {
+      "affinity": 0.768,
+      "affinity_rank": 0.783,
+      "popularity": 0.267
+     }
+    },
+    {
+     "cityId": "de-bochum",
+     "location": {
+      "latitude": 51.4819,
+      "longitude": 7.2158,
+      "geohash": "u1jhu"
+     },
+     "query": {
+      "affinity": 0.684,
+      "affinity_rank": 0.652,
+      "popularity": 0.268
+     }
+    },
+    {
+     "cityId": "de-wuppertal",
+     "location": {
+      "latitude": 51.2667,
+      "longitude": 7.1833,
+      "geohash": "u1j5e"
+     },
+     "query": {
+      "affinity": 1.0,
+      "affinity_rank": 1.0,
+      "popularity": 0.247
+     }
+    },
+    {
+     "cityId": "de-bielefeld",
+     "location": {
+      "latitude": 52.0211,
+      "longitude": 8.5347,
+      "geohash": "u1npf"
+     },
+     "query": {
+      "affinity": 0.548,
+      "affinity_rank": 0.391,
+      "popularity": 0.274
+     }
+    },
+    {
+     "cityId": "de-bonn",
+     "location": {
+      "latitude": 50.7353,
+      "longitude": 7.1022,
+      "geohash": "u1j09"
+     },
+     "query": {
+      "affinity": 0.776,
+      "affinity_rank": 0.87,
+      "popularity": 0.249
+     }
+    },
+    {
+     "cityId": "de-muenster",
+     "location": {
+      "latitude": 51.9625,
+      "longitude": 7.6256,
+      "geohash": "u1jrt"
+     },
+     "query": {
+      "affinity": 0.859,
+      "affinity_rank": 0.957,
+      "popularity": 0.269
+     }
+    },
+    {
+     "cityId": "de-karlsruhe",
+     "location": {
+      "latitude": 49.0092,
+      "longitude": 8.404,
+      "geohash": "u0tyz"
+     },
+     "query": {
+      "affinity": 0.59,
+      "affinity_rank": 0.522,
+      "popularity": 0.214
+     }
+    },
+    {
+     "cityId": "de-mannheim",
+     "location": {
+      "latitude": 49.4878,
+      "longitude": 8.4661,
+      "geohash": "u0y18"
+     },
+     "query": {
+      "affinity": 0.577,
+      "affinity_rank": 0.478,
+      "popularity": 0.228
+     }
+    },
+    {
+     "cityId": "de-augsburg",
+     "location": {
+      "latitude": 48.3689,
+      "longitude": 10.8978,
+      "geohash": "u0xep"
+     },
+     "query": {
+      "affinity": 0.359,
+      "affinity_rank": 0.217,
+      "popularity": 0.219
+     }
+    },
+    {
+     "cityId": "de-kassel",
+     "location": {
+      "latitude": 51.3158,
+      "longitude": 9.4979,
+      "geohash": "u1ngb"
+     },
+     "query": {
+      "affinity": 0.498,
+      "affinity_rank": 0.304,
+      "popularity": 0.258
+     }
+    }
+   ]
+  }
+ ]
+}
