@@ -12,7 +12,7 @@ const base:DesktopViewContext={
  projection:projectRescue(demo),audience,audienceSource:'qloo',
  selectedAudienceCityId:audience.places[0]!.cityId,audienceEvidenceOpen:false,mapZoom:1,
  simulation:projectSimulation(demo,'replacement-nuremberg',350),
- simulationTab:'route',savedDraft:false,changeCityOpen:false,agencyFilter:'attention',
+ simulationTab:'route',simulationCapDraft:null,simulationCapError:'',savedDraft:false,changeCityOpen:false,agencyFilter:'attention',
  agencyOwners:{},assigningTask:null,proposedOwner:'Alex',agencyNotice:'',
 };
 
@@ -52,4 +52,27 @@ test('board 07 is explicitly synthetic, with three issues and one unassigned own
  const all=renderDesktopFeature('agency',{...base,agencyFilter:'all'});
  assert.match(all,/Glass Index/);
  assert.match(all,/No open items/);
+});
+
+test('audience row reason follows actual fit and route nomination, never slot order',()=>{
+ const html=renderDesktopFeature('audience',base);
+ assert.doesNotMatch(html,/Cultural lead in a checked repair slot/);
+ for(const city of audience.places){
+   assert.ok(html.includes(city.relativeLabel));
+   assert.match(html,new RegExp(city.routeOptionId?'Route-nominated candidate':'Highest available taste-only alternative'));
+ }
+});
+test('failed what-if shows core extra-distance explanation and retains invalid input',()=>{
+ const s=projectSimulation(demo,'detour-frankfurt',100);
+ const page=renderDesktopFeature('simulation',{...base,simulation:s,simulationCapDraft:'abc',simulationCapError:'Invalid number'});
+ const check=s.checks.find(x=>x.id==='distance');
+ assert.equal(check?.status,'FAIL');
+ assert.ok(page.includes(check.explanation));
+ assert.match(page,/value="abc"/);
+ assert.match(page,/Invalid distance cap/);
+});
+test('mobile map provides numbered glyphs and an HTML key with city names',()=>{
+ const html=renderDesktopFeature('audience',base);
+ assert.match(html,/taste-map-mobile-number/);
+ assert.match(html,/taste-mobile-key/);
 });

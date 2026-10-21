@@ -16,6 +16,8 @@ import { createAiDemoSession } from '../../src/ai/demo.ts';
 import { createAiClient } from '../../web/src/ai-client.ts';
 import { hadMountedScreen, selectFocusTarget } from './focus-policy.ts';
 import { projectAudience, projectSimulation, loadSimulation, saveSimulation } from './desktop-model.ts';
+import { auditExport } from './audit-download.ts';
+import { parseExtraDistanceKm } from './simulation-input.ts';
 import type { AudienceSource, AudienceModel, SimulationModel, AgencyOwner } from './desktop-model.ts';
 import { renderDesktopFeature, isDesktopScreen } from './desktop-views.ts';
 import type { DesktopViewContext, DesktopScreen } from './desktop-views.ts';
@@ -56,6 +58,8 @@ let audienceZoom = 1;
 let simulationModel: SimulationModel | null = null;
 let simulationTab: 'route' | 'budget' = 'route';
 let simSaved = false;
+let simCapDraft:string|null=null;
+let simCapError='';
 let simChooseCity = false;
 let proposalFromSimulation = false;
 let proposalSource: ApiDecisionResult | null = null;
@@ -354,7 +358,8 @@ function desktopContext(): DesktopViewContext {
   return {
     projection, audience:audienceModel, audienceSource, selectedAudienceCityId,
     audienceEvidenceOpen, mapZoom:audienceZoom, simulation:simulationModel,
-    simulationTab, savedDraft:simSaved, changeCityOpen:simChooseCity,
+    simulationTab,simulationCapDraft:simCapDraft,simulationCapError:simCapError,
+    savedDraft:simSaved, changeCityOpen:simChooseCity,
     agencyFilter, agencyOwners, assigningTask:agencyAssignOpen,
     proposedOwner:agencyProposedOwner, agencyNotice,
   };
@@ -550,14 +555,14 @@ function back(): void {
   } else goHome();
   render();
 }
-function downloadAudit(): void {
-  const audited = screen === 'draft' ? proposalSource ?? result : result;
-  const value = JSON.stringify(audited.audit, null, 2);
-  const file = new Blob([value], { type: 'application/json' });
+function downloadAudit(source?:ApiDecisionResult,kind:'baseline'|'what-if'='baseline'):void {
+  const audited=source??(screen==='draft'?proposalSource??result:result);
+  const exported=auditExport(audited,kind);
+  const file=new Blob([exported.content],{type:'application/json'});
   const url = URL.createObjectURL(file);
   const link = document.createElement('a');
   link.href = url;
-  link.download = 'tour-rescue-' + audited.mode + '-' + audited.audit.runId.replace(/[^a-z0-9-]/gi, '_') + '-audit.json';
+  link.download = exported.filename;
   document.body.append(link);
   link.click();
   link.remove();
@@ -599,7 +604,7 @@ function openSimulation(optionId?: string): void {
   try {
     simulationModel = projectSimulation(result, chosen, cap);
     simSaved = Boolean(previous && previous.optionId === chosen && previous.extraKm === cap);
-    simChooseCity = false; simulationTab = 'route';
+    simChooseCity = false; simCapDraft=null; simCapError=''; simulationTab = 'route';
     screen = 'simulation'; notice = '';
   } catch(err) { notice='× Simulation unavailable: '+(err instanceof Error?err.message:'invalid audit'); }
   render();
@@ -830,17 +835,28 @@ root!.addEventListener('click', async event => {
     case 'sim-recheck': {
       const input=root!.querySelector<HTMLInputElement>('#sim-cap');
       if(!input||!simulationModel)break;
+      simCapDraft=input.value;
       try {
-        simulationModel=projectSimulation(result,simulationModel.optionId,Number(input.value));
-        simSaved=false;notice='✓ Recalculated with the deterministic core; existing tour unchanged.';
-      }catch(err){notice='× Invalid distance cap: '+(err instanceof Error?err.message:'enter 0–500 km');}
+        const cap=parseExtraDistanceKm(input.value);
+        simulationModel=projectSimulation(result,simulationModel.optionId,cap);
+        simCapDraft=null;simCapError='';simSaved=false;
+        notice=simulationModel.verdict==='PASS'?'✓ Recalculated. Checks pass conditionally.':
+          simulationModel.verdict==='FAIL'?'× Recalculated. A declared check fails.':
+          '? Recalculated. Evidence still needed.';
+      }catch(err){
+        simCapError=err instanceof Error?err.message:'Enter 0–500 km.';
+        notice='';
+      }
       render();break;
     }
     case 'sim-save':saveCurrentSimulation();break;
     case 'sim-proposal':previewSimulationProposal();break;
     case 'sim-evidence':
-      notice='× This option fails a check. Inspect the downloaded decision audit.';
-      downloadAudit();render();break;
+      if(simulationModel){
+        notice='× This what-if fails a check. Downloading this simulation’s audited result.';
+        downloadAudit(simulationModel.sourceResult,'what-if');
+      }
+      render();break;
     case 'agency-overview':openAgency();break;
     case 'agency-all':agencyFilter='all';agencyNotice='';render();break;
     case 'agency-attention':agencyFilter='attention';agencyNotice='';render();break;

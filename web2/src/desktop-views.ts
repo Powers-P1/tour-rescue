@@ -3,6 +3,14 @@ import { agencyTasks, AGENCY_FOURTH_TOUR } from './desktop-model.ts';
 import type { RescueProjection } from './model.ts';
 
 export type DesktopScreen = 'audience' | 'simulation' | 'agency';
+/** A city's explanatory text is derived from the audited fit, never its position. */
+export function audienceCityReason(city: AudiencePlace): string {
+  if (city.routeOptionId) return 'Route-nominated candidate · '+city.relativeLabel+'.';
+  if (city.fit.status==='unknown') return 'Taste evidence unresolved · no route checks.';
+  return 'Highest available taste-only alternative · '+city.relativeLabel+' · no route checks.';
+}
+export const formatExtraKm=(value:number):string=>
+ new Intl.NumberFormat('en-GB',{maximumFractionDigits:3}).format(value)+' km';
 export const isDesktopScreen = (value:string):value is DesktopScreen =>
   value==='audience'||value==='simulation'||value==='agency';
 
@@ -15,6 +23,8 @@ export interface DesktopViewContext {
   readonly mapZoom:number;
   readonly simulation:SimulationModel|null;
   readonly simulationTab:'route'|'budget';
+  readonly simulationCapDraft:string|null;
+  readonly simulationCapError:string;
   readonly savedDraft:boolean;
   readonly changeCityOpen:boolean;
   readonly agencyFilter:'attention'|'all';
@@ -53,7 +63,8 @@ function tasteMap(ctx:DesktopViewContext):string{
    return '<g><circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="#F3B65B" opacity="'+opacity+'"/>'+
      (city.cityId===selected?'<circle cx="'+x+'" cy="'+y+'" r="'+(r+7)+'" fill="none" stroke="#F3B65B" stroke-width="2"/>':'')+
      '<circle cx="'+x+'" cy="'+y+'" r="6" fill="'+(known?'#F3B65B':'#AEBCC6')+'"/>'+
-     '<text class="taste-map-label" x="'+(x+13)+'" y="'+(y+offset)+'">'+esc(city.name)+'</text></g>';
+     '<text class="taste-map-label" x="'+(x+13)+'" y="'+(y+offset)+'">'+esc(city.name)+'</text>'+
+      '<text class="taste-map-mobile-number" x="'+x+'" y="'+(y-14)+'" text-anchor="middle">'+(index+1)+'</text></g>';
  }).join('');
  const muted=labels.map(row=>'<circle cx="'+row.pos[0]+'" cy="'+row.pos[1]+'" r="4" fill="#AEBCC6"/>'+
    '<text class="taste-map-label" x="'+(row.pos[0]+12)+'" y="'+(row.pos[1]-13)+'">'+row.name+'</text>').join('');
@@ -64,6 +75,9 @@ function tasteMap(ctx:DesktopViewContext):string{
    '<path d="M260 29 L380 39 500 101 515 188 495 270 449 328 445 411 364 455 284 443 235 388 167 330 188 244 146 160 193 82Z" fill="#22333c" stroke="#4b6470" stroke-width="2"/>'+
    '<path d="M188 245 Q339 147 497 286 M214 132 Q301 270 436 429 M174 350 Q382 324 505 139" stroke="#344550" stroke-width="1.4" fill="none"/>'+
    muted+points+'</g></g></svg>'+
+   '<div class="taste-mobile-key" aria-label="Map marker names">'+
+   p.map((city,i)=>'<span><b>'+(i+1)+'</b> '+esc(city.name)+'</span>').join('')+
+   '<span>• Berlin</span><span>• Munich</span></div>'+
    '<div class="taste-map-bottom"><div><span>Relative cultural fit</span><div class="taste-scale" aria-hidden="true"><i></i><i></i><i></i><i></i></div><small>Low - High · within this candidate set</small></div>'+
    '<div class="map-zoom-actions"><button type="button" data-action="audience-zoom-out" aria-label="Zoom out">−</button>'+
    '<button type="button" data-action="audience-zoom-in" aria-label="Zoom in">+</button></div></div>'+
@@ -85,10 +99,10 @@ function audience(ctx:DesktopViewContext):string{
    (mode?
    '<div class="audience-columns"><section><h2>Cultural fit by city</h2>'+tasteMap(ctx)+'</section>'+
    '<section class="audience-picks"><h2>Worth a closer look.</h2><div role="radiogroup" aria-label="Cities for cultural-fit comparison">'+
-   places.map((city,i)=>'<button type="button" role="radio" aria-checked="'+(city.cityId===selected.cityId)+'" data-action="audience-select" data-id="'+esc(city.cityId)+
+   places.map(city=>'<button type="button" role="radio" aria-checked="'+(city.cityId===selected.cityId)+'" data-action="audience-select" data-id="'+esc(city.cityId)+
      '" class="audience-city'+(city.cityId===selected.cityId?' selected':'')+'"><strong>'+esc(city.name)+'</strong>'+
      '<span>'+esc(city.relativeLabel)+(city.routeOptionId?' · route nominated':' · taste lead only')+'</span>'+
-     '<small>'+(i===0?'Cultural lead in a checked repair slot.':i===1?'Another nominated city to compare.':'Discovery only; no route checks for this city.')+
+     '<small>'+esc(audienceCityReason(city))+
      '</small></button>').join('')+'</div>'+
    '<div class="audience-insight"><h3>What this tells you</h3><p>Where to investigate a show. Capacity, availability and travel still need independent checks.</p></div>'+
    action(selected.routeOptionId?'Try '+selected.name+' in a route →':'Route not checked for '+selected.name,
@@ -140,10 +154,14 @@ function simulation(ctx:DesktopViewContext):string{
    '<p class="muted">Results are audited against the existing '+esc(s.maxDailyDriving)+' daily limit and declared preferences.</p>'+
    '<div class="sim-check-list">'+s.checks.slice(0,3).map(check=>
       '<div><div><strong>'+esc(check.label)+'</strong>'+status(check.status)+'</div><p>'+esc(check.explanation)+'</p></div>').join('')+'</div>'+
-   '<p class="soft-status">'+status(s.checks[3]?.status??'UNKNOWN')+
-    ' Extra-distance preference · current cap '+esc(s.maxAdditionalDistanceKm.toFixed(3))+' km</p>'+
+   '<div class="sim-distance-status"><p class="soft-status">'+status(s.checks[3]?.status??'UNKNOWN')+
+    ' Extra-distance preference · current cap '+esc(formatExtraKm(s.maxAdditionalDistanceKm))+'</p>'+
+    (s.checks[3] && s.checks[3].status!=='PASS'
+      ? '<p class="sim-failed-explanation" role="status">'+esc(s.checks[3].explanation)+'</p>':'')+'</div>'+
    '<div class="sim-edit"><label for="sim-cap">What if extra distance were allowed up to (km)?</label>'+
-   '<input type="number" id="sim-cap" min="0" max="500" step="0.001" inputmode="decimal" value="'+esc(s.maxAdditionalDistanceKm.toFixed(3))+'">'+
+   '<input type="text" id="sim-cap" inputmode="decimal" autocomplete="off" spellcheck="false" value="'+
+      esc(ctx.simulationCapDraft ?? String(s.maxAdditionalDistanceKm))+'">'+
+   (ctx.simulationCapError ? '<p class="sim-input-error" role="alert">× Invalid distance cap: '+esc(ctx.simulationCapError)+'</p>':'')+
    action('Recheck one assumption →','sim-recheck')+'</div>'+
    '<div class="sim-final-action">'+action(ctx.savedDraft?'Save updated draft →':'Save draft scenario →','sim-save',true)+
    (ctx.savedDraft?'<p class="soft-status">✓ Saved on this device only - no tour, venue or booking updated.</p>':'')+
@@ -153,7 +171,7 @@ function simulation(ctx:DesktopViewContext):string{
    '</div></section></div>'
    :'<div class="sim-budget"><h2>Budget needs a separate review.</h2>'+
    '<p class="muted">A city choice and route evidence cannot confirm a venue fee or sell tickets.</p>'+
-   '<div class="sim-check-list"><div><strong>Declared extra-distance cap</strong><p>'+esc(s.maxAdditionalDistanceKm.toFixed(3))+' km · checked by the deterministic core</p></div>'+
+   '<div class="sim-check-list"><div><strong>Declared extra-distance cap</strong><p>'+esc(formatExtraKm(s.maxAdditionalDistanceKm))+' · checked by the deterministic core</p></div>'+
    '<div><strong>Actual venue terms</strong><p>? Unknown / To confirm - core booking fields are synthetic</p></div>'+
    '<div><strong>Attendance and settlement</strong><p>? Unknown / To confirm - not derivable from Qloo affinity</p></div></div>'+
    action('Review sample economics →','open-economics',true)+

@@ -119,3 +119,15 @@
 .feature-mobile-top { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 24px 0; }
 .feature-mobile-top .back-button { font-size:16px; }
 @media (min-width:980px) { .feature-mobile-top { display:none; } }
+
+/* PR-C review: mobile labels remain legible at the rendered width. */
+.taste-map-mobile-number,.taste-mobile-key{display:none}
+.sim-distance-status .sim-failed-explanation{color:var(--danger);font-size:16px;line-height:1.5;margin:10px 0 16px}
+.sim-input-error{color:var(--danger);font-size:16px;line-height:1.5;margin:10px 0}
+@media(max-width:979px){
+ .taste-map-label{display:none}
+ .taste-map-mobile-number{display:block;font:700 44px Inter,"IBM Plex Sans",sans-serif;fill:var(--text);stroke:#121A20;stroke-width:7px;paint-order:stroke}
+ .taste-mobile-key{display:flex;flex-wrap:wrap;gap:8px 16px;margin:12px 0;font-size:14px;line-height:1.5;color:var(--text)}
+ .taste-mobile-key span{display:inline-flex;align-items:center;gap:6px}
+ .taste-mobile-key b{font-size:14px;color:var(--accent)}
+}
