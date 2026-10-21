@@ -26,7 +26,7 @@ test('unknown driving evidence remains unknown, not a fabricated zero', () => {
 test('Frankfurt cannot advertise a passing outcome when extra distance fails', () => {
   const demo = createDemoResult({ runId: 'frankfurt-test', generatedAt: '2026-10-21T12:00:00.000Z' });
   const view = projectRescue(demo);
-  const frankfurt = view.options.find(option => option.cityName === 'Frankfurt');
+  const frankfurt = view.options.find(option => option.id === 'detour-frankfurt');
   assert.ok(frankfurt);
   const failedExtraDistance = frankfurt.checks.some(check => check.id === 'decision:additional-distance' && check.status === 'FAIL');
   assert.equal(failedExtraDistance, true, 'Fixture should expose the extra-distance failure');
