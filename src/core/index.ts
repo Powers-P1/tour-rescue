@@ -10,3 +10,8 @@ export { evaluateRouteTravel, combineCheckStatuses } from './travel-constraints.
 export type { CheckStatus, ConstraintCheck, DrivingAllocation, RouteTravelEvaluation } from './travel-constraints.ts';
 export * from './repair-types.ts';
 export { checkLockedCommitments, evaluateRepairOptions } from './repair-options.ts';
+export * from './decision-types.ts';
+export { PolicyInputError, parseDecisionPolicy, recommendRepair } from './decision.ts';
+export * from './fit-sensitivity.ts';
+export * from './breakpoint.ts';
+export * from './decision-analysis.ts';

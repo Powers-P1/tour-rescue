@@ -24,6 +24,12 @@ For synthetic metadata, request path/status/latency/recording date are explicitl
 - `qloo/heatmap_de_synthetic.json`: three invented artist vectors with synthetic/publication metadata. `cityId` is our annotation, not a Qloo response field. `parseSyntheticHeatmapFitInput` consumes only this explicitly synthetic format and applies the scenario 50/50 policy; it does not use `affinity_rank`, popularity or geohash to invent missing affinity.
 - `tests/helpers/scenarios.ts` assembles the five dates documented in `docs/SCENARIO_DE_2026.md` with fictional venues and booking facts for integration tests, without duplicating the maintained matrices. These tests exercise the actual frozen road snapshot and synthetic fit data with no network access.
 
+## PR3 decision fixture
+
+`synthetic/decision__germany__policy.json` declares demonstration preferences and bounded search ranges for the same Germany scenario assembled in `tests/helpers/scenarios.ts`. It adds no Qloo observations. Its sibling metadata marks the absent API request explicitly.
+
+At minimum fit 20 and a 350,000 m extra-distance cap, the invented artist/booking evidence selects Nuremberg. The fixture records independently tested changes to Frankfurt at a 354,097 m cap (+4,097 m), or to day off at minimum fit 26 / venue-fee ceiling EUR 499.99. These values demonstrate the deterministic rule, not audience demand or live venue availability. `tests/decision-analysis.test.ts` verifies the complete report, frozen commitments and the two comparison-artist omission runs.
+
 ## Normalized fit contract
 
 `schemaVersion` is `tour-rescue.fit-input.v1`. Each profile supplies its query ID, artist ID, role, model weight, candidate-set ID, provenance and exactly one observation for every frozen city. An observation is `{ "status": "known", "value": <finite number> }` or `{ "status": "unknown", "reason": "..." }` under `affinity`.
