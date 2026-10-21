@@ -1,0 +1,13 @@
+{
+  "source": "synthetic",
+  "contract": "tour-rescue.qloo-contract-examples.v1",
+  "request": { "path": "UNKNOWN", "query": {} },
+  "recordedAt": null,
+  "httpStatus": null,
+  "latencyMs": null,
+  "warnings": ["No live Qloo response or artist evidence is included. These examples validate only the documented transport contract and deterministic normalization."],
+  "shapeReferences": [
+    "https://github.com/qloo/docs-public/blob/main/reference/heatmaps-use-case.md",
+    "https://registry.npmjs.org/@qloo/qloo-harness/-/qloo-harness-0.1.26.tgz"
+  ]
+}

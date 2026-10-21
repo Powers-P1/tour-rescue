@@ -1,0 +1,187 @@
+{
+  "schemaVersion": "tour-rescue.control-profile.v1",
+  "dataKind": "synthetic",
+  "label": "The Inland Static",
+  "description": "Fictional control artist. Nuremberg is deliberately lowest and the remaining cities follow sorted local IDs, solely to demonstrate a different-target control with unchanged comparisons. No live API request or real audience claim.",
+  "profile": {
+    "queryId": "synthetic-control-act-q1",
+    "candidateSetId": "cities-de-v1",
+    "artistId": "synthetic-control-act-q1",
+    "role": "target",
+    "weight": 0.5,
+    "provenance": {
+      "kind": "synthetic",
+      "reference": "fixtures/synthetic/fit__germany__control.json"
+    },
+    "observations": [
+      {
+        "cityId": "de-nuremberg",
+        "affinity": {
+          "status": "known",
+          "value": 0.0
+        }
+      },
+      {
+        "cityId": "de-augsburg",
+        "affinity": {
+          "status": "known",
+          "value": 0.043478260869565216
+        }
+      },
+      {
+        "cityId": "de-berlin",
+        "affinity": {
+          "status": "known",
+          "value": 0.08695652173913043
+        }
+      },
+      {
+        "cityId": "de-bielefeld",
+        "affinity": {
+          "status": "known",
+          "value": 0.13043478260869565
+        }
+      },
+      {
+        "cityId": "de-bochum",
+        "affinity": {
+          "status": "known",
+          "value": 0.17391304347826086
+        }
+      },
+      {
+        "cityId": "de-bonn",
+        "affinity": {
+          "status": "known",
+          "value": 0.21739130434782608
+        }
+      },
+      {
+        "cityId": "de-bremen",
+        "affinity": {
+          "status": "known",
+          "value": 0.2608695652173913
+        }
+      },
+      {
+        "cityId": "de-cologne",
+        "affinity": {
+          "status": "known",
+          "value": 0.30434782608695654
+        }
+      },
+      {
+        "cityId": "de-dortmund",
+        "affinity": {
+          "status": "known",
+          "value": 0.34782608695652173
+        }
+      },
+      {
+        "cityId": "de-dresden",
+        "affinity": {
+          "status": "known",
+          "value": 0.391304347826087
+        }
+      },
+      {
+        "cityId": "de-duesseldorf",
+        "affinity": {
+          "status": "known",
+          "value": 0.43478260869565216
+        }
+      },
+      {
+        "cityId": "de-duisburg",
+        "affinity": {
+          "status": "known",
+          "value": 0.4782608695652174
+        }
+      },
+      {
+        "cityId": "de-essen",
+        "affinity": {
+          "status": "known",
+          "value": 0.5217391304347826
+        }
+      },
+      {
+        "cityId": "de-frankfurt",
+        "affinity": {
+          "status": "known",
+          "value": 0.5652173913043478
+        }
+      },
+      {
+        "cityId": "de-hamburg",
+        "affinity": {
+          "status": "known",
+          "value": 0.6086956521739131
+        }
+      },
+      {
+        "cityId": "de-hanover",
+        "affinity": {
+          "status": "known",
+          "value": 0.6521739130434783
+        }
+      },
+      {
+        "cityId": "de-karlsruhe",
+        "affinity": {
+          "status": "known",
+          "value": 0.6956521739130435
+        }
+      },
+      {
+        "cityId": "de-kassel",
+        "affinity": {
+          "status": "known",
+          "value": 0.7391304347826086
+        }
+      },
+      {
+        "cityId": "de-leipzig",
+        "affinity": {
+          "status": "known",
+          "value": 0.782608695652174
+        }
+      },
+      {
+        "cityId": "de-mannheim",
+        "affinity": {
+          "status": "known",
+          "value": 0.8260869565217391
+        }
+      },
+      {
+        "cityId": "de-muenster",
+        "affinity": {
+          "status": "known",
+          "value": 0.8695652173913043
+        }
+      },
+      {
+        "cityId": "de-munich",
+        "affinity": {
+          "status": "known",
+          "value": 0.9130434782608695
+        }
+      },
+      {
+        "cityId": "de-stuttgart",
+        "affinity": {
+          "status": "known",
+          "value": 0.9565217391304348
+        }
+      },
+      {
+        "cityId": "de-wuppertal",
+        "affinity": {
+          "status": "known",
+          "value": 1.0
+        }
+      }
+    ]
+  }
+}

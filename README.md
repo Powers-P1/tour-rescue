@@ -12,8 +12,9 @@ The core is deterministic (pure TypeScript functions). An LLM is optional and on
 
 - [docs/BRIEF.md](docs/BRIEF.md): product brief, scope, architecture, acceptance criteria, plan
 - [docs/QLOO_NOTES.md](docs/QLOO_NOTES.md): what is confirmed about the Qloo API, and what is still unknown
-- [docs/PRD.md](docs/PRD.md): domain decisions, fit formula, acceptance boundaries and five-PR roadmap
-- [docs/DEPLOY.md](docs/DEPLOY.md): maintainer-supplied Pages/Worker skeleton and deployment commands
+- [docs/PRD.md](docs/PRD.md): domain decisions, fit formula, acceptance boundaries and six-PR roadmap
+- [docs/API.md](docs/API.md): demo/live requests, audit replay and error semantics
+- [docs/DEPLOY.md](docs/DEPLOY.md): Worker configuration, private quotas/cache and maintainer deployment commands
 - [fixtures/README.md](fixtures/README.md): fixture naming for offline tests
 
 ## Licence
@@ -22,25 +23,28 @@ MIT, see [LICENSE](LICENSE).
 
 ## How to run
 
-The core provides validated tour inputs, a pure cultural-fit index, three evaluated repair options, an explicit recommendation policy, bounded breakpoints and comparison-artist sensitivity. Install **Node 24** (see `.nvmrc`), then:
+The core provides validated tour inputs, a pure cultural-fit index, three evaluated repair options, an explicit recommendation policy, bounded breakpoints, comparison-artist sensitivity and a replayable JSON audit. Install **Node 24** (see `.nvmrc`), then:
 
 ```sh
 npm ci
 npm run check
+npm run worker:build
+npm run worker:dev
 ```
 
-`check` runs strict TypeScript checking and Node's built-in test runner. After installing development dependencies, core checks need no network, Qloo key, Cloudflare account or LLM. There are no core runtime dependencies. GitHub Actions runs the same checks on pull requests.
+`check` runs strict TypeScript checking, including the Worker, and Node's built-in test runner. Tests use synthetic fixtures and injected HTTP/storage doubles; they need no Qloo key, Cloudflare account or LLM. There are no core runtime dependencies. `worker:build` bundles with Wrangler **without deploying**; GitHub Actions runs both checks. `worker:dev` starts the local Worker and SQLite Durable Object.
 
-Maintainers supplied a Pages placeholder and Worker health/Durable Object skeleton. The comparison UI and decision API are planned increments; `npm run dev` is not available yet. There is no live Qloo integration in PR3.
+Open `http://localhost:8787/api/demo` for the labelled synthetic decision or `/api/demo/audit` to download its JSON audit. Both work without a secret. `/health` describes the edge service and `/do-check` exercises the existing `UnitLedger` storage. Live mode is disabled by default; maintainers configure it according to [DEPLOY](docs/DEPLOY.md). The Pages comparison UI remains PR5 work, followed by the printable promoter one-pager in PR6.
 
 ## Repository layout
 
 ```text
-src/core/        Validation, fit, directed travel, decisions, breakpoints and sensitivity
-src/qloo/        Normalization boundary; client awaits a verified response contract
-src/worker/      Planned decision API boundary (PR4)
+src/core/        Validation, fit, travel, decisions, breakpoints, sensitivity and audit
+src/qloo/        Verified Qloo contracts, bounded client and cell-to-city normalization
+src/demo/        Shared Germany scenario builder and explicitly synthetic demo inputs
+src/worker/      Pointer to the runtime implementation under worker/
 src/web/         Planned comparison UI boundary (PR5)
-worker/         Maintained Worker health/Durable Object skeleton
+worker/         Edge API, SQLite UnitLedger, persistent quotas and private cache
 web/            Maintained Pages placeholder
 fixtures/       Synthetic Qloo examples and a maintained OSRM Germany snapshot
 tests/          Offline arithmetic, invariance and contract checks
@@ -102,8 +106,20 @@ The [synthetic Germany policy](fixtures/synthetic/decision__germany__policy.json
 
 These are arithmetic examples, not measured Qloo demand or actual booking advice. The complete example is covered by `tests/decision-analysis.test.ts`.
 
-Leave-one-artist-out removes **comparison artists only**, one at a time, keeping the target and city set fixed. Surviving weights are proportionally renormalized: 0.5/0.25/0.25 becomes 2/3 and 1/3, rather than resetting the scenario to 50/50. Every run retains removed-artist identity, before/after weights, fit provenance, decision and constraints for PR4. Unknown runs remain visible; a recovered result without a known baseline is not counted as a flip. The retained-recommendation fraction is available only when every requested omission is comparable. It is not statistical confidence. The different-target control run and downloadable audit remain PR4 work.
+Leave-one-artist-out removes **comparison artists only**, one at a time, keeping the target and city set fixed. Surviving weights are proportionally renormalized: 0.5/0.25/0.25 becomes 2/3 and 1/3, rather than resetting the scenario to 50/50. Every run retains removed-artist identity, before/after weights, fit provenance, decision and constraints in the audit. Unknown runs remain visible; a recovered result without a known baseline is not counted as a flip. The retained-recommendation fraction is available only when every requested omission is comparable. It is not statistical confidence.
+
+## Audit and API contract
+
+`createDecisionAudit` combines the decision analysis with the frozen city universe, projected request parameters, warnings, supplied timestamps, a different-target control, route changes and a **zero-violations gate**. The control changes only the target artist; all comparisons, weights, candidate cities, road facts and preferences stay fixed. The gate concerns the recommended option's declared checks. It reports UNKNOWN when there is no recommendation and never treats zero known failures as proof that unresolved checks passed.
+
+`replayDecisionAudit` recomputes the results from the audit's versioned inputs. Replay contains **within-query percentiles with ties and missingness preserved**, not raw Qloo affinities or geohash payloads. Query acquisition times and response references survive cache hits; synthetic fixtures never claim an HTTP status or live recording time. The JSON also names unchanged locked shows and reports every added, removed or modified stop.
+
+The fixed Germany API uses the same scenario builder as the tests. Demo artist affinities, venues, availability and fees are invented. Live mode replaces artist evidence with separate Qloo calls while keeping this explicitly synthetic booking scenario and the frozen OSRM matrix. It accepts resolved artist UUIDs and bounded preference changes, not arbitrary routes or Qloo query URLs. The target/comparison weights remain 50/50; up to three comparisons and one distinct control artist are supported. Search and live evaluation each count as one daily action.
+
+All calculation runs inside the existing SQLite `UnitLedger` Durable Object; the outer Worker bounds requests and forwards them. Limits are persistent: **10 outgoing Qloo calls per rolling second**, **50,000 per UTC month**, **30 live actions per UTC day**, and **10 per daily client hash**. Private cache hits skip provider quota but still count as live actions. Failed requests consume their reserved allowance. The Qloo key stays in `QLOO_API_KEY`; only allowlisted metadata and derived ranks reach public responses. See [API](docs/API.md) for schemas and failure behavior.
 
 ## Current evidence boundary
 
-Public Qloo fixtures must be **synthetic**. Raw Qloo responses must not be published. The Germany road matrix is a separate maintainer-recorded OSRM model snapshot with its own source, timestamp and units. Maintainers also supplied geometry-only cell-to-city mapping in `src/qloo/geo.ts`; the complete live normalization contract, verified scenario coverage and Worker access remain **UNKNOWN**. The live key and probe data stay with maintainers. Existing `BRIEF.md` and `QLOO_NOTES.md` remain the source of product and probe requirements.
+Public Qloo fixtures must be **synthetic**. Raw Qloo responses must not be published. The Germany road matrix is a separate maintainer-recorded OSRM model snapshot with its own source, timestamp and units. Qloo response shapes are checked against official documentation and the published official search harness, then exercised with invented values. `src/qloo/geo.ts` maps cells to the frozen cities; the adapter averages returned cell affinity per city before the core computes percentiles. An incomplete profile makes aggregate fit UNKNOWN; it never silently shrinks the city set.
+
+Real coverage for selected artists and access from a deployed Cloudflare Worker remain **UNKNOWN** until maintainer live probes. The client caps each response at 1 MB, 5,000 cells and 10 seconds, with no partial ranking on overflow. No real Qloo key or response was used during implementation. The live key and probe data stay with maintainers. Existing `BRIEF.md` and `QLOO_NOTES.md` remain the source of product and probe requirements.

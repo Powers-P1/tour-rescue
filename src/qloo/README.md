@@ -1,9 +1,30 @@
-# Qloo boundary
+# Qloo server boundary
 
-`contracts.ts` specifies our application-owned adapter boundary. It does not describe the raw Qloo JSON schema. Maintainer probes report `urn:geohash` and `urn:entity:locality`, district-level localities without a dedicated city field, and ignored heatmap `take`. The complete raw response contract, normalized city mapping, scenario coverage and Worker access remain **UNKNOWN**; see [QLOO_NOTES](../../docs/QLOO_NOTES.md).
+`createQlooClient` exposes two operations: `searchArtists({ queryId, query })` and `heatmap({ queryId, artistId, role, weight })`. The caller supplies the server secret, private cache, durable quota reservation, frozen candidate set, existing geometry mapping and one bounded rectangular region. The injectable `fetch` and clock let tests exercise the contract without a key or live API calls.
 
-PR4 will add the GET-only client and runtime response adapter after maintainers supply an approved recording/contract. Each normalized profile represents one artist query over the same frozen city universe. The adapter must not reinterpret missing rows as zero, mix query-local raw affinities, silently drop cities, or merge geographic cells without a documented rule. Application profile weights are not Qloo per-entity weights.
+## Verified request and response contracts
 
-Record the query ID and a provenance reference so a later audit can join input data to the redacted query log. No API keys, authorization headers, IP addresses or unrestricted upstream payloads belong in public fixtures or client bundles. Maintainers own credentials, live probes, publication clearance and deployment.
+- Fixed origin `https://hackathon.api.qloo.com`; GET only; `X-Api-Key` header; redirects fail. The key never appears in URLs, logs, returned data or fixtures.
+- `/search` sends `query`, `types=urn:entity:artist`, `take=10`. The verified envelope is a direct `results` array. Rows need `entity_id`, `name` and an explicit artist marker in `subtype`, `type` or `types`. Only `{ id, name }` leaves the parser. It never chooses the first match for the caller.
+- `/v2/insights` sends `filter.type=urn:heatmap`, `output.heatmap.boundary=urn:geohash`, the fixed `filter.location` WKT and **one** artist UUID in `signal.interests.entities`. It sends **no `take` and no entity weights**. Response rows are `results.heatmap[].location.geohash` and `query.affinity` / `query.popularity`, under `success: true`.
+- Runtime validation rejects duplicate cells/artists, mixed cell resolutions, malformed fields and scores outside 0..1. Missing affinity is never replaced with rank, popularity or zero. A valid empty heatmap becomes unknown city evidence.
 
-The probes also report domination by a popular comparison artist in a combined-artist query. PR1 deliberately consumes separate artist vectors, computes ranks within each, then applies explicit model weights. Before PR4, agree a bounded region and response-size cap: `take` is not a reliable payload limit for heatmaps. A district or geohash must not be silently treated as a city.
+The heatmap envelope comes from Qloo's [published documentation](https://github.com/qloo/docs-public/blob/main/reference/heatmaps-use-case.md). Search parameters come from its [search reference](https://github.com/qloo/docs-public/blob/main/reference/get-search.md); the direct results array and entity fields were checked in the source of Qloo's published [`@qloo/qloo-harness@0.1.26`](https://www.npmjs.com/package/@qloo/qloo-harness/v/0.1.26), `dist/router.js` and `dist/resolution-provider.js`. These are contract checks, **not live integration verification**. Maintainer probe findings and remaining UNKNOWNs are in [QLOO_NOTES](../../docs/QLOO_NOTES.md).
+
+## Normalization and missing evidence
+
+`parseHeatmapResponse` extracts only validated cells. `normalizeHeatmapCells` takes that parsed list and uses `geo.ts` (`loadCityCells` / `aggregateCellsByCity`) to map cells into our frozen scenario cities. For each artist, a city's statistic is the **arithmetic mean affinity of its mapped returned cells**. Neither cell count nor popularity increases this statistic. This is a cultural-fit proxy, not audience size, ticket demand or estimated reach.
+
+The resulting `AffinityProfile` includes every frozen city. Missing city evidence stays `unknown`; unmapped cells are counted in safe warnings and stay unassigned. The core's `computeFitIndex` then computes within-profile midrank percentiles and model weights. The client does not mix raw affinities across artist queries or enforce scenario-specific 50/50 weights, allowing the core's leave-one-artist-out reweighting. A shorter or longer geohash follows the existing geometry adapter; mixed resolution within one response is rejected because cells could overlap.
+
+## Budgets, cache and audit evidence
+
+Every cache miss must first pass the injected durable `beforeRequest()` reservation for the application budgets of 10 requests/second and 50,000/month. Failure of the ledger is fail-closed. Successful private cache hits consume no provider request. No automatic retries or speculative parallel fan-out happen inside this client.
+
+Default transport bounds are 10 seconds through body download, 1,000,000 response bytes and 5,000 cells. A caller may lower the byte cap; the timeout is capped at 15 seconds. Heatmap `take` is ignored by Qloo, so these limits and the bounded WKT region are the actual response safeguards. Oversized bodies are cancelled and rejected; partial data is never scored. These caps can make a dense artist query unusable, which remains an explicit failure until maintainers approve a different scenario or cap.
+
+The private cache stores sanitized cells or search identities, warning counts, a response hash reference and original recording time; its default TTL is six hours, with a maximum of 24 hours. It does not store the secret, arbitrary provider warning/error text or the full raw response. Cache hits are revalidated and remapped against the current frozen city configuration. Private cache infrastructure failures are visible safe warnings; writes can fail without invalidating an otherwise verified response.
+
+Every result has a typed success/error and `QueryEvidence`: exact allowlisted parameters, current request timestamps, live/cache source, status and original response hash/recording time. Cached evidence keeps that original provenance while warnings use the current query ID. Arbitrary exceptions and HTTP error bodies never enter results. Provider warnings are represented by counts and a fixed application message. Only stable allowlisted quota codes and bounded retry intervals are retained.
+
+All public contract fixtures are explicitly synthetic and hand-written. Maintainers own live probes, publication clearance and deployment. Worker-to-Qloo access, real scenario coverage and provider reset-window semantics remain **UNKNOWN** until verified by their probes.

@@ -49,7 +49,7 @@ The default production routing input is a **frozen directed OSRM road matrix sup
 
 ## Cultural fit specification
 
-Fit is calculated separately from travel, cost and constraints. Its input is a frozen city set and one complete, comparable profile per selected artist. A profile must contain exactly one usable finite affinity value for every candidate city. Values within a profile must come from a comparable collection context; unrelated per-city queries must not be stitched into a ranking. The live normalization contract is currently **UNKNOWN**.
+Fit is calculated separately from travel, cost and constraints. Its input is a frozen city set and one complete, comparable profile per selected artist. A profile must contain exactly one usable finite affinity value for every candidate city. Values within a profile must come from a comparable collection context; unrelated per-city queries must not be stitched into a ranking. PR4 validates the documented geohash response shape, maps cells through `src/qloo/geo.ts` and uses mean returned-cell affinity per city. Missing city evidence remains UNKNOWN. Real completeness for selected artists and provider access from a deployed Worker remain **UNKNOWN** until maintainer probes.
 
 For a city within one artist profile of `n >= 2` cities:
 
@@ -110,25 +110,35 @@ Each axis records bounds, resolution, baseline, checked values and one of:
 
 Daily driving limits, market spacing, venue availability and target-artist identity are not searched by these three axes. Their checks remain fixed and visible. A result must always name its searched parameter and range.
 
-## PR3 comparison-artist sensitivity, ready for PR4
+## Comparison-artist sensitivity
 
 `buildLeaveOneArtistOutInputs` and `computeLeaveOneArtistOutFits` omit each selected comparison artist once while retaining the target, frozen city universe and every surviving observation and provenance field. Survivor weights are divided by their actual sum; the scenario 50/50 rule is not reapplied inside an ablation. The before/after weights and removed query/artist IDs are recorded. These generic fit helpers still validate normalized inputs.
 
 `analyzeTourDecision` attaches each ablated fit report to the unchanged baseline routes and feasibility evidence, then recomputes preference checks and ranking. Omission outcomes distinguish retained recommendation, changed option, recommendation withdrawn, unresolved and not comparable. If the baseline needs evidence, dropping an incomplete artist may recover a recommendation, but cannot establish a reversal of a previously known decision.
 
-All requested omissions remain in the summary denominator. The retained-recommendation fraction is defined only for a nonempty set of wholly comparable runs; otherwise it is UNKNOWN. Target-only input is not applicable, not 100% stable. The fraction is an empirical property of these specified ablations, not a confidence interval or a probability of real-world success. PR4 will place this evidence in the downloadable audit and add the separate different-target control run.
+All requested omissions remain in the summary denominator. The retained-recommendation fraction is defined only for a nonempty set of wholly comparable runs; otherwise it is UNKNOWN. Target-only input is not applicable, not 100% stable. The fraction is an empirical property of these specified ablations, not a confidence interval or a probability of real-world success. PR4 places this evidence in the downloadable audit alongside the separate different-target control run.
 
 The Germany example uses the explicit synthetic policy fixture: minimum fit 20, extra-distance cap 350,000 m, and venue-fee budget EUR 1,000.00. Its baseline selects Nuremberg. Raising only the cap to 354,097 m changes the selection to Frankfurt; raising only the fit floor to 26 or lowering only the budget to EUR 499.99 selects day off. One of two comparison omissions retains the baseline. These results illustrate the policy with invented affinity and booking facts; they are not evidence of actual audience demand.
 
+## PR4 audit and delivery contract
+
+`createDecisionAudit` validates and records the exact candidate set, query parameters and safe warnings, calculation and acquisition times, complete baseline analysis, comparison omissions, and a different-target control. Control validation requires identical comparison profiles and their provenance, model weights, candidate universe, route and preferences. It changes only the target artist. Failed or unavailable control evidence stays UNKNOWN and does not suppress a usable baseline.
+
+Every original-to-option route change names the changed show and fields and lists unchanged locked commitments. Baseline-to-control stop changes require a recommendation in both runs; otherwise the difference is UNKNOWN. The zero-violations gate is scoped to the recommended option and all its declared feasibility/preference checks. No recommendation is UNKNOWN, not an empty PASS. A successful gate is a statement about supplied evidence and model constraints, not commercial feasibility or a confirmed booking.
+
+The replay section exports within-query percentile surrogates, preserving exact order, ties and missingness. `replayDecisionAudit` reruns the core from these inputs; raw Qloo affinity vectors and geohash cells are not distributed. Every profile must link to its matching successful query and original acquisition reference/time. Synthetic inputs cannot masquerade as live responses. When acquisition fails before a fit input can be assembled, the known frozen city set and failed query log remain in the audit.
+
+The API is restricted to the maintained Germany scenario. Demo runs without a key. Live accepts one resolved target, zero to three distinct comparisons and one different control plus bounded preferences; each artist is queried separately. Its booking facts remain explicitly fictional, even when artist evidence is live. Complete response contracts and error semantics are in [API](API.md).
+
 ## Architecture and delivery boundaries
 
-The core is deterministic, dependency-light TypeScript with no network access. It includes scenario validation, directed-road constraints, option evaluation, recommendation, bounded breakpoint search and comparison-artist sensitivity. Later PRs add audit export and a thin server-side adapter for verified Qloo contracts. Maintainers supplied geometry-only cell-to-city mapping separately; the complete live normalization contract and verified scenario coverage remain **UNKNOWN**. Raw Qloo responses must not be published; public Qloo fixtures are synthetic.
+The core is deterministic, dependency-light TypeScript with no network access. It includes scenario validation, directed-road constraints, option evaluation, recommendation, bounded breakpoint search, comparison-artist sensitivity and audit replay. The server-only Qloo adapter validates official documented shapes with synthetic test values. Maintainers supplied geometry-only cell-to-city mapping separately. Raw Qloo responses must not be published; public Qloo fixtures are synthetic.
 
-The eventual public UI is static on Cloudflare Pages. A Worker owns the Qloo secret, bounded calls, per-IP limits, a daily cap, a kill switch and private response caching. Real response data must not be committed to the public repository. Public offline fixtures are hand-written and explicitly synthetic. The application must remain available free of charge without login through 16 November 2026.
+The eventual public UI is static on Cloudflare Pages. The Worker bounds and validates incoming requests, then delegates calculation and private state to the existing SQLite `UnitLedger` Durable Object. The DO persists rate/monthly provider quotas, daily live and daily client-hash quotas, and a six-hour bounded private cache. Keeping these in the same existing DO avoids a second KV binding and non-atomic distributed quota checks. The secret is server-side `QLOO_API_KEY`; live mode is disabled by default. Real response data must not be committed to the public repository. Public offline fixtures are hand-written and explicitly synthetic. The application must remain available free of charge without login through 16 November 2026.
 
 Except in the AI Rescue mode (PR6), an LLM may only summarize already computed evidence. It cannot invent entities, fill missing values, decide whether constraints passed or change numeric results. A template summary provides the complete workflow without an LLM. In PR6 the LLM agent researches and proposes, but the deterministic checker and audit decide; PR4 exposes them as pure typed tools.
 
-## Roadmap (five PRs plus PR6)
+## Six-PR roadmap
 
 | PR | Deliverable | Acceptance boundary |
 |---|---|---|
@@ -136,10 +146,10 @@ Except in the AI Rescue mode (PR6), an LLM may only summarize already computed e
 | 2 | Runtime input validation, locked-date constraints, directed-road checks and exactly three repair options | Preserve every locked commitment; reject invalid inputs; keep failed and unknown checks distinct. Settle corridor and spacing policies. |
 | 3 | Explicit recommendation policy, bounded breakpoint and comparison-artist sensitivity engine | Report a witnessed one-assumption change or an honest bounded not-found/unknown result; preserve constraints, city set and omission provenance. |
 | 4 | Reproducible audit, different-target control run, sensitivity export, verified Qloo client and Worker | Logged parameters omit secrets; data provenance and unresolved checks survive export; limits and kill switch work. |
-| 5 | Front-end comparison, audit download, promoter one-pager (A4 print stylesheet, optional PNG export) and Cloudflare configuration | Usable responsive flow and labelled offline fallback; one-pager prints on one A4 page with constraint statuses matching the audit and no server or LLM; maintainers run live probes, review, deploy and merge. |
+| 5 | Front-end comparison, independent fit/extra-distance axes, evidence cards, audit download, promoter one-pager (A4 print stylesheet, one page, optional browser canvas PNG) and Cloudflare Pages configuration | Usable responsive flow, labelled demo/live and offline-fallback state and a Tag Bridge with at most three sourced common tags or UNKNOWN; no tag bonus in ranking. One-pager uses the selected option and existing audit (artist, city/date, venue placeholder, fit, three comparison-artist slots and omission note, extra travel against limits, PASS/FAIL/UNKNOWN, risks, sources, timestamp) on one A4 page with statuses matching the audit; missing evidence stays UNKNOWN; no server rendering or LLM. Maintainers run live probes, review, deploy and merge. |
 | 6 | AI Rescue mode (Pro tier) | Agent (Claude Sonnet 5.5 via Worker, key as secret `ANTHROPIC_API_KEY`; premium may use Claude Opus 5.5) with tools: Qloo fit data, OSRM matrix, web search/fetch, deterministic constraint checker, audit generator. Agent proposes options with evidence and links; every option validated PASS/FAIL/UNKNOWN by the checker; breakpoints deterministic; audit records sources. Demo: limited live sessions per day with saved transcripts; product: paid tier. The agent can never set a constraint to PASS. |
 
-The five PRs are reviewable increments within the brief's seven-day build window. Maintainers supply real Qloo recordings and the OSRM freeze, review the contract assumptions, and perform deployment. PR1 does not promise a live integration or a deployed service.
+These are logical delivery increments, not GitHub pull-request numbers. The promoter sheet follows the comparison front end so it can reuse the selected option and the audit without delaying PR4. Maintainers supply private Qloo probes and the OSRM freeze, review contract assumptions, configure secrets, deploy and merge. No implementation PR claims a live probe or deployment that has not been performed.
 
 ## Synthetic scenario
 
