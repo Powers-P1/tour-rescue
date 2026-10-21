@@ -71,14 +71,14 @@ function tasteMap(ctx:DesktopViewContext):string{
  }).join('');
  const muted=labels.map(row=>'<circle cx="'+row.pos[0]+'" cy="'+row.pos[1]+'" r="4" fill="#AEBCC6"/>'+
    '<text class="taste-map-label" x="'+(row.pos[0]+12)+'" y="'+(row.pos[1]-13)+'">'+row.name+'</text>').join('');
- return '<div class="taste-map-wrap"><svg class="taste-map" viewBox="0 0 680 520" role="img" aria-label="Schematic German geography: circular regions show relative fit ranks only, not individual fans" preserveAspectRatio="xMidYMid meet">'+
+ return '<div class="taste-map-wrap"><svg class="taste-map" viewBox="0 0 680 520" role="img" aria-describedby="taste-map-key" aria-label="Schematic German geography: circular regions show relative fit ranks only, not individual fans" preserveAspectRatio="xMidYMid meet">'+
    '<defs><clipPath id="taste-clip"><rect x="20" y="8" width="640" height="480" rx="14"/></clipPath></defs>'+
    '<g clip-path="url(#taste-clip)"><rect x="0" y="0" width="680" height="520" fill="#19262D"/>'+
    '<g transform="translate('+(340-340*zoom)+' '+(240-240*zoom)+') scale('+zoom+')">'+
    '<path d="M260 29 L380 39 500 101 515 188 495 270 449 328 445 411 364 455 284 443 235 388 167 330 188 244 146 160 193 82Z" fill="#22333c" stroke="#4b6470" stroke-width="2"/>'+
    '<path d="M188 245 Q339 147 497 286 M214 132 Q301 270 436 429 M174 350 Q382 324 505 139" stroke="#344550" stroke-width="1.4" fill="none"/>'+
    muted+points+'</g></g></svg>'+
-   '<div class="taste-mobile-key" aria-label="Map marker names">'+
+   '<div id="taste-map-key" class="taste-mobile-key" aria-label="Map marker names">'+
    p.map((city,i)=>'<span><b>'+(i+1)+'</b> '+esc(city.name)+'</span>').join('')+
    '<span>• Berlin</span><span>• Munich</span></div>'+
    '<div class="taste-map-bottom"><div><span>Relative cultural fit</span><div class="taste-scale" aria-hidden="true"><i></i><i></i><i></i><i></i></div><small>Low - High · within this candidate set</small></div>'+

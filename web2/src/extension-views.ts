@@ -76,14 +76,16 @@ function sosOptions(ctx: ExtensionContext): string {
     '<h1>Two local options.</h1><p class="muted">A head, fitting and delivery.</p></div>' +
     '<div class="extension-choices" role="radiogroup" aria-label="Illustrative local suppliers">' +
     SAMPLE_SUPPLIERS.map(provider => '<button type="button" role="radio" aria-checked="' +
-      (provider.id === ctx.sos.selectedId) + '" data-action="sos-select" data-id="' + provider.id +
+      (provider.id === ctx.sos.selectedId) + '" data-action="sos-select" aria-controls="sos-choice-summary" data-id="' + provider.id +
       '" tabindex="' + (provider.id === ctx.sos.selectedId ? '0' : '-1') + '" class="option-row' +
       (provider.id === ctx.sos.selectedId ? ' selected' : '') + '">' +
       '<div class="option-heading"><strong>⚒ ' + esc(provider.name) + '</strong><span class="fake-radio"></span></div>' +
       '<div class="option-reason">' + (provider.id === 'minh-backline' ? 'Crew reference · sample only' : 'Sample supplier') + '</div>' +
       '<div class="drive-line">' + esc(money(provider.estimateVnd)) + ' · Travel ~' + provider.travelMinutes + ' min</div>' +
       '<div class="tiny-label">? Stock, fee and arrival unverified</div></button>').join('') + '</div>' +
-    '<div class="focused-bottom">' + action('Review sample quote →','sos-quote',true) +
+    '<div class="focused-bottom"><p id="sos-choice-summary" class="tiny-label">Selected sample: '+
+    esc(selectedSupplier(ctx.sos).name)+' · no real quote requested</p>' +
+    action('Review sample quote →','sos-quote',true) +
     action('I’ll call myself', 'sos-self-call') +
     sample('Supplier names, prices and travel times are fictional estimates. No quote has been requested.') +
     '</div>', 'SOS');

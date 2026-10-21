@@ -102,3 +102,9 @@ Desktop Audience, Simulation and Agency tabs now use roving keyboard focus (Arro
 
 ### Confirmed Pages deployment mode
 The `tour-rescue` Pages project uses **direct-upload** (`source: null`), not Git integration. There is no Cloudflare-side build command or merge-triggered deployment. Repository scripts `npm run web:build`, `npm run web2:build`, and `npm run web:legacy-build` only generate local output. To release v2, manually run `npx wrangler pages deploy web/dist --project-name tour-rescue --branch main` after authorisation. For rollback, use `npm run web:legacy-build` then explicitly upload `web/dist`; no remote build-setting change is needed.
+
+## Front v2 polish: honest limitations and keyboard accessibility
+
+The Judges page has a concise **Known limits** section: relative cultural affinity is not attendance, live Qloo is bounded by source coverage and Worker/provider quotas, mapping and weighted artist comparisons are application-owned choices, the OSRM matrix is a frozen driving snapshot, and proposals never establish bookings or sent messages. The public landing and judges page still use the explicit synthetic default, without automatically calling Qloo.
+
+Audience map city names at widths 980–1279px are legible in a full-size **15px HTML key** paired with numbered markers. Mobile Audience/Agency/Simulation have exactly one visible Back action. The hero's illustrative scene caption sits above the phone inset. Every tab and radio group has linked `aria-controls` targets with roving arrow-key navigation and a real browser regression check.

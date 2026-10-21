@@ -176,11 +176,11 @@ function homeMobile(): string {
 function shortlist(): string {
   return '<section class="mobile-view rescue-view">' + header(true, projection.cancelledDate) +
     '<div class="intro"><h1>Three ways forward.</h1><p class="muted">' + HTML(projection.fromCity) + ' → replacement → ' + HTML(projection.toCity) + '</p></div>' +
-    '<fieldset class="options-list"><legend class="sr-only">Choose a rescue option</legend>' +
+    '<fieldset class="options-list" role="radiogroup" aria-labelledby="rescue-options-legend"><legend class="sr-only" id="rescue-options-legend">Choose a rescue option</legend>' +
     projection.options.map(option => {
       const selected = option.id === pendingId;
       return '<button type="button" role="radio" aria-checked="' + String(selected) + '" class="option-row' + (selected ? ' selected' : '') +
-        '" data-action="select-option" data-id="' + HTML(option.id) + '" tabindex="' + (selected ? '0' : '-1') + '">' +
+        '" data-action="select-option" data-id="' + HTML(option.id) + '" aria-controls="rescue-choice-summary" tabindex="' + (selected ? '0' : '-1') + '">' +
         '<div class="option-heading"><strong>' + HTML(option.cityName) + '</strong>' +
         (option.recommended ? '<span class="suggested">Suggested by checks</span>' : '') +
         '<span class="fake-radio" aria-hidden="true"></span></div>' +
@@ -189,7 +189,7 @@ function shortlist(): string {
           HTML(option.inbound) + ' in <span class="middle-dot">·</span> ' + HTML(option.outbound) + ' onward') + '</div>' +
         '<div class="option-validation">' + statusBadge(option.decisionCheck) + '</div></button>';
     }).join('') + '</fieldset>' +
-    '<div class="focused-bottom">' + primary(optionById(pendingId)?.kind === 'day-off' ?
+    '<div id="rescue-choice-summary" class="focused-bottom">' + primary(optionById(pendingId)?.kind === 'day-off' ?
       'Keep the day off →' : 'Review ' + (optionById(pendingId)?.cityName ?? 'option') + ' →', 'review') +
     '<p class="tiny-label">Source-labelled estimates · venue/date not confirmed</p>' +
     softButton('Run fresh Qloo evidence →', 'open-live', 'muted-button') + '</div></section>';
