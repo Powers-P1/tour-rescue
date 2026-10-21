@@ -1,0 +1,593 @@
+{
+  "schemaVersion": 1,
+  "id": "tour-five-dates-one-cancelled",
+  "dataKind": "synthetic",
+  "description": "Application-normalized example only. Real city labels; invented venues, dates, cancellation and road estimates. This is neither a Qloo response nor a verified route.",
+  "tour": {
+    "id": "tour-demo-pl",
+    "name": "Synthetic five-date Poland tour",
+    "region": "Poland",
+    "shows": [
+      {
+        "id": "show-1",
+        "cityId": "pl-poznan",
+        "venueId": "venue-pl-poznan",
+        "schedule": {
+          "arriveBy": {
+            "iso": "2026-11-10T16:00:00+01:00",
+            "timeZone": "Europe/Warsaw"
+          },
+          "startsAt": {
+            "iso": "2026-11-10T20:00:00+01:00",
+            "timeZone": "Europe/Warsaw"
+          },
+          "endsAt": {
+            "iso": "2026-11-10T22:00:00+01:00",
+            "timeZone": "Europe/Warsaw"
+          },
+          "departAfter": {
+            "iso": "2026-11-10T23:00:00+01:00",
+            "timeZone": "Europe/Warsaw"
+          }
+        },
+        "status": "confirmed",
+        "locked": true
+      },
+      {
+        "id": "show-2",
+        "cityId": "pl-lodz",
+        "venueId": "venue-pl-lodz",
+        "schedule": {
+          "arriveBy": {
+            "iso": "2026-11-11T16:00:00+01:00",
+            "timeZone": "Europe/Warsaw"
+          },
+          "startsAt": {
+            "iso": "2026-11-11T20:00:00+01:00",
+            "timeZone": "Europe/Warsaw"
+          },
+          "endsAt": {
+            "iso": "2026-11-11T22:00:00+01:00",
+            "timeZone": "Europe/Warsaw"
+          },
+          "departAfter": {
+            "iso": "2026-11-11T23:00:00+01:00",
+            "timeZone": "Europe/Warsaw"
+          }
+        },
+        "status": "confirmed",
+        "locked": true
+      },
+      {
+        "id": "show-3",
+        "cityId": "pl-warsaw",
+        "venueId": "venue-pl-warsaw",
+        "schedule": {
+          "arriveBy": {
+            "iso": "2026-11-12T16:00:00+01:00",
+            "timeZone": "Europe/Warsaw"
+          },
+          "startsAt": {
+            "iso": "2026-11-12T20:00:00+01:00",
+            "timeZone": "Europe/Warsaw"
+          },
+          "endsAt": {
+            "iso": "2026-11-12T22:00:00+01:00",
+            "timeZone": "Europe/Warsaw"
+          },
+          "departAfter": {
+            "iso": "2026-11-12T23:00:00+01:00",
+            "timeZone": "Europe/Warsaw"
+          }
+        },
+        "status": "cancelled",
+        "locked": false,
+        "reason": "Synthetic scenario: the middle show has been cancelled."
+      },
+      {
+        "id": "show-4",
+        "cityId": "pl-lublin",
+        "venueId": "venue-pl-lublin",
+        "schedule": {
+          "arriveBy": {
+            "iso": "2026-11-13T16:00:00+01:00",
+            "timeZone": "Europe/Warsaw"
+          },
+          "startsAt": {
+            "iso": "2026-11-13T20:00:00+01:00",
+            "timeZone": "Europe/Warsaw"
+          },
+          "endsAt": {
+            "iso": "2026-11-13T22:00:00+01:00",
+            "timeZone": "Europe/Warsaw"
+          },
+          "departAfter": {
+            "iso": "2026-11-13T23:00:00+01:00",
+            "timeZone": "Europe/Warsaw"
+          }
+        },
+        "status": "confirmed",
+        "locked": true
+      },
+      {
+        "id": "show-5",
+        "cityId": "pl-rzeszow",
+        "venueId": "venue-pl-rzeszow",
+        "schedule": {
+          "arriveBy": {
+            "iso": "2026-11-14T16:00:00+01:00",
+            "timeZone": "Europe/Warsaw"
+          },
+          "startsAt": {
+            "iso": "2026-11-14T20:00:00+01:00",
+            "timeZone": "Europe/Warsaw"
+          },
+          "endsAt": {
+            "iso": "2026-11-14T22:00:00+01:00",
+            "timeZone": "Europe/Warsaw"
+          },
+          "departAfter": {
+            "iso": "2026-11-14T23:00:00+01:00",
+            "timeZone": "Europe/Warsaw"
+          }
+        },
+        "status": "confirmed",
+        "locked": true
+      }
+    ],
+    "constraints": {
+      "drivingDayTimeZone": "Europe/Warsaw",
+      "maxDailyDrivingSeconds": 14400,
+      "minimumMarketSpacingMetres": 50000,
+      "marketSpacingMeasure": "road-distance",
+      "additionalBudget": {
+        "status": "known",
+        "value": {
+          "currency": "PLN",
+          "minorUnits": 50000
+        }
+      }
+    }
+  },
+  "cities": [
+    {
+      "id": "pl-poznan",
+      "name": "Poznań",
+      "countryCode": "PL",
+      "timeZone": "Europe/Warsaw",
+      "qlooEntityId": {
+        "status": "unknown",
+        "reason": "Local geographic label only; no Qloo identity resolution was performed."
+      }
+    },
+    {
+      "id": "pl-lodz",
+      "name": "Łódź",
+      "countryCode": "PL",
+      "timeZone": "Europe/Warsaw",
+      "qlooEntityId": {
+        "status": "unknown",
+        "reason": "Local geographic label only; no Qloo identity resolution was performed."
+      }
+    },
+    {
+      "id": "pl-warsaw",
+      "name": "Warsaw",
+      "countryCode": "PL",
+      "timeZone": "Europe/Warsaw",
+      "qlooEntityId": {
+        "status": "unknown",
+        "reason": "Local geographic label only; no Qloo identity resolution was performed."
+      }
+    },
+    {
+      "id": "pl-lublin",
+      "name": "Lublin",
+      "countryCode": "PL",
+      "timeZone": "Europe/Warsaw",
+      "qlooEntityId": {
+        "status": "unknown",
+        "reason": "Local geographic label only; no Qloo identity resolution was performed."
+      }
+    },
+    {
+      "id": "pl-rzeszow",
+      "name": "Rzeszów",
+      "countryCode": "PL",
+      "timeZone": "Europe/Warsaw",
+      "qlooEntityId": {
+        "status": "unknown",
+        "reason": "Local geographic label only; no Qloo identity resolution was performed."
+      }
+    },
+    {
+      "id": "pl-radom",
+      "name": "Radom",
+      "countryCode": "PL",
+      "timeZone": "Europe/Warsaw",
+      "qlooEntityId": {
+        "status": "unknown",
+        "reason": "Local geographic label only; no Qloo identity resolution was performed."
+      }
+    },
+    {
+      "id": "pl-kielce",
+      "name": "Kielce",
+      "countryCode": "PL",
+      "timeZone": "Europe/Warsaw",
+      "qlooEntityId": {
+        "status": "unknown",
+        "reason": "Local geographic label only; no Qloo identity resolution was performed."
+      }
+    }
+  ],
+  "venues": [
+    {
+      "id": "venue-pl-poznan",
+      "cityId": "pl-poznan",
+      "name": "Fictional Poznań Demo Room",
+      "qlooEntityId": {
+        "status": "unknown",
+        "reason": "Invented fixture venue; not a Qloo entity."
+      },
+      "availability": {
+        "status": "unknown",
+        "reason": "No date-specific availability has been supplied by a booker."
+      },
+      "capacityPeople": {
+        "status": "unknown",
+        "reason": "No capacity has been verified or supplied by a booker."
+      },
+      "fee": {
+        "status": "unknown",
+        "reason": "No venue quote has been supplied by a booker."
+      },
+      "promoterTerms": {
+        "status": "unknown",
+        "reason": "No promoter terms have been supplied by a booker."
+      }
+    },
+    {
+      "id": "venue-pl-lodz",
+      "cityId": "pl-lodz",
+      "name": "Fictional Łódź Demo Room",
+      "qlooEntityId": {
+        "status": "unknown",
+        "reason": "Invented fixture venue; not a Qloo entity."
+      },
+      "availability": {
+        "status": "unknown",
+        "reason": "No date-specific availability has been supplied by a booker."
+      },
+      "capacityPeople": {
+        "status": "unknown",
+        "reason": "No capacity has been verified or supplied by a booker."
+      },
+      "fee": {
+        "status": "unknown",
+        "reason": "No venue quote has been supplied by a booker."
+      },
+      "promoterTerms": {
+        "status": "unknown",
+        "reason": "No promoter terms have been supplied by a booker."
+      }
+    },
+    {
+      "id": "venue-pl-warsaw",
+      "cityId": "pl-warsaw",
+      "name": "Fictional Warsaw Demo Room",
+      "qlooEntityId": {
+        "status": "unknown",
+        "reason": "Invented fixture venue; not a Qloo entity."
+      },
+      "availability": {
+        "status": "unknown",
+        "reason": "No date-specific availability has been supplied by a booker."
+      },
+      "capacityPeople": {
+        "status": "unknown",
+        "reason": "No capacity has been verified or supplied by a booker."
+      },
+      "fee": {
+        "status": "unknown",
+        "reason": "No venue quote has been supplied by a booker."
+      },
+      "promoterTerms": {
+        "status": "unknown",
+        "reason": "No promoter terms have been supplied by a booker."
+      }
+    },
+    {
+      "id": "venue-pl-lublin",
+      "cityId": "pl-lublin",
+      "name": "Fictional Lublin Demo Room",
+      "qlooEntityId": {
+        "status": "unknown",
+        "reason": "Invented fixture venue; not a Qloo entity."
+      },
+      "availability": {
+        "status": "unknown",
+        "reason": "No date-specific availability has been supplied by a booker."
+      },
+      "capacityPeople": {
+        "status": "unknown",
+        "reason": "No capacity has been verified or supplied by a booker."
+      },
+      "fee": {
+        "status": "unknown",
+        "reason": "No venue quote has been supplied by a booker."
+      },
+      "promoterTerms": {
+        "status": "unknown",
+        "reason": "No promoter terms have been supplied by a booker."
+      }
+    },
+    {
+      "id": "venue-pl-rzeszow",
+      "cityId": "pl-rzeszow",
+      "name": "Fictional Rzeszów Demo Room",
+      "qlooEntityId": {
+        "status": "unknown",
+        "reason": "Invented fixture venue; not a Qloo entity."
+      },
+      "availability": {
+        "status": "unknown",
+        "reason": "No date-specific availability has been supplied by a booker."
+      },
+      "capacityPeople": {
+        "status": "unknown",
+        "reason": "No capacity has been verified or supplied by a booker."
+      },
+      "fee": {
+        "status": "unknown",
+        "reason": "No venue quote has been supplied by a booker."
+      },
+      "promoterTerms": {
+        "status": "unknown",
+        "reason": "No promoter terms have been supplied by a booker."
+      }
+    },
+    {
+      "id": "venue-pl-radom",
+      "cityId": "pl-radom",
+      "name": "Fictional Radom Demo Room",
+      "qlooEntityId": {
+        "status": "unknown",
+        "reason": "Invented fixture venue; not a Qloo entity."
+      },
+      "availability": {
+        "status": "unknown",
+        "reason": "No date-specific availability has been supplied by a booker."
+      },
+      "capacityPeople": {
+        "status": "unknown",
+        "reason": "No capacity has been verified or supplied by a booker."
+      },
+      "fee": {
+        "status": "unknown",
+        "reason": "No venue quote has been supplied by a booker."
+      },
+      "promoterTerms": {
+        "status": "unknown",
+        "reason": "No promoter terms have been supplied by a booker."
+      }
+    },
+    {
+      "id": "venue-pl-kielce",
+      "cityId": "pl-kielce",
+      "name": "Fictional Kielce Demo Room",
+      "qlooEntityId": {
+        "status": "unknown",
+        "reason": "Invented fixture venue; not a Qloo entity."
+      },
+      "availability": {
+        "status": "unknown",
+        "reason": "No date-specific availability has been supplied by a booker."
+      },
+      "capacityPeople": {
+        "status": "unknown",
+        "reason": "No capacity has been verified or supplied by a booker."
+      },
+      "fee": {
+        "status": "unknown",
+        "reason": "No venue quote has been supplied by a booker."
+      },
+      "promoterTerms": {
+        "status": "unknown",
+        "reason": "No promoter terms have been supplied by a booker."
+      }
+    }
+  ],
+  "roadMatrix": {
+    "id": "synthetic-directed-road-matrix-v1",
+    "directed": true,
+    "provenance": {
+      "source": "Tour Rescue hand-written synthetic fixture",
+      "method": "synthetic-fixture",
+      "recordedAt": {
+        "status": "unknown",
+        "reason": "No routing service was called; these road distances and durations were invented."
+      },
+      "description": "Sparse directed matrix of illustrative estimates. Reverse directions may differ. Missing legs remain UNKNOWN. No Haversine measurements or OSRM recordings are represented."
+    },
+    "legs": [
+      {
+        "fromCityId": "pl-poznan",
+        "toCityId": "pl-lodz",
+        "quality": "estimate",
+        "travel": {
+          "status": "known",
+          "value": {
+            "distanceMetres": 207000,
+            "durationSeconds": 9000
+          }
+        }
+      },
+      {
+        "fromCityId": "pl-lodz",
+        "toCityId": "pl-poznan",
+        "quality": "estimate",
+        "travel": {
+          "status": "known",
+          "value": {
+            "distanceMetres": 214000,
+            "durationSeconds": 9600
+          }
+        }
+      },
+      {
+        "fromCityId": "pl-lodz",
+        "toCityId": "pl-warsaw",
+        "quality": "estimate",
+        "travel": {
+          "status": "known",
+          "value": {
+            "distanceMetres": 137000,
+            "durationSeconds": 6600
+          }
+        }
+      },
+      {
+        "fromCityId": "pl-warsaw",
+        "toCityId": "pl-lublin",
+        "quality": "estimate",
+        "travel": {
+          "status": "known",
+          "value": {
+            "distanceMetres": 171000,
+            "durationSeconds": 7800
+          }
+        }
+      },
+      {
+        "fromCityId": "pl-lublin",
+        "toCityId": "pl-rzeszow",
+        "quality": "estimate",
+        "travel": {
+          "status": "known",
+          "value": {
+            "distanceMetres": 170000,
+            "durationSeconds": 8400
+          }
+        }
+      },
+      {
+        "fromCityId": "pl-lodz",
+        "toCityId": "pl-radom",
+        "quality": "estimate",
+        "travel": {
+          "status": "known",
+          "value": {
+            "distanceMetres": 138000,
+            "durationSeconds": 6900
+          }
+        }
+      },
+      {
+        "fromCityId": "pl-radom",
+        "toCityId": "pl-lublin",
+        "quality": "estimate",
+        "travel": {
+          "status": "known",
+          "value": {
+            "distanceMetres": 116000,
+            "durationSeconds": 5700
+          }
+        }
+      },
+      {
+        "fromCityId": "pl-lodz",
+        "toCityId": "pl-kielce",
+        "quality": "estimate",
+        "travel": {
+          "status": "known",
+          "value": {
+            "distanceMetres": 154000,
+            "durationSeconds": 7500
+          }
+        }
+      },
+      {
+        "fromCityId": "pl-kielce",
+        "toCityId": "pl-lublin",
+        "quality": "estimate",
+        "travel": {
+          "status": "known",
+          "value": {
+            "distanceMetres": 184000,
+            "durationSeconds": 9600
+          }
+        }
+      },
+      {
+        "fromCityId": "pl-lodz",
+        "toCityId": "pl-lublin",
+        "quality": "estimate",
+        "travel": {
+          "status": "known",
+          "value": {
+            "distanceMetres": 252000,
+            "durationSeconds": 12300
+          }
+        }
+      }
+    ]
+  },
+  "repairCandidates": [
+    {
+      "id": "replacement-radom",
+      "kind": "replacement",
+      "cancelledShowId": "show-3",
+      "cityId": "pl-radom",
+      "venueId": "venue-pl-radom",
+      "schedule": {
+        "arriveBy": {
+          "iso": "2026-11-12T16:00:00+01:00",
+          "timeZone": "Europe/Warsaw"
+        },
+        "startsAt": {
+          "iso": "2026-11-12T20:00:00+01:00",
+          "timeZone": "Europe/Warsaw"
+        },
+        "endsAt": {
+          "iso": "2026-11-12T22:00:00+01:00",
+          "timeZone": "Europe/Warsaw"
+        },
+        "departAfter": {
+          "iso": "2026-11-12T23:00:00+01:00",
+          "timeZone": "Europe/Warsaw"
+        }
+      }
+    },
+    {
+      "id": "detour-kielce",
+      "kind": "detour",
+      "cancelledShowId": "show-3",
+      "cityId": "pl-kielce",
+      "venueId": "venue-pl-kielce",
+      "schedule": {
+        "arriveBy": {
+          "iso": "2026-11-12T16:00:00+01:00",
+          "timeZone": "Europe/Warsaw"
+        },
+        "startsAt": {
+          "iso": "2026-11-12T20:00:00+01:00",
+          "timeZone": "Europe/Warsaw"
+        },
+        "endsAt": {
+          "iso": "2026-11-12T22:00:00+01:00",
+          "timeZone": "Europe/Warsaw"
+        },
+        "departAfter": {
+          "iso": "2026-11-12T23:00:00+01:00",
+          "timeZone": "Europe/Warsaw"
+        }
+      }
+    },
+    {
+      "id": "day-off",
+      "kind": "day-off",
+      "cancelledShowId": "show-3"
+    }
+  ]
+}

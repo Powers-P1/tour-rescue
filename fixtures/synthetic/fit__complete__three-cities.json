@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "tour-rescue.fit-input.v1",
+  "candidateSet": { "id": "synthetic-region-v1", "cityIds": ["city-a", "city-b", "city-c"] },
+  "profiles": [
+    {
+      "queryId": "synthetic-target-query",
+      "candidateSetId": "synthetic-region-v1",
+      "artistId": "synthetic-artist-target",
+      "role": "target",
+      "weight": 0.5,
+      "provenance": { "kind": "synthetic", "reference": "fit__complete__three-cities.json#target" },
+      "observations": [
+        { "cityId": "city-a", "affinity": { "status": "known", "value": 0 } },
+        { "cityId": "city-b", "affinity": { "status": "known", "value": 50 } },
+        { "cityId": "city-c", "affinity": { "status": "known", "value": 100 } }
+      ]
+    },
+    {
+      "queryId": "synthetic-comparison-a-query",
+      "candidateSetId": "synthetic-region-v1",
+      "artistId": "synthetic-artist-comparison-a",
+      "role": "comparison",
+      "weight": 0.25,
+      "provenance": { "kind": "synthetic", "reference": "fit__complete__three-cities.json#comparison-a" },
+      "observations": [
+        { "cityId": "city-a", "affinity": { "status": "known", "value": 100 } },
+        { "cityId": "city-b", "affinity": { "status": "known", "value": 50 } },
+        { "cityId": "city-c", "affinity": { "status": "known", "value": 0 } }
+      ]
+    },
+    {
+      "queryId": "synthetic-comparison-b-query",
+      "candidateSetId": "synthetic-region-v1",
+      "artistId": "synthetic-artist-comparison-b",
+      "role": "comparison",
+      "weight": 0.25,
+      "provenance": { "kind": "synthetic", "reference": "fit__complete__three-cities.json#comparison-b" },
+      "observations": [
+        { "cityId": "city-a", "affinity": { "status": "known", "value": 0 } },
+        { "cityId": "city-b", "affinity": { "status": "known", "value": 100 } },
+        { "cityId": "city-c", "affinity": { "status": "known", "value": 50 } }
+      ]
+    }
+  ]
+}
