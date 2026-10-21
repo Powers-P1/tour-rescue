@@ -27,12 +27,12 @@ const built = await build({
 });
 await writeFile(new URL('./dist/index.html', import.meta.url), await readFile(new URL('./index.html', import.meta.url)));
 await writeFile(new URL('./dist/404.html', import.meta.url), await readFile(new URL('../web/404.html', import.meta.url)));
-await writeFile(new URL('./dist/_headers', import.meta.url), \`/*
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' \${origin.origin}; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'
+await writeFile(new URL('./dist/_headers', import.meta.url), `/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' ${origin.origin}; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
   Permissions-Policy: camera=(), microphone=(), geolocation=()
   Cache-Control: public, max-age=0, must-revalidate
-\`);
-for (const [path, output] of Object.entries(built.metafile.outputs)) console.log(\`\${path}: \${(output.bytes / 1024).toFixed(1)} kB\`);
-console.log(\`Public Worker origin: \${origin.origin} (v2 preview only; existing deploy unchanged)\`);
+`);
+for (const [path, output] of Object.entries(built.metafile.outputs)) console.log(`${path}: ${(output.bytes / 1024).toFixed(1)} kB`);
+console.log(`Public Worker origin: ${origin.origin} (v2 preview only; existing deploy unchanged)`);
