@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "fixture": "tour__five-dates__one-cancelled.json",
+  "source": "synthetic",
+  "format": "tour-rescue-normalized-application-domain",
+  "qlooResponseSchema": {
+    "status": "unknown",
+    "reason": "No real Qloo response contract or fixture has been supplied; this file does not assert Qloo schema compatibility."
+  },
+  "request": {
+    "path": {
+      "status": "unknown",
+      "reason": "No HTTP request was made."
+    },
+    "query": {
+      "status": "unknown",
+      "reason": "No HTTP request was made."
+    }
+  },
+  "recordedAt": {
+    "status": "unknown",
+    "reason": "Hand-written synthetic fixture; no recording occurred."
+  },
+  "httpStatus": {
+    "status": "unknown",
+    "reason": "No HTTP response exists."
+  },
+  "latencyMs": {
+    "status": "unknown",
+    "reason": "No HTTP request was measured."
+  },
+  "apiWarnings": {
+    "status": "unknown",
+    "reason": "No API was called; there is no API warning record."
+  },
+  "warnings": [
+    "All venue names, schedules, booking circumstances and travel measurements are invented.",
+    "Road distances and durations are estimates, never verified travel or current traffic.",
+    "The directed matrix is sparse; a missing leg must remain UNKNOWN.",
+    "All Qloo IDs and venue availability, capacity, fees and promoter terms remain UNKNOWN.",
+    "Replacement/detour classification is supplied for this scenario; its automatic policy is deferred to PR2.",
+    "The known budget and schedule are fixture assumptions, not real booker instructions."
+  ]
+}

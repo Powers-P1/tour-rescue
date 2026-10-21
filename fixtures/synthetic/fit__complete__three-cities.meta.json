@@ -1,0 +1,16 @@
+{
+  "source": "synthetic",
+  "contract": "tour-rescue.fit-input.v1",
+  "request": { "path": "UNKNOWN", "query": {} },
+  "recordedAt": null,
+  "httpStatus": null,
+  "latencyMs": null,
+  "warnings": [
+    "Hand-written application-normalized evidence, not a recorded or schema-verified Qloo response.",
+    "Fictional artists and cities. Values prove arithmetic only, not heatmap coverage or decision quality."
+  ],
+  "expected": {
+    "method": "weighted-midrank-v1",
+    "fitByCity": { "city-a": 25, "city-b": 62.5, "city-c": 62.5 }
+  }
+}
