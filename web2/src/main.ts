@@ -144,7 +144,9 @@ function details(): string {
     (showEvidence ? evidencePanel(option) : '') +
     '<div class="focused-bottom">' +
     (option.kind === 'day-off' ? primary('Download decision audit →', 'audit')
-      : primary('Prepare promoter proposal →', 'prepare')) +
+      : option.routeCheck === 'FAIL' || option.decisionCheck === 'FAIL'
+        ? primary('Choose another direction →', 'back')
+        : primary('Prepare promoter proposal →', 'prepare')) +
     softButton(showEvidence ? 'Hide evidence & assumptions ↑' : 'See evidence & assumptions →', 'toggle-evidence') +
     '<p class="tiny-label">' + HTML(projection.mode === 'live' ? 'Live Qloo fit · sample booking scenario · not ticket sales' : 'Sample scenario · affinity is not ticket sales') + '</p>' +
     '</div></section>';
@@ -356,6 +358,10 @@ function review(): void {
 function prepare(): void {
   const selected = currentOption();
   if (!selected || selected.kind === 'day-off') return;
+  if (selected.routeCheck === 'FAIL' || selected.decisionCheck === 'FAIL') {
+    notice = 'This direction fails declared checks. Choose another option before drafting.';
+    render(); return;
+  }
   incident = transitionIncident(incident, { type: 'prepare-draft' });
   chosenProposal = buildPromoterModel(result, selected.id);
   proposalMessage = defaultMessage(chosenProposal);
@@ -468,7 +474,10 @@ root!.addEventListener('click', async event => {
     case 'back': back(); break;
     case 'select-option':
       if (optionById(button.dataset.id ?? '')) pendingId = button.dataset.id!;
-      render(); break;
+      render();
+      [...root!.querySelectorAll<HTMLElement>('[data-action="select-option"]')]
+        .find(node => node.dataset.id === pendingId)?.focus();
+      break;
     case 'review': review(); break;
     case 'prepare': prepare(); break;
     case 'toggle-evidence': showEvidence = !showEvidence; render(); break;
@@ -506,6 +515,26 @@ root!.addEventListener('click', async event => {
       render(); break;
     }
     case 'run-live': await runLive(); break;
+  }
+});
+root!.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && (liveOpen || showSOS)) {
+    if (liveOpen) liveOpen = false;
+    else showSOS = false;
+    render();
+    return;
+  }
+  if (screen === 'options' && (event.key === 'ArrowDown' || event.key === 'ArrowUp')
+      && event.target instanceof Element && event.target.closest('[data-action="select-option"]')) {
+    event.preventDefault();
+    const index = projection.options.findIndex(option => option.id === pendingId);
+    const step = event.key === 'ArrowDown' ? 1 : -1;
+    const next = projection.options[(index + step + projection.options.length) % projection.options.length];
+    if (!next) return;
+    pendingId = next.id;
+    render();
+    [...root!.querySelectorAll<HTMLElement>('[data-action="select-option"]')]
+      .find(node => node.dataset.id === pendingId)?.focus();
   }
 });
 // The old web/ shell and deployment remain unchanged until PR-D.
