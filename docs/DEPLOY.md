@@ -1,17 +1,38 @@
 # Deploy (Cloudflare free tier)
 
-`web/` remains the maintainer-supplied static placeholder until PR5. PR4 extends `worker/` with demo/live decisions, a JSON audit and private state in the existing SQLite Durable Object. Wrangler is a pinned-by-lockfile local development dependency. Deployment and secrets are handled by maintainers; opening this PR does not deploy it.
+`web/` contains the plain TypeScript/HTML/CSS Pages app. `npm run web:build` creates the deployable **`web/dist`** directory; no frontend runtime framework is required. The existing `worker/` supplies live decisions, a JSON audit and private state in the SQLite Durable Object. Deployment and secrets remain maintainer operations; building or opening this PR does not deploy anything.
 
 ## Local checks
 
 ```sh
 npm ci
 npm run check
-npm run worker:build
+npm run web:build
+npm run web:preview
+# In a separate terminal, if testing the API locally:
 npm run worker:dev
 ```
 
 `worker:build` invokes Wrangler with `--dry-run`; no Cloudflare account or provider key is required. The default local API serves `/health`, `/do-check`, `/api/demo` and `/api/demo/audit`. Live is disabled. The pure/client/API tests use synthetic evidence and mocked provider requests. A separate local workerd/SQLite smoke check during PR4 verified the actual built entry point, DO binding, demo, audit attachment and disabled live path without a Qloo key.
+
+## Pages build and local preview
+
+Open `http://localhost:4173` after `npm run web:preview`. `npm run web:dev` builds once and starts the same static preview; after edits, rebuild and reload. Demo is evaluated from the bundled synthetic fixtures and deterministic core in the browser. It needs no Worker, account, Qloo key, LLM or external font/map request. Hash routes `#route`, `#options`, `#breakpoint`, `#evidence`, `#audit` and `#promoter` keep direct links on the static Pages origin.
+
+`PUBLIC_WORKER_ORIGIN` is the **public API origin**, not a secret. Its default is `https://tour-rescue-api.oli-struska.workers.dev`. To build against local development:
+
+```sh
+PUBLIC_WORKER_ORIGIN=http://localhost:8787 npm run web:build
+npm run web:preview
+```
+
+Set the Worker's `ALLOWED_ORIGIN` to `http://localhost:4173` for that local session, or to the exact Pages origin for deployment. CORS remains enforced; the frontend does not proxy around it. Local live requests still need the trusted identity contract described below. No secrets belong in `PUBLIC_WORKER_ORIGIN`, HTML, browser storage or Pages environment variables. The build validates the origin and emits a matching `connect-src` policy in `web/dist/_headers`.
+
+For Cloudflare Pages Git integration, use repository root, **build command `npm run web:build`**, **output directory `web/dist`**, and **Node 24**. `npm run check` checks both the core/Worker and browser TypeScript; CI also builds Pages and performs the Worker dry run. Build output is git-ignored.
+
+The Live dialog checks `/health`, then searches only on explicit submission and calls `/api/live` after users select distinct artist identities. Each search and evaluation consumes an action; there is no invented remaining-quota counter. Disabled mode, network/CORS failures, 429 and HTTP200 results with UNKNOWN evidence stay visible. No live failure silently switches to demo. Local breakpoint adjustments reuse the accepted rank-only audit and preserve query acquisition timestamps; they spend no provider quota.
+
+The promoter view renders a single A4 sheet and exports a PNG through browser canvas. Print/Save PDF uses the browser print dialog (A4, portrait; disable browser headers/footers if enabled). The sheet states the selected option's own status, includes three comparator slots (UNKNOWN for absent slots), and labels all fixture booking facts as fictional. This is a proposal to investigate, not confirmation of venue availability. JSON audit and PNG downloads are generated in the browser; there is no document service.
 
 ## Existing URLs and deploy commands
 
@@ -24,14 +45,15 @@ Export `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in the maintainer shel
 
 ```sh
 npx wrangler deploy --config worker/wrangler.toml
-npx wrangler pages deploy web --project-name tour-rescue --branch main --force
+npm run web:build
+npx wrangler pages deploy web/dist --project-name tour-rescue --branch main
 ```
 
 The Pages project already exists. The original setup used `POST /accounts/{account_id}/pages/projects` with `{"name":"tour-rescue","production_branch":"main"}` because that Wrangler version's project-creation command failed in the maintainer environment. No project recreation is needed for this PR.
 
 ## Existing Durable Object and private state
 
-`UnitLedger` keeps its existing SQLite class/binding and migration `v1`. Do **not** change or replay that migration. This PR adds namespaced key-value state using the existing storage API; it does not add a DO class or schema migration. The old skeleton's state can remain untouched. All edge requests use the same named instance, `tour-rescue-global-v1`, so concurrent requests share one transactional quota ledger.
+`UnitLedger` keeps its existing SQLite class/binding and migration `v1`. Do **not** change or replay that migration. PR4 added namespaced key-value state using the existing storage API; PR5 changes neither that state nor the class/migration. The old skeleton's state can remain untouched. All edge requests use the same named instance, `tour-rescue-global-v1`, so concurrent requests share one transactional quota ledger.
 
 Heavy deterministic decision, breakpoint and audit calculation runs inside the DO. The outer Worker only checks routes, bounds small inputs, derives the daily client hash and forwards the response. The same DO stores private validated Qloo projections and response references with a six-hour TTL. No new KV namespace is required. Cache defaults are 128 entries and 512 KiB per entry; expired entries are removed on access, and the oldest write is evicted at capacity. Oversized valid values skip caching. Public audit responses have `Cache-Control: no-store` and contain derived percentiles, not raw Qloo cells.
 

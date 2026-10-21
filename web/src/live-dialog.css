@@ -1,0 +1,57 @@
+.live-dialog {
+  width: min(760px, calc(100vw - 32px));
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  border: 1px solid #d8e1ed;
+  border-radius: 14px;
+  padding: 28px;
+  color: #101828;
+  background: #fff;
+  box-shadow: 0 24px 100px #07111e40;
+}
+.live-dialog::backdrop { background: #111b2e80; backdrop-filter: blur(3px); }
+.live-dialog-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+.live-dialog h2 { margin: 0; font-size: clamp(23px, 3vw, 29px); line-height: 1.2; letter-spacing: -.7px; }
+.live-close { flex: 0 0 auto; }
+.live-description { color: #61718a; margin: 14px 0 18px; font-size: 14px; line-height: 1.55; }
+.live-connection { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #f3f6fa; border: 1px solid #dfe6ef; padding: 12px 14px; border-radius: 8px; font-size: 13px; }
+.live-connection p { margin: 0; }
+.live-connection .button { flex: 0 0 auto; min-height: 34px; padding: 7px 12px; }
+.live-error { margin: 14px 0; padding: 12px 14px; color: #a12c25; background: #fff0ee; border: 1px solid #efc3be; border-radius: 8px; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.live-selected { display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: 10px; margin: 20px 0; }
+.live-selection-group { min-width: 0; padding: 12px; border: 1px solid #dce3ed; border-radius: 8px; }
+.live-selection-group h3 { font-size: 12px; margin: 0 0 9px; }
+.live-empty { margin: 0; font-size: 12px; color: #61718a; line-height: 1.5; }
+.live-artist-chip { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 7px 8px; background: #f1f8f4; border-radius: 5px; font-size: 12px; line-height: 1.4; overflow-wrap: anywhere; }
+.live-artist-chip + .live-artist-chip { margin-top: 6px; }
+.live-remove { padding: 1px 0; border: 0; background: none; color: #406653; font: inherit; font-size: 11px; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.live-remove:disabled { opacity: .5; cursor: wait; }
+.live-search-form { display: grid; grid-template-columns: 156px minmax(0, 1fr) auto; align-items: end; gap: 10px; }
+.live-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: 12px; font-weight: 600; }
+.live-field input, .live-field select { box-sizing: border-box; width: 100%; height: 43px; border: 1px solid #becbdb; border-radius: 6px; padding: 9px 10px; background: #fff; color: #101828; font: inherit; font-size: 13px; font-weight: 400; }
+.live-field input:disabled, .live-field select:disabled { background: #f4f6f9; color: #627087; }
+.live-search-form > .button { min-height: 43px; padding: 9px 13px; }
+.live-results { max-height: 260px; overflow: auto; margin-top: 12px; }
+.live-results-heading { margin: 0 0 8px; color: #61718a; font-size: 12px; }
+.live-search-result { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid #e7ebf1; }
+.live-search-result .button { flex: 0 0 auto; padding: 7px 10px; min-height: 34px; font-size: 12px; }
+.live-result-identity { min-width: 0; overflow-wrap: anywhere; }
+.live-result-identity > strong { font-size: 13px; font-weight: 600; }
+.live-identity-detail { margin-top: 4px; color: #71819a; font-size: 10px; }
+.live-identity-detail summary { cursor: pointer; }
+.live-identity-detail code { display: block; margin-top: 4px; font-size: 10px; }
+.live-comparison-note, .live-limits { color: #61718a; font-size: 12px; line-height: 1.5; }
+.live-comparison-note { margin: 14px 0 10px; }
+.live-progress { margin: 10px 0; color: #0c7347; font-size: 13px; line-height: 1.5; min-height: 19px; overflow-wrap: anywhere; }
+.live-limits { padding-top: 12px; border-top: 1px solid #e1e7ef; }
+.live-dialog-footer { display: flex; justify-content: flex-end; gap: 10px; padding-top: 8px; }
+@media (max-width: 650px) {
+  .live-dialog { padding: 20px; }
+  .live-selected { grid-template-columns: 1fr; }
+  .live-search-form { grid-template-columns: 1fr; }
+  .live-dialog-footer { flex-direction: column-reverse; }
+  .live-connection { align-items: flex-start; flex-direction: column; }
+  .live-dialog-header { gap: 10px; }
+  .live-close { min-height: 34px; padding: 7px 10px; }
+}
+@media print { .live-dialog { display: none !important; } }
