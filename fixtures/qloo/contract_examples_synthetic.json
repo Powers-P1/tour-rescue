@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "tour-rescue.qloo-contract-examples.v1",
+  "dataKind": "synthetic",
+  "metadata": {
+    "synthetic": true,
+    "no_raw_api_data": true,
+    "description": "Hand-written transport examples. All artists, scores and warnings are invented; no API request was made. The envelope/field paths follow Qloo's public heatmap guide and official harness 0.1.26 search reader."
+  },
+  "heatmap": {
+    "success": true,
+    "results": {
+      "heatmap": [
+        { "location": { "geohash": "u1x0e", "latitude": 53.55, "longitude": 10.0 }, "query": { "affinity": 0.2, "affinity_rank": 0.1, "popularity": 0.9 } },
+        { "location": { "geohash": "u1x0s", "latitude": 53.6, "longitude": 10.0 }, "query": { "affinity": 0.8, "affinity_rank": 0.8, "popularity": 0.1 } },
+        { "location": { "geohash": "u33dc", "latitude": 52.52, "longitude": 13.405 }, "query": { "affinity": 0.9, "affinity_rank": 0.99, "popularity": 0.4 } }
+      ]
+    },
+    "warnings": ["Invented provider-warning text that is not exported verbatim."]
+  },
+  "search": {
+    "success": true,
+    "results": [
+      { "entity_id": "11111111-1111-4111-8111-111111111111", "name": "The Fictional Tides", "types": ["urn:entity:artist"], "properties": { "description": "Invented extra data: excluded from the client projection." } }
+    ]
+  }
+}

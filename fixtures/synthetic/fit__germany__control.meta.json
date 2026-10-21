@@ -1,0 +1,15 @@
+{
+  "source": "synthetic",
+  "contract": "tour-rescue.control-profile.v1",
+  "request": {
+    "path": "UNKNOWN",
+    "query": {}
+  },
+  "recordedAt": null,
+  "httpStatus": null,
+  "latencyMs": null,
+  "warnings": [
+    "Hand-written control profile over the same frozen Germany cities.",
+    "Values demonstrate control-run arithmetic only; no Qloo response or real artist data is included."
+  ]
+}

@@ -2,6 +2,13 @@ name = "tour-rescue-api"
 main = "src/index.ts"
 compatibility_date = "2026-10-21"
 
+[vars]
+LIVE_ENABLED = "false"
+ALLOWED_ORIGIN = "https://tour-rescue.pages.dev"
+DAILY_LIVE_LIMIT = "30"
+DAILY_PER_IP_LIMIT = "10"
+QLOO_MONTHLY_LIMIT = "50000"
+
 [[durable_objects.bindings]]
 name = "UNIT_LEDGER"
 class_name = "UnitLedger"

@@ -22,7 +22,7 @@ For synthetic metadata, request path/status/latency/recording date are explicitl
 - `cities_de.json`: maintained 24-city reference catalogue.
 - `osrm_matrix_de.json`: frozen directed 24x24 road-model response with metre/second integer matrices, provenance and timestamp. `parseOsrmMatrix` preserves direction and represents paired null cells as unknown.
 - `qloo/heatmap_de_synthetic.json`: three invented artist vectors with synthetic/publication metadata. `cityId` is our annotation, not a Qloo response field. `parseSyntheticHeatmapFitInput` consumes only this explicitly synthetic format and applies the scenario 50/50 policy; it does not use `affinity_rank`, popularity or geohash to invent missing affinity.
-- `tests/helpers/scenarios.ts` assembles the five dates documented in `docs/SCENARIO_DE_2026.md` with fictional venues and booking facts for integration tests, without duplicating the maintained matrices. These tests exercise the actual frozen road snapshot and synthetic fit data with no network access.
+- `src/demo/germany.ts` assembles the five dates documented in `docs/SCENARIO_DE_2026.md` with fictional venues and booking facts. Both the Worker demo and `tests/helpers/scenarios.ts` use this builder without duplicating the maintained matrices. Tests exercise the actual frozen road snapshot and synthetic fit data with no network access.
 
 ## PR3 decision fixture
 
@@ -34,4 +34,11 @@ At minimum fit 20 and a 350,000 m extra-distance cap, the invented artist/bookin
 
 `schemaVersion` is `tour-rescue.fit-input.v1`. Each profile supplies its query ID, artist ID, role, model weight, candidate-set ID, provenance and exactly one observation for every frozen city. An observation is `{ "status": "known", "value": <finite number> }` or `{ "status": "unknown", "reason": "..." }` under `affinity`.
 
-Use **one comparable query vector per artist**, not independent per-city queries stitched together. The adapter's raw field mapping, locality resolution and any cell aggregation remain UNKNOWN. A recording reference must name the immutable evidence, recording time and normalization version; a query ID alone does not identify one response. Record timestamps in ISO 8601 with an explicit offset. PR4 will validate the live capture metadata and query contract.
+Use **one comparable query vector per artist**, not independent per-city queries stitched together. PR4 checks the documented `results.heatmap` contract and maps returned geohash cells using the maintained geometry fixture. It uses mean affinity per mapped city, then the core computes within-query percentiles. Missing city evidence stays UNKNOWN. Locality output remains unsupported. A recording reference must name the immutable evidence, recording time and normalization version; a query ID alone does not identify one response. Record timestamps in ISO 8601 with an explicit offset. The audit checks these links and exports only percentile surrogates, not provider scores or cells.
+
+## PR4 synthetic fixtures
+
+- `synthetic/fit__germany__control.json`: a different fictional target over exactly the same 24 cities. Comparison profiles, weights, road facts and preferences remain unchanged. Its invented ranking makes the baseline Nuremberg choice change to day off under the existing demo policy. This demonstrates the isolated control and stop-change report, not measured artist demand. The fixture contains no API recording and its metadata says so.
+- `qloo/contract_examples_synthetic.json`: hand-written search and geohash heatmap envelopes following the cited official contract sources. Names, UUIDs and scores are invented. These samples test shape validation, geometry mapping and transport error handling; they are not a live response or proof of complete Germany coverage.
+
+The existing demo has two comparison profiles; the live API supports up to three. Additional comparison evidence must be supplied explicitly, never generated to fill a UI slot.

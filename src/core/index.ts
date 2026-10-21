@@ -15,3 +15,6 @@ export { PolicyInputError, parseDecisionPolicy, recommendRepair } from './decisi
 export * from './fit-sensitivity.ts';
 export * from './breakpoint.ts';
 export * from './decision-analysis.ts';
+export * from './evidence-types.ts';
+export * from './audit-types.ts';
+export { AuditInputError, createDecisionAudit, replayDecisionAudit, evaluateZeroViolationsGate } from './audit.ts';
