@@ -77,3 +77,17 @@ Board **06** uses `recomputeResult` from the existing pure core when a user adju
 Board **07** shows three fictitious agency issues and a fourth issue-free sample tour. Owner assignment changes only in-memory display; opening the SOS / rescue cases returns to the already labelled existing demo flows. Local time zones are written explicitly. Share copies a **sample** overview rather than contacting the agency.
 
 **Deviations from boards 05–07:** the screenshot map has designed Erfurt/Dresden/Halle regions but the frozen core nominates Nuremberg/Frankfurt (as approved), so cities and relative evidence come from actual audit instead. Fan requests have no collector and therefore a truthful empty state rather than fake declarations. The map uses fixture geography, not a rendered basemap. The 06 simulation may be FAIL/UNKNOWN under actual rules rather than artificially PASS and does not assume a 5-hour limit (actual 6h). The 07 sample agency is intentionally not a real connected task system. No deploy switch before PR-D.
+
+## PR-D: public landing, judges page and Pages switch
+
+- **08 Landing** at `/`: calm graphite/amber hero, editorial production photography and mobile incident inset, separate core rescue and fictional local SOS, warm paper agency band. Actual option labels/check status and optional breakpoint are projected from `createLandingModel(createDemoResult())`.
+- **09 Judges** at `/judges/`: visible **Judges · Start here** utility header, one click to ready Leipzig example, computed three-way sample comparison, exact core evidence links, JSON audit export, separate implemented-vs-concept scope, public MIT source and Qloo+OSRM+agent limitations.
+- Public Pages command `npm run web:build` produces `web/dist` using **v2**, without editing `web/` source or Cloudflare settings. `npm run web2:build` produces `web2/dist`. `npm run web:legacy-build` preserves rollback.
+- Editorial photographs under the **Unsplash License**: behind-the-scenes film crew photo by Logan Ward (<https://unsplash.com/photos/EDZLyd6re_M>) and drummer adjusting a snare by Rogelio Gonzalez (<https://unsplash.com/photos/ZB-VdffP1UY>). These are contextual images; the exact ImageGen blue-hour touring van and repair shot are **not** available as clean licensed photo assets, so no false identity/location is implied.
+- Main navigation links are real `/app/`, `/judges/`, GitHub repository, docs and audit actions. No checkout, sign-up or outbound promoter email.
+- Existing root app hash links are redirected to the new ready demo. Public `#fan` opens the no-persistence sample artist page under `/app/#fan`.
+- The illustrated Berlin-Leipzig-[Nuremberg/Frankfurt]-Munich corridor uses audited core values for chosen city and all option statuses; its SVG is a labelled *schematic*, not routed geodata.
+
+### Design deviations
+
+The static boards illustrate Leipzig 12 November and Erfurt/Dresden/Halle with 5-hour limits. Per maintainer decision, the deployed application and public landing use **the unchanged validated core**: Leipzig 14 November, Nuremberg/Frankfurt/day off, six-hour limit. The marketing photo has backstage production crew instead of a specifically staged van/tour manager and a real drummer adjusting a snare instead of the fictional 22-inch kick repair; photo licensing and representation are honest. SOS, agency, plan, fan features remain sample/demo-only. AI/Worker provider access is not proved by build-only screenshots. The judges page never marks synthetic artist evidence as a live Qloo recording.

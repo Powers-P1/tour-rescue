@@ -131,3 +131,9 @@
  .taste-mobile-key span{display:inline-flex;align-items:center;gap:6px}
  .taste-mobile-key b{font-size:14px;color:var(--accent)}
 }
+
+/* PR-D: restore a visible Back control to desktop Audience, Agency and proposal. */
+.desktop-proposal-back,.feature-head-actions .feature-back{min-height:48px;color:var(--muted)}
+@media(min-width:980px){
+ .desktop-centered .desktop-proposal-back{display:inline-flex;margin-top:14px;margin-bottom:0}
+}

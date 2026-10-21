@@ -199,7 +199,7 @@ function ai(ctx: ExtensionContext): string {
     ? 'Saved, authored research transcript. No Claude, Qloo or web request is made.'
     : ctx.sourceMode === 'live'
       ? 'Live Qloo evidence will be used with the Worker. No message or booking is sent.'
-      : 'Run fresh Qloo first to enable genuine agent research.';
+      : 'ⓘ Unavailable - run fresh Qloo first to enable genuine agent research.';
   return frame('<div class="intro"><p class="eyebrow">AGENT HOOK · RESCUE RESEARCH</p>' +
     '<h1>Research the gap.</h1><p class="muted">' + esc(modeMessage) + '</p></div>' +
     '<div class="extension-facts"><div><span>Research mode</span><strong>' + (ctx.aiMode === 'demo' ? 'Saved synthetic transcript' : 'Live Claude via Worker') + '</strong></div></div>' +

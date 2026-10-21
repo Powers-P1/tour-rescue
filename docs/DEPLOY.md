@@ -121,3 +121,27 @@ The agent has six Messages requests, 8,000 cumulative output tokens, 24 client t
 ## Platform budgets
 
 Cloudflare documents separate [Worker limits](https://developers.cloudflare.com/workers/platform/limits/) and [Durable Object limits](https://developers.cloudflare.com/durable-objects/platform/limits/). The free outer Worker has a 10 ms CPU budget; putting core calculation inside the DO avoids depending on that small budget. SQLite-backed DOs are the backend supported on the free plan. The private cache and small demo memoization reduce repeated provider and computation work, but provider quotas do not exempt requests from Cloudflare platform limits. Local smoke checks establish runtime compatibility, not measured production capacity.
+
+## Front v2 deployment switch (PR-D)
+
+The existing Cloudflare Pages Git integration requires **no dashboard configuration change**. From PR-D onward, the repository-level `npm run web:build` builds the **new** `web2/` frontend and emits the same physical **`web/dist`** directory the Pages project already uses. The old source `web/` is preserved for rollback and can be built with `npm run web:legacy-build` (this overwrites `web/dist` locally, so rebuild v2 before deploy). `npm run web2:build` still makes an isolated `web2/dist` local preview.
+
+The v2 output has `/index.html` (product landing, board 08), `/app/index.html` (interactive Tour Rescue), `/judges/index.html` (judges page, board 09) and a strict `404.html`. All pages share the graphite/amber tokens. The judges header explicitly says **Judges · Start here** above the fold. Primary judge CTA opens `/app/#rescue` (precomputed synthetic decision); live Qloo/AI research remains a separate user action. The default landing and judges pages compute the synthetic decision directly from the maintained core; no provider request is made just to load either page.
+
+The Worker URL/CORS origin, secrets, Durable Object, quota limits and live switches **do not change** during the front-end switch. The original Cloudflare Pages origin (`https://tour-rescue.pages.dev`) remains the origin required in `ALLOWED_ORIGIN`. `PUBLIC_WORKER_ORIGIN` is still a public origin, never an API key. New CSP allows Google Fonts and two explicitly attributed Unsplash editorial photographs; no external fonts/photo is required for the app core to function.
+
+**Manual deployment (only after review/merge and maintainer authorisation):**
+
+```sh
+npm ci
+npm run check
+npm run web:build
+npm run web:preview
+# Inspect /, /judges/, /app/#rescue in local preview.
+npx wrangler pages deploy web/dist --project-name tour-rescue --branch main
+```
+
+Building or merging the PR does **not** itself call the deployment command. The existing Pages project's connected-Git deployment may deploy on a main push if enabled, so maintainers should review that setting before merging. Do not claim public v2 availability until a hosted smoke test confirms it. For rollback, restore the previous package build command to `node web/build.mjs` and redeploy.
+
+### Screenshot evidence
+The `visual-v2.yml` workflow builds the actual `web/dist` output, captures desktop/mobile screenshots from a local static preview with Playwright, and uploads an Actions artifact called `tour-rescue-v2-screenshots`. It does not perform Cloudflare production deployment. The capture script also checks for console/CSP errors, horizontal overflow and duplicate IDs at the specified viewports.

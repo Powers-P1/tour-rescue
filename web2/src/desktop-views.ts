@@ -44,7 +44,9 @@ const status=(v:'PASS'|'FAIL'|'UNKNOWN')=>'<span class="status status-'+
 const fallback=(text:string)=>'<p class="tiny-label">ⓘ '+esc(text)+'</p>';
 function titleRow(title:string,desc:string,badge:string,actionHtml=''):string{
  return '<header class="feature-header"><div><h1>'+esc(title)+'</h1><p class="muted">'+esc(desc)+'</p></div>'+
-   '<div class="feature-head-actions"><span class="status">'+esc(badge)+'</span>'+actionHtml+'</div></header>';
+   '<div class="feature-head-actions"><span class="status">'+esc(badge)+'</span>'+
+    '<button type="button" class="text-button feature-back" data-action="feature-back">← Back</button>'+
+    actionHtml+'</div></header>';
 }
 const project=(lon:number,lat:number):readonly[number,number]=>[
   Math.round(60+(lon-5.5)/10*530),Math.round(42+(55.2-lat)/8.2*405),

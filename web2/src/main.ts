@@ -370,7 +370,8 @@ function desktopInner(): string {
   return '<div class="desktop-centered"><div class="desktop-mini-header"><strong>' + HTML(projection.title) +
     '</strong><span>' + badge(projection.mode === 'demo' ? 'Sample scenario' : 'Live Qloo taste · sample tour') + '</span></div>' +
     (isExtensionScreen(screen) ? renderExtension(screen, extensionContext())
-      : screen === 'options' ? shortlist() : screen === 'detail' ? details() : screen === 'draft' ? draft() :
+      : screen === 'options' ? shortlist() : screen === 'detail' ? details() :
+        screen === 'draft' ? '<button type="button" class="text-button desktop-proposal-back" data-action="back">← Back to checked route</button>'+draft() :
       screen === 'crew' ? crew() : unbuilt()) + '</div>';
 }
 function liveDialog(): string {
@@ -812,7 +813,7 @@ root!.addEventListener('click', async event => {
     case 'concept-audience': openAudience(); break;
     case 'concept-agency': openAgency(); break;
     case 'open-sim': openSimulation(); break;
-    case 'feature-back': routeHub(); break;
+    case 'feature-back': screen === 'agency' ? goHome() : routeHub(); break;
     case 'audience-qloo': audienceSource='qloo';render();break;
     case 'audience-fans': audienceSource='fans';render();break;
     case 'audience-select':
@@ -1030,10 +1031,17 @@ document.addEventListener('focusin', event => {
   const dialog = focusedDialog();
   if (dialog && event.target instanceof Node && !dialog.contains(event.target)) focusFirstHeading(dialog);
 });
-window.addEventListener('hashchange', () => {
-  if (window.location.hash === '#fan') screen = 'fan';
-  else if (screen === 'fan') screen = 'route';
+function followAppHash():void {
+  const hash=window.location.hash.slice(1);
+  if(hash==='fan'){screen='fan';render();return;}
+  if(hash==='rescue'||hash==='options'){incident=initialIncident();startRescue();return;}
+  if(hash==='agency'){openAgency();return;}
+  if(hash==='audience'){openAudience();return;}
+  if(hash==='simulation'){openSimulation();return;}
+  if(hash==='sos'){openSos();return;}
+  if(screen==='fan')screen='route';
   render();
-});
-// The old web/ shell and deployment remain unchanged until PR-D.
-render();
+}
+window.addEventListener('hashchange', followAppHash);
+// PR-D preserves the old web/ source and builds this app under /app/.
+followAppHash();

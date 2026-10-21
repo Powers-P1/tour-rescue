@@ -14,12 +14,13 @@
     "check": "npm run typecheck && npm test",
     "worker:dev": "wrangler dev --config worker/wrangler.toml",
     "worker:build": "wrangler deploy --dry-run --config worker/wrangler.toml --outdir dist/worker",
-    "web:build": "node web/build.mjs",
+    "web:build": "node web2/build.mjs --deploy",
     "web:dev": "npm run web:build && node web/serve.mjs",
-    "web:preview": "node web/serve.mjs",
+    "web:preview": "node web2/serve.mjs --deploy",
     "web2:build": "node web2/build.mjs",
     "web2:dev": "npm run web2:build && node web2/serve.mjs",
-    "web2:preview": "node web2/serve.mjs"
+    "web2:preview": "node web2/serve.mjs",
+    "web:legacy-build": "node web/build.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

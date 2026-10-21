@@ -142,3 +142,11 @@ The interface follows [docs/mockups](docs/mockups/README.md) with English copy a
 The Evidence view includes every comparison omission, all three options, the distinct control and the frozen city set. Tag Bridge requires matching returned tag IDs with provenance on both sides, is capped at three tags, and never enters scoring. Current API responses contain no verified tag evidence, so the card correctly displays **UNKNOWN** in demo and live. Raw Qloo responses are never included in the public fixture or browser bundle.
 
 Map context uses a small [Natural Earth](https://www.naturalearthdata.com/about/terms-of-use/) public-domain Germany outline and the maintained city coordinates. Connections are explicitly schematic; all road metrics come from OSRM. No map tile service or remote font is required. Every interactive screen supports keyboard navigation and responsive layouts; status text accompanies all status colours.
+
+## Front-end v2 (PR-D)
+
+The default Pages build now serves `web2/` through the existing `web/dist` output:
+`/` = new landing; `/judges/` = concise Qloo judges entry; `/app/` = the Tour Rescue workspace.
+Launch the ready rescue case at `/app/#rescue`. No sign-in or Qloo call is needed for the visibly synthetic saved demo. Fresh live artist evidence is an explicit, rate-limited action. `npm run web:build` is the Pages build; `npm run web2:build` targets the isolated preview; `npm run web:legacy-build` restores the previous frontend build locally if needed.
+
+The original `web/` files remain in the repository until post-launch acceptance. Review `docs/DEPLOY.md#front-v2-deployment-switch-pr-d` before any Cloudflare production deployment. Generated screenshots are uploaded as GitHub Actions artifacts, not substituted for manual reviewer confirmation. Public marketing uses two Unsplash-licensed editorial photos, credited in `web2/README.md`. The photo subjects are **not** claimed as the fictional Northbound band, supplier or tour manager.
