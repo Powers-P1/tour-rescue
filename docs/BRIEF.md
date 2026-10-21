@@ -9,6 +9,7 @@ Entry for the Qloo Agentic Hackathon 2026. A booker or tour manager has a confir
 - One region, one existing tour of 5 dates, one lost date, exactly 3 repair options.
 - Venue availability, capacity, fees and promoter terms are inputs supplied by the user or marked UNKNOWN. Qloo supplies only cultural fit.
 - If no option is feasible, the agent says so explicitly.
+- Promoter one-pager for the chosen option: a printable single A4 page that the booker sends to the venue or promoter. It is built in the browser (HTML print stylesheet; optional PNG export via canvas), with no server and no LLM. It shows the artist, proposed city and date, a venue placeholder, the fit index with the three comparison artists and a leave-one-out note, extra kilometres and drive time against the limit, constraint status (PASS, FAIL or UNKNOWN), top risks, data sources (Qloo taste data, OSRM) and a generation timestamp.
 
 ## Definitions
 
@@ -42,6 +43,7 @@ ChatGPT/Codex writes code via pull requests. The OK Agency side runs live Qloo p
 3. The audit JSON is downloadable from the UI.
 4. Zero violated constraints in every recommended option; infeasibility is reported honestly.
 5. Control run (different artist) and leave-one-artist-out are part of the audit.
+6. The promoter one-pager prints on one A4 page with every field listed in the MVP scope. Its constraint statuses match the audit, UNKNOWN is never shown as PASS, and no raw Qloo response data appears in it.
 
 ## 7-day plan
 

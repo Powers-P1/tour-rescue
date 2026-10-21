@@ -136,7 +136,7 @@ An LLM may summarize already computed evidence. It cannot invent entities, fill 
 | 2 | Runtime input validation, locked-date constraints, directed-road checks and exactly three repair options | Preserve every locked commitment; reject invalid inputs; keep failed and unknown checks distinct. Settle corridor and spacing policies. |
 | 3 | Explicit recommendation policy, bounded breakpoint and comparison-artist sensitivity engine | Report a witnessed one-assumption change or an honest bounded not-found/unknown result; preserve constraints, city set and omission provenance. |
 | 4 | Reproducible audit, different-target control run, sensitivity export, verified Qloo client and Worker | Logged parameters omit secrets; data provenance and unresolved checks survive export; limits and kill switch work. |
-| 5 | Front-end comparison, audit download and Cloudflare configuration | Usable responsive flow and labelled offline fallback; maintainers run live probes, review, deploy and merge. |
+| 5 | Front-end comparison, audit download, promoter one-pager (A4 print stylesheet, optional PNG export) and Cloudflare configuration | Usable responsive flow and labelled offline fallback; one-pager prints on one A4 page with constraint statuses matching the audit and no server or LLM; maintainers run live probes, review, deploy and merge. |
 
 The five PRs are reviewable increments within the brief's seven-day build window. Maintainers supply real Qloo recordings and the OSRM freeze, review the contract assumptions, and perform deployment. PR1 does not promise a live integration or a deployed service.
 
