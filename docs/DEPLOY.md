@@ -1,6 +1,6 @@
 # Deploy (Cloudflare free tier)
 
-`web/` contains the plain TypeScript/HTML/CSS Pages app. `npm run web:build` creates the deployable **`web/dist`** directory; no frontend runtime framework is required. The existing `worker/` supplies live decisions, a JSON audit and private state in the SQLite Durable Object. Deployment and secrets remain maintainer operations; building or opening this PR does not deploy anything.
+`web/` contains the plain TypeScript/HTML/CSS landing page and Pages app. `npm run web:build` creates the deployable **`web/dist`** directory; no frontend runtime framework is required. The existing `worker/` supplies live decisions, a JSON audit and private state in the SQLite Durable Object. Deployment and secrets remain maintainer operations; building or opening this PR does not deploy anything.
 
 ## Local checks
 
@@ -17,7 +17,11 @@ npm run worker:dev
 
 ## Pages build and local preview
 
-Open `http://localhost:4173` after `npm run web:preview`. `npm run web:dev` builds once and starts the same static preview; after edits, rebuild and reload. Demo is evaluated from the bundled synthetic fixtures and deterministic core in the browser. It needs no Worker, account, Qloo key, LLM or external font/map request. Hash routes `#route`, `#options`, `#breakpoint`, `#evidence`, `#audit` and `#promoter` keep direct links on the static Pages origin.
+Open `http://localhost:4173` for the landing page or `http://localhost:4173/app` for the app after `npm run web:preview`. `npm run web:dev` builds once and starts the same static preview; after edits, rebuild and reload. Both pages evaluate the bundled synthetic fixtures and deterministic core in the browser. They need no Worker, account, Qloo key, LLM or external font/map request. Loading the landing page does not initialize the app or contact providers.
+
+The build emits physical `index.html` and `app/index.html` pages, with absolute `/landing.js`, `/landing.css`, `/app.js` and `/app.css` asset paths. `/index.html` is a landing alias; `/app`, `/app/` and `/app/index.html` resolve to the app (Pages can canonicalize the index paths). A top-level `404.html` prevents unknown paths from falling back to the landing page as a single-page app. The build command, output directory and Worker configuration stay unchanged.
+
+App hash routes are `#route`, `#options`, `#breakpoint`, `#evidence`, `#audit`, `#promoter` and `#ai`. Old root links such as `/#breakpoint` redirect to the fixed same-origin `/app#breakpoint`; landing anchors such as `#how-it-works`, `#the-decision`, `#judges` and `#faq` stay on the landing. Compatibility redirects retain only a single supported `tour=start` or `tour=resume` query. A root URL with that explicit tour request and no recognized app hash opens `/app?tour=start#route` (or `resume`); arbitrary destinations and other query parameters are not forwarded.
 
 `PUBLIC_WORKER_ORIGIN` is the **public API origin**, not a secret. Its default is `https://tour-rescue-api.oli-struska.workers.dev`. To build against local development:
 
@@ -33,6 +37,21 @@ For Cloudflare Pages Git integration, use repository root, **build command `npm 
 The Live dialog checks `/health`, then searches only on explicit submission and calls `/api/live` after users select distinct artist identities. Each search and evaluation consumes an action; there is no invented remaining-quota counter. Disabled mode, network/CORS failures, 429 and HTTP200 results with UNKNOWN evidence stay visible. No live failure silently switches to demo. Local breakpoint adjustments reuse the accepted rank-only audit and preserve query acquisition timestamps; they spend no provider quota.
 
 The promoter view renders a single A4 sheet and exports a PNG through browser canvas. Print/Save PDF uses the browser print dialog (A4, portrait; disable browser headers/footers if enabled). The sheet states the selected option's own status, includes three comparator slots (UNKNOWN for absent slots), and labels all fixture booking facts as fictional. This is a proposal to investigate, not confirmation of venue availability. JSON audit and PNG downloads are generated in the browser; there is no document service.
+
+## Guided tour (PR7)
+
+**Start the guided tour** is available on the landing page, in its judges section and in the app. No coach marks open merely because a visitor loads a page or has saved progress. An explicit start/resume URL is consumed once and removed from the address bar. The six steps cover:
+
+1. The cancelled date and **Rescue this date**.
+2. The three options and PASS / FAIL / UNKNOWN checks.
+3. Setting the **additional-travel** limit to **354.1 km** and applying it. The exact core breakpoint is **354.097 km**, from a 350 km baseline; the daily-driving limit is unchanged.
+4. The map, leave-one-artist-out results and Tag Bridge.
+5. Audit JSON and the selected option's A4 / PNG promoter sheet.
+6. Optional **Rescue with AI (Pro)**, with saved demo research and no automatic live session.
+
+The nonmodal coach marks have keyboard-operable Back / Next / Finish, **Focus highlighted area**, and **Esc / Skip** at every step. The versioned localStorage key `tour-rescue:guided-tour:v1` stores only step and status, including completion; it stores no artist, audit, provider or comparison data. Blocked storage falls back to progress for the current page session. Resuming a paused guide still requires an explicit button or URL action.
+
+Starting within an existing app comparison keeps that workspace in memory, uses a separate synthetic demo for the guide, and restores the comparison and selected view on Skip or Finish. This snapshot does not survive a reload. Starting through the landing link keeps the explored demo on exit so the visitor can continue investigating it.
 
 ## Existing URLs and deploy commands
 

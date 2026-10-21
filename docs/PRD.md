@@ -138,7 +138,7 @@ The eventual public UI is static on Cloudflare Pages. The Worker bounds and vali
 
 Except in the AI Rescue mode (PR6), an LLM may only summarize already computed evidence. It cannot invent entities, fill missing values, decide whether constraints passed or change numeric results. A template summary provides the complete workflow without an LLM. In PR6 the LLM agent researches and proposes, but the deterministic checker and audit decide; PR4 exposes them as pure typed tools.
 
-## Six-PR roadmap
+## Seven-PR roadmap
 
 | PR | Deliverable | Acceptance boundary |
 |---|---|---|
@@ -148,6 +148,7 @@ Except in the AI Rescue mode (PR6), an LLM may only summarize already computed e
 | 4 | Reproducible audit, different-target control run, sensitivity export, verified Qloo client and Worker | Logged parameters omit secrets; data provenance and unresolved checks survive export; limits and kill switch work. |
 | 5 | Front-end comparison, independent fit/extra-distance axes, evidence cards, audit download, promoter one-pager (A4 print stylesheet, one page, optional browser canvas PNG) and Cloudflare Pages configuration | Usable responsive flow, labelled demo/live and offline-fallback state and a Tag Bridge with at most three sourced common tags or UNKNOWN; no tag bonus in ranking. One-pager uses the selected option and existing audit (artist, city/date, venue placeholder, fit, three comparison-artist slots and omission note, extra travel against limits, PASS/FAIL/UNKNOWN, risks, sources, timestamp) on one A4 page with statuses matching the audit; missing evidence stays UNKNOWN; no server rendering or LLM. Maintainers run live probes, review, deploy and merge. |
 | 6 | AI Rescue mode (Pro tier) | Agent (Claude Sonnet 5.5 via Worker, key as secret `ANTHROPIC_API_KEY`; premium may use Claude Opus 5.5) with tools: Qloo fit data, OSRM matrix, web search/fetch, deterministic constraint checker, audit generator. Agent proposes options with evidence and links; every option validated PASS/FAIL/UNKNOWN by the checker; breakpoints deterministic; audit records sources. Demo: limited live sessions per day with saved transcripts; product: paid tier. The agent can never set a constraint to PASS. |
+| 7 | Landing page at `/`, app at `/app`, and a six-step guided tour | Same Pages build; responsive English copy; demo table and exact breakpoint computed from the existing core; synthetic taste and recorded-road disclosures. Explicit start/resume, keyboard controls, Esc / Skip, local progress/completion and restoration of an existing app comparison after leaving the temporary demo. |
 
 These are logical delivery increments, not GitHub pull-request numbers. The promoter sheet follows the comparison front end so it can reuse the selected option and the audit without delaying PR4. Maintainers supply private Qloo probes and the OSRM freeze, review contract assumptions, configure secrets, deploy and merge. No implementation PR claims a live probe or deployment that has not been performed.
 
@@ -156,6 +157,16 @@ These are logical delivery increments, not GitHub pull-request numbers. The prom
 The implemented **AI Rescue (Pro)** view researches a private server-recorded live Qloo context with the exact `claude-sonnet-5-5` model, or replays one of two explicitly authored synthetic transcripts without provider calls. It proposes 2–4 replacement/detour leads; each is deterministically checked and requires explicit acceptance to replace the corresponding comparison card. Day off, the frozen city set, directed road evidence and four locked shows stay fixed. Public venue research leaves booking facts UNKNOWN. An incomplete AI run cannot be accepted.
 
 Research sources and acceptance history use a separate versioned envelope around the existing decision audit. The agent streams public tool summaries, has persistent daily session limits and bounded steps/output tokens/web calls/time. Exact contracts, limits and the unverified live-provider boundary are specified in [AI_RESCUE](AI_RESCUE.md). “Pro” names the proposed tier; billing is outside this PR.
+
+## PR7 landing and guided tour boundary
+
+The landing follows `docs/mockups/landing-v1.webp`: the lost-show problem, three-step workflow, decision table, breakpoint, evidence, judges' challenge, FAQ and demo links. Its route, option values, statuses and breakpoint are projected from the same frozen demo evaluation used by the app. The table distinguishes feasibility from preference gates and preserves N/A for day-off fit and UNKNOWN for missing evidence. The FAQ states that taste profiles and booking facts are synthetic, the OSRM matrix is recorded, live Qloo runs through the Worker, and fit is a relative taste index rather than a ticket forecast.
+
+The showcased reversal raises only the extra-distance cap from **350,000 m to 354,097 m**, switching Nuremberg to Frankfurt. The guide asks users to apply **354.1 km**, just above that exact boundary. Neither the landing nor guide represents this as a daily-driving-limit breakpoint. If the computed result is unknown or no reversal exists in the checked range, the presentation must preserve that outcome.
+
+The six coach marks cover the cancelled date, three options, extra-distance what-if, evidence, audit/promoter exports and optional AI research. They require explicit start/resume from the landing or app, support keyboard navigation and Esc / Skip, and store only versioned progress/completion in localStorage. An app-initiated guide uses a temporary synthetic workspace and restores the existing comparison on Skip or Finish; a landing-initiated guide keeps the explored demo open. Neither starts paid research automatically.
+
+Both entry points build to `web/dist` without new runtime libraries. App aliases and old root hash links remain supported; unknown paths return a static 404. Routing and storage details are in [DEPLOY](DEPLOY.md). PR7 does not change the deterministic policy, Worker secrets or AI limits.
 
 ## Synthetic scenario
 

@@ -12,7 +12,7 @@ The core is deterministic (pure TypeScript functions). The demo, live Qloo flow,
 
 - [docs/BRIEF.md](docs/BRIEF.md): product brief, scope, architecture, acceptance criteria, plan
 - [docs/QLOO_NOTES.md](docs/QLOO_NOTES.md): what is confirmed about the Qloo API, and what is still unknown
-- [docs/PRD.md](docs/PRD.md): domain decisions, fit formula, acceptance boundaries and six-PR roadmap
+- [docs/PRD.md](docs/PRD.md): domain decisions, fit formula, acceptance boundaries and seven-PR roadmap
 - [docs/API.md](docs/API.md): demo/live requests, audit replay and error semantics
 - [docs/DEPLOY.md](docs/DEPLOY.md): Worker configuration, private quotas/cache and maintainer deployment commands
 - [docs/AI_RESCUE.md](docs/AI_RESCUE.md): agent tools, source provenance, token/session bounds and AI audit contract
@@ -33,9 +33,11 @@ npm run web:build
 npm run web:preview
 ```
 
-`check` runs strict TypeScript checking for the core, Worker and browser, plus Node's built-in test runner. Tests use synthetic fixtures and injected HTTP/storage doubles; they need no Qloo key, Cloudflare account or LLM. There are no core or frontend runtime dependencies. `web:build` bundles the plain TypeScript app into `web/dist` with esbuild. GitHub Actions runs the checks, Pages build and `worker:build` (Wrangler **without deploying**). `worker:dev` starts the optional local Worker and SQLite Durable Object.
+`check` runs strict TypeScript checking for the core, Worker and browser, plus Node's built-in test runner. Tests use synthetic fixtures and injected HTTP/storage doubles; they need no Qloo key, Cloudflare account or LLM. There are no core or frontend runtime dependencies. `web:build` bundles the plain TypeScript landing page and app into `web/dist` with esbuild. GitHub Actions runs the checks, Pages build and `worker:build` (Wrangler **without deploying**). `worker:dev` starts the optional local Worker and SQLite Durable Object.
 
-Open **`http://localhost:4173`** for the five-screen demo: Route, Options, Breakpoint, Evidence and Audit. It runs the bundled synthetic fixture locally and makes no provider request. Select an option and open its **Promoter sheet** for A4 print/Save PDF or a canvas PNG download. Demo includes two comparison artists; the third sheet slot is explicitly UNKNOWN.
+Open **`http://localhost:4173`** for the landing page, or **`http://localhost:4173/app`** for the five-screen demo: Route, Options, Breakpoint, Evidence and Audit. Both evaluate the bundled synthetic fixture locally without a provider request. The landing table and exact **350 → 354.097 km** breakpoint come from the same core result as the app; this changes the extra-distance preference, not the daily-driving limit. Existing root hash links such as `/#options` forward to `/app#options`. Select an option and open its **Promoter sheet** for A4 print/Save PDF or a canvas PNG download. Demo includes two comparison artists; the third sheet slot is explicitly UNKNOWN.
+
+Choose **Start the guided tour** on the landing page, in its judges section or in the app for six steps: cancelled date, option checks, the 354.1 km what-if, evidence, exports and optional AI research. It starts only on an explicit action, supports keyboard controls and **Esc / Skip**, and saves progress/completion in localStorage. Starting inside the app uses a temporary synthetic demo and restores the previous comparison on Skip or Finish; starting from the landing page leaves the explored demo open. See [DEPLOY](docs/DEPLOY.md#guided-tour-pr7) for storage and routing details.
 
 **Rescue with AI (Pro)** opens two saved synthetic research transcripts without a key or network request. Live AI starts from a server-recorded live Qloo result, streams tool progress, and proposes 2–4 evidence-linked options. Accept a lead to replace its A/B comparison card and recalculate constraints, breakpoints and the audit. Researched venue availability and fees remain UNKNOWN. Saved demo transcripts are authored examples, not claimed recordings of Claude calls.
 
@@ -53,7 +55,7 @@ src/ai/          Pure proposal tools, AI evidence contracts and synthetic transc
 src/worker/      Pointer to the runtime implementation under worker/
 src/web/         Pointer to the implemented frontend under web/
 worker/         Edge API, SQLite UnitLedger, persistent quotas and private cache
-web/            Plain TS app, browser models, SVG visuals, A4/PNG sheet and build
+web/            Plain TS landing, app, guided tour, SVG visuals, A4/PNG sheet and build
 web/dist/       Generated static Pages output (ignored by git)
 fixtures/       Synthetic Qloo examples and a maintained OSRM Germany snapshot
 tests/          Offline arithmetic, invariance and contract checks

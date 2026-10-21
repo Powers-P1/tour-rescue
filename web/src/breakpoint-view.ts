@@ -7,6 +7,10 @@ import { formatDistance, formatFit, formatMoney, optionTitle, recommendedSummary
 // UI selection survives a new immutable result render; it never enters the score or audit.
 let selectedAxis: NumericBreakpointParameter = 'maxAdditionalDistanceMetres';
 
+/** Preserve the user's selected tab around the isolated guided demo. */
+export const getBreakpointAxis = (): NumericBreakpointParameter => selectedAxis;
+export function setBreakpointAxis(parameter: NumericBreakpointParameter): void { selectedAxis = parameter; }
+
 const labels: Record<NumericBreakpointParameter, { title: string; unit: string; description: string }> = {
   maxAdditionalDistanceMetres: {
     title: 'Extra distance cap', unit: 'metres',
@@ -110,6 +114,7 @@ export function renderBreakpointView(
     panel.append(intro);
 
     const controls = element('div', 'bp-controls');
+    if (axis.parameter === 'maxAdditionalDistanceMetres') controls.dataset.tour = 'breakpoint-limit';
     const currentKnown = currentScalar.status === 'known';
     let draft = currentKnown ? currentScalar.value : axis.range.minimum;
     const draftHeading = element('div', 'bp-draft-heading');

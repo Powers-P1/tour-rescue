@@ -5,6 +5,7 @@ import './evidence.css';
 import './breakpoint.css';
 import './live-dialog.css';
 import './ai.css';
+import './guided-tour.css';
 import { createDemoResult, recomputeResult } from './data.ts';
 import type { ApiDecisionResult, DecisionChanges } from './data.ts';
 import { cancelledShow, decisionStatus, fitDisplay, formatDate, formatDistance, formatDuration,
@@ -13,10 +14,13 @@ import { cancelledShow, decisionStatus, fitDisplay, formatDate, formatDistance, 
 import { announce, badge, button, downloadJson, el, icon } from './dom.ts';
 import { renderRouteMap, renderFitScatter } from './visuals.ts';
 import { renderEvidence, renderAudit } from './evidence.ts';
-import { renderBreakpointView } from './breakpoint-view.ts';
+import { getBreakpointAxis, renderBreakpointView, setBreakpointAxis } from './breakpoint-view.ts';
 import { renderPromoterSheet, downloadPromoterPng } from './promoter.ts';
 import { openLiveDialog } from './live-dialog.ts';
 import { createAiRescueView } from './ai-view.ts';
+import { createGuidedTour, TOUR_STEPS } from './guided-tour.ts';
+import type { TourStepIndex } from './guided-tour.ts';
+import { guidedTourRequest } from './site-routing.ts';
 import { acceptAiProposal, createAiAuditEnvelope, safeAiSourceUrl } from '../../src/ai/tools.ts';
 import type { AiAcceptance, AiSessionResult, AiValidatedProposal } from '../../src/ai/types.ts';
 import type { ConstraintCheck } from '../../src/core/travel-constraints.ts';
@@ -39,6 +43,83 @@ let aiView: ReturnType<typeof createAiRescueView> | undefined;
 let aiSession: AiSessionResult | undefined;
 let aiAcceptances: AiAcceptance[] = [];
 const acceptedSessions = new Map<string, AiSessionResult>();
+let guidedTour: ReturnType<typeof createGuidedTour> | undefined;
+let preserveGuideWorkspace = true;
+interface GuideWorkspace {
+  readonly baseline: ApiDecisionResult;
+  readonly current: ApiDecisionResult;
+  readonly selectedId: string;
+  readonly page: Page;
+  readonly breakpointAxis: ReturnType<typeof getBreakpointAxis>;
+  readonly liveBaseRunId: string | undefined;
+  readonly aiView: ReturnType<typeof createAiRescueView> | undefined;
+  readonly aiSession: AiSessionResult | undefined;
+  readonly aiAcceptances: AiAcceptance[];
+  readonly acceptedSessions: readonly (readonly [string, AiSessionResult])[];
+}
+let guideWorkspace: GuideWorkspace | undefined;
+
+/** The walkthrough gets a temporary demo; an existing live/AI comparison stays in memory. */
+function beginGuidedWorkspace(): void {
+  guideWorkspace = preserveGuideWorkspace ? {
+    baseline, current, selectedId, page: page(), breakpointAxis: getBreakpointAxis(),
+    liveBaseRunId, aiView, aiSession, aiAcceptances, acceptedSessions: [...acceptedSessions],
+  } : undefined;
+  decisionRevision += 1;
+  busy = false;
+  app.removeAttribute('aria-busy');
+  baseline = createDemoResult();
+  current = baseline;
+  selectedId = selectedRecommendation(current)?.id ?? current.audit.analysis.repairs.options[0]?.id ?? '';
+  liveBaseRunId = undefined;
+  aiView = undefined;
+  aiSession = undefined;
+  aiAcceptances = [];
+  acceptedSessions.clear();
+  setBreakpointAxis('maxAdditionalDistanceMetres');
+}
+
+function finishGuidedWorkspace(completed: boolean): void {
+  const previous = guideWorkspace;
+  guideWorkspace = undefined;
+  preserveGuideWorkspace = true;
+  decisionRevision += 1;
+  busy = false;
+  app.removeAttribute('aria-busy');
+  if (previous) {
+    aiView?.dispose();
+    baseline = previous.baseline;
+    current = previous.current;
+    selectedId = previous.selectedId;
+    liveBaseRunId = previous.liveBaseRunId;
+    aiView = previous.aiView;
+    aiSession = previous.aiSession;
+    aiAcceptances = previous.aiAcceptances;
+    acceptedSessions.clear();
+    previous.acceptedSessions.forEach(([id, session]) => acceptedSessions.set(id, session));
+    setBreakpointAxis(previous.breakpointAxis);
+    const url = new URL(location.href);
+    url.hash = previous.page;
+    history.replaceState(history.state, '', url);
+  }
+  render(true);
+  announce(`${completed ? 'Guided tour completed.' : 'Guided tour paused.'}${previous ? ' Your previous comparison has been restored.' : ''}`);
+}
+
+function guideStepForPage(destination: Page): TourStepIndex {
+  return destination === 'promoter' ? 4
+    : Math.max(0, TOUR_STEPS.findIndex(step => step.page === destination)) as TourStepIndex;
+}
+
+function navigateGuide(step: TourStepIndex): void {
+  if (step === 2) setBreakpointAxis('maxAdditionalDistanceMetres');
+  const url = new URL(location.href);
+  // The promoter sheet and the audit share the export step. Do not send a
+  // user who explicitly opened the sheet back to the audit during step sync.
+  url.hash = step === 4 && page() === 'promoter' ? 'promoter' : TOUR_STEPS[step].page;
+  history.replaceState(history.state, '', url);
+  render(true);
+}
 
 function page(): Page {
   const value = location.hash.slice(1);
@@ -46,6 +127,10 @@ function page(): Page {
 }
 
 function navigate(destination: Page): void {
+  if (guidedTour?.isActive() && destination !== 'promoter') {
+    const step = guideStepForPage(destination);
+    if (guidedTour.getProgress().step !== step) { guidedTour.goTo(step); return; }
+  }
   if (page() === destination) { render(true); return; }
   location.hash = destination;
 }
@@ -60,6 +145,7 @@ function hasUsableFit(): boolean {
 }
 
 function useResult(result: ApiDecisionResult): void {
+  if (guidedTour?.isActive()) guidedTour.skip();
   decisionRevision += 1;
   busy = false;
   app.removeAttribute('aria-busy');
@@ -109,7 +195,10 @@ function aiScreen(): HTMLElement {
     workerOrigin: __WORKER_ORIGIN__, getCurrentResult: () => current,
     getLiveBaseRunId: () => liveBaseRunId,
     onAccept: acceptResearch,
-    onStartLiveSetup: () => openLiveDialog(__WORKER_ORIGIN__, current, useResult),
+    onStartLiveSetup: () => {
+      if (guidedTour?.isActive()) guidedTour.skip();
+      openLiveDialog(__WORKER_ORIGIN__, current, useResult);
+    },
   });
   aiView.refresh();
   return aiView.element;
@@ -162,10 +251,20 @@ function header(): HTMLElement {
   const mode = el('div', 'mode-controls');
   const modeLabel = badge(current.mode === 'demo' ? 'unknown' : 'pass', current.mode === 'demo' ? 'DEMO' : 'LIVE QLOO');
   const live = button('Try live', () => openLiveDialog(__WORKER_ORIGIN__, current, useResult), 'live-button');
+  live.disabled = guidedTour?.isActive() ?? false;
   live.prepend(el('span', 'live-dot'));
   const ai = button('Rescue with AI (Pro)', () => navigate(page() === 'ai' ? 'options' : 'ai'), 'ai-mode-button');
   ai.setAttribute('aria-pressed', String(page() === 'ai'));
-  mode.append(modeLabel, live, ai, el('span', 'mode-note', 'Daily limits apply'));
+  ai.dataset.tour = 'ai';
+  const guide = button('Start the guided tour', () => {
+    preserveGuideWorkspace = true;
+    const progress = guidedTour?.getProgress();
+    if (progress && (progress.status === 'paused' || progress.status === 'in-progress')) guidedTour?.resume(guide);
+    else guidedTour?.start(guide);
+  }, 'guide-start-button');
+  guide.disabled = busy || (guidedTour?.isActive() ?? false);
+  guide.title = 'Explore a temporary synthetic demo; your comparison is restored when you leave the tour.';
+  mode.append(modeLabel, live, ai, guide, el('span', 'mode-note', 'Daily limits apply'));
   node.append(brand, nav, mode);
   return node;
 }
@@ -185,7 +284,10 @@ function provenanceNote(): HTMLElement {
   note.append(el('span', '', current.mode === 'demo'
     ? 'Synthetic taste data and fictional bookings. Recorded OSRM road snapshot. No live requests.'
     : `${hasUsableFit() ? 'Live Qloo fit available.' : 'Live Qloo attempt; cultural-fit evidence UNKNOWN. See the audit.'} ${aiAcceptances.length ? 'Fictional Germany tour. Researched venues remain unconfirmed; inspect the source links and UNKNOWN checks.' : 'The Germany route and venue facts are still fictional; venue availability is not verified.'}`));
-  if (current.mode === 'live') note.append(button('Return to demo', () => useResult(createDemoResult()), 'text-button'));
+  if (guidedTour?.isActive()) note.append(el('span', 'guide-context-note', guideWorkspace
+    ? 'Guided demo: your previous comparison returns when you finish or skip.'
+    : 'Guided demo: these changes use synthetic taste evidence and no provider calls.'));
+  else if (current.mode === 'live') note.append(button('Return to demo', () => useResult(createDemoResult()), 'text-button'));
   return note;
 }
 
@@ -233,6 +335,7 @@ function routeScreen(): HTMLElement {
   for (const show of current.audit.replay.scenario.tour.shows) {
     const cancelled = show.status === 'cancelled';
     const row = el('li', `tour-stop ${cancelled ? 'is-cancelled' : ''}`);
+    if (cancelled) row.dataset.tour = 'cancelled-date';
     const date = el('div', 'stop-date');
     date.append(el('strong', '', formatDate(show.schedule.startsAt)), el('span', '',
       new Intl.DateTimeFormat('en-GB', { weekday: 'short', timeZone: show.schedule.startsAt.timeZone }).format(new Date(show.schedule.startsAt.iso))));
@@ -329,6 +432,7 @@ function optionCard(option: EvaluatedRepairOption): HTMLElement {
 
 function optionGrid(): HTMLElement {
   const grid = el('div', 'option-grid');
+  grid.dataset.tour = 'options';
   for (const option of current.audit.analysis.repairs.options) grid.append(optionCard(option));
   return grid;
 }
@@ -361,6 +465,9 @@ function optionsScreen(): HTMLElement {
 
 function applyChanges(changes: DecisionChanges): void {
   if (busy) return;
+  const activeControl = document.activeElement;
+  const focusSelector = ['.bp-exact-input', '.bp-apply', '.bp-witness-button']
+    .find(selector => activeControl?.matches(selector));
   busy = true;
   const revision = ++decisionRevision;
   const source = baseline;
@@ -371,7 +478,11 @@ function applyChanges(changes: DecisionChanges): void {
     try {
       current = recomputeResult(source, changes);
       selectedId = selectedRecommendation(current)?.id ?? selectedId;
+      busy = false;
       render();
+      if (focusSelector && !activeControl?.isConnected) {
+        app.querySelector<HTMLElement>(focusSelector)?.focus({ preventScroll: true });
+      }
       announce(`Decision recomputed: ${recommendedSummary(current)}.`);
     } catch (error) { showError(error); }
     finally { busy = false; app.removeAttribute('aria-busy'); }
@@ -399,6 +510,7 @@ function breakpointScreen(): HTMLElement {
 function footer(): HTMLElement {
   const node = el('footer', 'app-footer');
   const actions = el('div', 'footer-actions');
+  if (page() === 'audit') actions.dataset.tour = 'exports';
   if (page() === 'route') actions.append(button('Compare three options', () => navigate('options'), 'button button-primary'));
   if (page() === 'options') actions.append(button('Explore breakpoint', () => navigate('breakpoint'), 'button button-primary'));
   if (page() === 'breakpoint' || page() === 'evidence') actions.append(button('Back to options', () => navigate('options'), 'button button-secondary'));
@@ -418,6 +530,9 @@ function footer(): HTMLElement {
   const source = el('p', 'footer-source', `${current.mode === 'demo' ? 'Synthetic taste fixtures' : 'Taste requests: Qloo'} · Roads: OSRM snapshot`);
   source.append(el('span', '', current.mode === 'demo' ? 'Demo taste profiles are synthetic. No booking is made.'
     : `${hasUsableFit() ? 'Live fit available.' : 'Taste evidence UNKNOWN.'} ${aiAcceptances.length ? 'Researched booking facts remain UNKNOWN.' : 'Availability and fees remain fictional.'}`));
+  const home = el('a', 'app-home-link', 'About Tour Rescue');
+  home.href = '/';
+  source.append(home);
   node.append(actions, source);
   return node;
 }
@@ -449,7 +564,9 @@ function promoterScreen(): void {
   app.hidden = true;
   promoter.hidden = false;
   const toolbar = el('div', 'promoter-toolbar');
-  toolbar.append(button('Back to options', () => navigate('options'), 'button button-secondary'));
+  toolbar.dataset.tour = 'exports';
+  toolbar.append(button(guidedTour?.isActive() ? 'Back to audit' : 'Back to options',
+    () => navigate(guidedTour?.isActive() ? 'audit' : 'options'), 'button button-secondary'));
   const group = el('div', 'promoter-toolbar-actions');
   const selection = el('select');
   selection.setAttribute('aria-label', 'Promoter sheet option');
@@ -459,7 +576,7 @@ function promoterScreen(): void {
     item.selected = option.id === selectedId;
     selection.append(item);
   }
-  selection.addEventListener('change', () => { selectedId = selection.value; promoterScreen(); });
+  selection.addEventListener('change', () => { selectedId = selection.value; promoterScreen(); guidedTour?.refresh(); });
   const png = button('Download PNG', () => {
     png.disabled = true;
     png.textContent = 'Preparing PNG...';
@@ -474,7 +591,7 @@ function promoterScreen(): void {
 
 function render(focusHeading = false): void {
   if (!current) return;
-  if (page() === 'promoter') { promoterScreen(); if (focusHeading) window.scrollTo(0, 0); return; }
+  if (page() === 'promoter') { promoterScreen(); if (focusHeading) window.scrollTo(0, 0); guidedTour?.refresh(); return; }
   app.hidden = false;
   promoter.hidden = true;
   promoter.replaceChildren();
@@ -494,14 +611,38 @@ function render(focusHeading = false): void {
   app.replaceChildren(header(), main);
   document.title = `${active === 'ai' ? 'AI Rescue (Pro)' : labels[pages.indexOf(active as typeof pages[number])]} - Tour Rescue`;
   if (focusHeading) { window.scrollTo(0, 0); main.querySelector('h1')?.focus({ preventScroll: true }); }
+  guidedTour?.refresh();
 }
 
-window.addEventListener('hashchange', () => render(true));
+window.addEventListener('hashchange', () => {
+  if (guidedTour?.isActive()) {
+    const step = guideStepForPage(page());
+    if (guidedTour.getProgress().step !== step) { guidedTour.goTo(step); return; }
+  }
+  render(true);
+});
 try {
   baseline = createDemoResult();
   current = baseline;
   selectedId = selectedRecommendation(current)?.id ?? current.audit.analysis.repairs.options[0]?.id ?? '';
+  guidedTour = createGuidedTour({
+    navigate: navigateGuide,
+    getTarget: step => document.querySelector<HTMLElement>(`${page() === 'promoter' ? '#promoter-view' : '#app'} [data-tour="${TOUR_STEPS[step].target}"]`),
+    onStart: beginGuidedWorkspace,
+    onExit: finishGuidedWorkspace,
+    getReturnFocus: () => page() === 'promoter' ? promoter.querySelector<HTMLButtonElement>('button')
+      : app.querySelector<HTMLButtonElement>('.guide-start-button'),
+  });
   render();
+  const entry = new URL(location.href);
+  const tourIntent = guidedTourRequest(entry.search);
+  if (tourIntent === 'start' || tourIntent === 'resume') {
+    entry.searchParams.delete('tour');
+    history.replaceState(history.state, '', entry);
+    preserveGuideWorkspace = false;
+    if (tourIntent === 'resume') guidedTour.resume();
+    else guidedTour.start();
+  }
 } catch (error) {
   const failure = el('main', 'boot-state');
   failure.append(el('h1', '', 'The demo could not be evaluated.'), el('p', '', error instanceof Error ? error.message : 'Unexpected data error.'),
