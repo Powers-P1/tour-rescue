@@ -26,6 +26,8 @@ const built=await build({
     app:'web2/src/main.ts',
   },
   bundle:true, format:'esm',platform:'browser',target:['es2022'],
+  // Assets are copied explicitly into Pages root; esbuild must not resolve absolute public paths.
+  external:['/assets/*'],
   outdir, minify:true,metafile:true,legalComments:'eof',
   define:{__WORKER_ORIGIN__:JSON.stringify(origin.origin)},
 });
