@@ -188,7 +188,7 @@ try{
      action:document.activeElement?.getAttribute('data-action'),
      panelId:document.activeElement?.getAttribute('aria-controls'),
    }));
-   const chosen=page.locator('[data-action="'+nextAction+'"]');
+   const chosen=page.locator('[role="tab"][data-action="'+nextAction+'"]');
    if(active.action!==nextAction||!active.panelId||
      await chosen.getAttribute('aria-selected')!=='true'||
      await page.locator('[id="'+active.panelId+'"]').count()!==1)
