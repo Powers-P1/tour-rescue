@@ -10,6 +10,7 @@ Entry for the Qloo Agentic Hackathon 2026. A booker or tour manager has a confir
 - Venue availability, capacity, fees and promoter terms are inputs supplied by the user or marked UNKNOWN. Qloo supplies only cultural fit.
 - If no option is feasible, the agent says so explicitly.
 - Promoter one-pager for the chosen option: a printable single A4 page that the booker sends to the venue or promoter. It is built in the browser (HTML print stylesheet; optional PNG export via canvas), with no server and no LLM. It shows the artist, proposed city and date, a venue placeholder, the fit index with the three comparison artists and a leave-one-out note, extra kilometres and drive time against the limit, constraint status (PASS, FAIL or UNKNOWN), top risks, data sources (Qloo taste data, OSRM) and a generation timestamp.
+- Guided tour (decision by Damian 21.10): an in-app coach-marks tutorial with 6 steps: (1) cancelled date to Rescue; (2) compare the three options with PASS, FAIL or UNKNOWN; (3) overturn the recommendation by moving the travel limit to 354.1 km; (4) evidence; (5) download the audit JSON and the promoter one-pager; (6) optional Rescue with AI (Pro). It starts from the landing page and the "For hackathon judges" section and is skippable with Esc or Skip. Progress is kept in localStorage. No external libraries. Keyboard accessible. Copy in English.
 
 ## Definitions
 
@@ -44,6 +45,7 @@ ChatGPT/Codex writes code via pull requests. The OK Agency side runs live Qloo p
 4. Zero violated constraints in every recommended option; infeasibility is reported honestly.
 5. Control run (different artist) and leave-one-artist-out are part of the audit.
 6. The promoter one-pager prints on one A4 page with every field listed in the MVP scope. Its constraint statuses match the audit, UNKNOWN is never shown as PASS, and no raw Qloo response data appears in it.
+7. Guided tour: the six steps in MVP scope run from the landing page and the "For hackathon judges" section; Esc or Skip ends it at any step; progress persists in localStorage; no external library; fully keyboard operable; English copy.
 
 ## AI Rescue mode (Pro tier), PR6
 Principle: AI proposes, the deterministic core verifies. The constraint checker, breakpoints and audit stay deterministic; an agent does the research.
@@ -54,6 +56,11 @@ Principle: AI proposes, the deterministic core verifies. The constraint checker,
 - Guardrails: the agent cannot mark a constraint PASS (only the checker can); missing facts stay UNKNOWN; every claim carries a source link.
 - Demo: limited live sessions per day, saved transcripts for offline mode. Product: paid tier.
 - Plan: PR6 after PR5. PR4 exposes the checker and audit as pure typed tools for the agent.
+
+## PR plan
+
+- PR6: AI Rescue mode (see above), after PR5.
+- PR7: Landing page (StoryBrand narrative, `docs/mockups/landing-v1.webp`) as site index with the demo app behind the CTA.
 
 ## 7-day plan
 
