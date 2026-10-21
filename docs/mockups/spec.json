@@ -1,6 +1,5 @@
 {
   "project": "Tour Rescue",
-  "source": "User supplied Fable request in this chat,21Oct2026. No other Fable files or conversations accessed.",
   "output": "5desktop screens, mobile screen2, plus alternate no-breakpoint state of screen3",
   "mode": "Static imagegen visual mockups, not implemented interactive app",
   "fixture_disclaimer": "All venues, artist profiles, scores, route metrics, costs and API logs are synthetic demo examples. No actual Qloo or OSRM queries.",
@@ -86,6 +85,5 @@
     ],
     "remaining_dates_changed": false
   },
-  "immutable_footer": "dane o gustach: Qloo; przejazdy: OSRM; demo działa do16.11",
-  "user_geoapify_steering": "Work on Geoapify deferred until Codex usage limit renews; no project implementation now."
+  "immutable_footer": "dane o gustach: Qloo; przejazdy: OSRM; demo działa do16.11"
 }
