@@ -1,0 +1,13 @@
+{
+  "source": "synthetic",
+  "contract": "tour-rescue.decision-example.v1",
+  "request": { "path": "UNKNOWN", "query": {} },
+  "recordedAt": null,
+  "httpStatus": null,
+  "latencyMs": null,
+  "warnings": [
+    "Hand-written decision preferences and search ranges, not a Qloo response or measured commercial threshold.",
+    "Expected choices combine invented affinity and booking facts with the separately maintained frozen OSRM model.",
+    "Results illustrate arithmetic only and do not confirm real venue availability, demand or a booking."
+  ]
+}

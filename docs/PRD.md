@@ -83,9 +83,46 @@ Distance/time deltas use the **day-off route** (all four surviving shows) as bas
 
 The synthetic Germany integration uses the maintained 24-city road matrix and heatmap-shaped fixture. The synthetic adapter reads application-added `cityId` values, not geohash-to-city inference, and rejects inputs lacking explicit synthetic/publication flags. No raw Qloo data is added to the public repository. The original five-date Polish fixture remains deliberately sparse and unverified, so its feasibility is correctly unknown.
 
+## PR3 recommendation policy
+
+`evaluateTourDecision` returns both the original repair report and a separate decision report. The scenario entry still enforces target/comparison weights of 50/50. `recommendRepair` consumes a core-produced repair report and an explicit `tour-rescue.decision-policy.v1` policy; its consistency checks do not replace the scenario parser for untrusted inputs.
+
+The booker declares `minimumFitIndex` as an integer from 0 through 100 and `maxAdditionalDistanceMetres` as a nonnegative safe integer. A show must pass every original feasibility check, have fit greater than or equal to the minimum, and have additional metres less than or equal to the cap. Thresholds are inclusive. There is no conversion between fit and kilometres, hidden utility coefficient or default preference. A negative distance delta remains a saving and can pass a zero cap.
+
+Passing shows rank by fit descending, additional metres ascending, then Unicode code-point option-ID order. The last tie-break creates reproducibility, not a quality claim. Any otherwise viable UNKNOWN show blocks a recommendation, including when another show is known to pass. A proven failure excludes a show despite unrelated unknown evidence. Day off wins only if both shows are definitively excluded and its original constraints pass; its fit remains not applicable. If the fallback is unresolved, the result is `needs-evidence`; if all options fail, it is `no-feasible-option`. A failing day-off route does not veto an independently passing show.
+
+This is a policy for selecting the next option to investigate under declared inputs. The existing venue-fee-only budget scope and driving-model limits remain in force. Neither `recommended` nor PASS means the venue has agreed to a performance.
+
+## PR3 bounded breakpoints
+
+`analyzeNumericBreakpoints` accepts explicit bounds for three scalar axes: extra-distance cap, minimum fit and the existing venue-fee budget in its original currency. The `tour-rescue.breakpoint-ranges.v1` envelope requires all three `{ minimum, maximum }` ranges; known baselines must be inside them. Currency mismatch or an unknown budget is not silently resolved. No route, artist, city set, venue fact or second preference changes during a numeric counterfactual.
+
+Search domains are integer metres, integer fit points and integer minor units. This resolution is part of the contract: a continuous fit threshold has no smallest real increase above an inclusive boundary, so the engine does not invent an epsilon breakpoint. It preserves the fractional fit scores themselves.
+
+The `exact-critical-values-v1` method evaluates the baseline and range endpoints plus both sides of every gate: `distance - 1 / distance`, `floor(fit) / floor(fit) + 1`, and `fee - 1 / fee` for matching currencies. These values cover every decision-constant interval on each declared integer domain. The nearest reversing value is chosen within each axis; equal distances prefer the smaller counterfactual value. Metres, fit points and money are never compared as a common global minimum.
+
+Each axis records bounds, resolution, baseline, checked values and one of:
+
+- `found`: a different recommended option, or a known `recommendation-withdrawn` result. Its witness contains before/after values, signed delta and the complete resulting decision checks. If a closer or equally close counterfactual is unresolved, minimality is UNKNOWN even though the witness remains valid.
+- `not-found`: no reversal exists within the declared bounds and resolution, with no unresolved counterfactual. This makes no claim outside the searched range or about other assumptions.
+- `unknown`: an unresolved baseline/parameter or unresolved counterfactual prevents the applicable conclusion. Missing evidence never becomes a flip or proof of stability.
+- `not-applicable`: no option was recommended at the baseline, so there is no recommendation to reverse.
+
+Daily driving limits, market spacing, venue availability and target-artist identity are not searched by these three axes. Their checks remain fixed and visible. A result must always name its searched parameter and range.
+
+## PR3 comparison-artist sensitivity, ready for PR4
+
+`buildLeaveOneArtistOutInputs` and `computeLeaveOneArtistOutFits` omit each selected comparison artist once while retaining the target, frozen city universe and every surviving observation and provenance field. Survivor weights are divided by their actual sum; the scenario 50/50 rule is not reapplied inside an ablation. The before/after weights and removed query/artist IDs are recorded. These generic fit helpers still validate normalized inputs.
+
+`analyzeTourDecision` attaches each ablated fit report to the unchanged baseline routes and feasibility evidence, then recomputes preference checks and ranking. Omission outcomes distinguish retained recommendation, changed option, recommendation withdrawn, unresolved and not comparable. If the baseline needs evidence, dropping an incomplete artist may recover a recommendation, but cannot establish a reversal of a previously known decision.
+
+All requested omissions remain in the summary denominator. The retained-recommendation fraction is defined only for a nonempty set of wholly comparable runs; otherwise it is UNKNOWN. Target-only input is not applicable, not 100% stable. The fraction is an empirical property of these specified ablations, not a confidence interval or a probability of real-world success. PR4 will place this evidence in the downloadable audit and add the separate different-target control run.
+
+The Germany example uses the explicit synthetic policy fixture: minimum fit 20, extra-distance cap 350,000 m, and venue-fee budget EUR 1,000.00. Its baseline selects Nuremberg. Raising only the cap to 354,097 m changes the selection to Frankfurt; raising only the fit floor to 26 or lowering only the budget to EUR 499.99 selects day off. One of two comparison omissions retains the baseline. These results illustrate the policy with invented affinity and booking facts; they are not evidence of actual audience demand.
+
 ## Architecture and delivery boundaries
 
-The core is deterministic, dependency-light TypeScript with no network access. PR2 adds scenario validation, directed-road constraints and option evaluation. Later PRs add breakpoint search, audit generation and a thin server-side adapter for verified Qloo contracts. Maintainers supplied geometry-only cell-to-city mapping separately; the complete live normalization contract and verified scenario coverage remain **UNKNOWN**. Raw Qloo responses must not be published; public Qloo fixtures are synthetic.
+The core is deterministic, dependency-light TypeScript with no network access. It includes scenario validation, directed-road constraints, option evaluation, recommendation, bounded breakpoint search and comparison-artist sensitivity. Later PRs add audit export and a thin server-side adapter for verified Qloo contracts. Maintainers supplied geometry-only cell-to-city mapping separately; the complete live normalization contract and verified scenario coverage remain **UNKNOWN**. Raw Qloo responses must not be published; public Qloo fixtures are synthetic.
 
 The eventual public UI is static on Cloudflare Pages. A Worker owns the Qloo secret, bounded calls, per-IP limits, a daily cap, a kill switch and private response caching. Real response data must not be committed to the public repository. Public offline fixtures are hand-written and explicitly synthetic. The application must remain available free of charge without login through 16 November 2026.
 
@@ -97,8 +134,8 @@ An LLM may summarize already computed evidence. It cannot invent entities, fill 
 |---|---|---|
 | 1 | Repository skeleton, domain types, fit index, synthetic normalized scenario and focused offline tests | No network or key needed; synthetic provenance explicit; fit edge cases covered. No route-feasibility claim yet. |
 | 2 | Runtime input validation, locked-date constraints, directed-road checks and exactly three repair options | Preserve every locked commitment; reject invalid inputs; keep failed and unknown checks distinct. Settle corridor and spacing policies. |
-| 3 | Breakpoint and sensitivity engine | Report the bounded one-assumption change that flips the decision, or an honest none-found/unknown result. Use deterministic fixtures. |
-| 4 | Reproducible audit, control artist and leave-one-artist-out runs, verified Qloo client and Worker | Logged parameters omit secrets; data provenance and unresolved checks survive export; limits and kill switch work. |
+| 3 | Explicit recommendation policy, bounded breakpoint and comparison-artist sensitivity engine | Report a witnessed one-assumption change or an honest bounded not-found/unknown result; preserve constraints, city set and omission provenance. |
+| 4 | Reproducible audit, different-target control run, sensitivity export, verified Qloo client and Worker | Logged parameters omit secrets; data provenance and unresolved checks survive export; limits and kill switch work. |
 | 5 | Front-end comparison, audit download and Cloudflare configuration | Usable responsive flow and labelled offline fallback; maintainers run live probes, review, deploy and merge. |
 
 The five PRs are reviewable increments within the brief's seven-day build window. Maintainers supply real Qloo recordings and the OSRM freeze, review the contract assumptions, and perform deployment. PR1 does not promise a live integration or a deployed service.

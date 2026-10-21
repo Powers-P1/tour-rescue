@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "tour-rescue.decision-example.v1",
+  "dataKind": "synthetic",
+  "description": "Explicit demo preferences for the fictional Germany tour assembled by tests/helpers/scenarios.ts. These thresholds illustrate the decision rule; they are not measured Qloo demand, costs or a booking recommendation.",
+  "policy": {
+    "schemaVersion": "tour-rescue.decision-policy.v1",
+    "minimumFitIndex": 20,
+    "maxAdditionalDistanceMetres": 350000
+  },
+  "ranges": {
+    "schemaVersion": "tour-rescue.breakpoint-ranges.v1",
+    "maxAdditionalDistanceMetres": { "minimum": 0, "maximum": 500000 },
+    "minimumFitIndex": { "minimum": 0, "maximum": 100 },
+    "additionalBudgetMinorUnits": { "minimum": 0, "maximum": 150000 }
+  },
+  "expected": {
+    "recommendedOptionId": "replacement-nuremberg",
+    "distanceBreakpointMetres": 354097,
+    "distanceChangeMetres": 4097,
+    "distanceNextOptionId": "detour-frankfurt",
+    "fitFloorBreakpoint": 26,
+    "fitFloorNextOptionId": "day-off",
+    "venueBudgetBreakpointMinorUnits": 49999,
+    "venueBudgetCurrency": "EUR",
+    "venueBudgetNextOptionId": "day-off"
+  }
+}

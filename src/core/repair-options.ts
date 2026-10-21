@@ -176,7 +176,7 @@ export function evaluateRepairOptions(scenarioValue: unknown, fitValue?: unknown
       'Market spacing covers all retained show pairs and uses the smaller of both directed road distances.',
       'PASS concerns declared routing checks, date-specific availability and the venue-fee ceiling only; it is not a confirmed booking or a complete cost estimate.',
       'Capacity and promoter terms are retained as evidence; no attendance requirement or agreement is inferred.',
-      'Cultural fit and signed extra kilometres are independent; a day off has no fit score. No option is recommended by PR2.',
+      'Cultural fit and signed extra kilometres are independent; a day off has no fit score.',
     ],
   };
 }
