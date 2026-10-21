@@ -32,6 +32,7 @@ export interface DesktopViewContext {
   readonly assigningTask:'drum'|'leipzig'|'presale'|null;
   readonly proposedOwner:AgencyOwner;
   readonly agencyNotice:string;
+  readonly actionNotice:string;
 }
 const esc=(value:unknown)=>String(value??'').replace(/[&<>"']/g,c=>
   ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]??c);
@@ -94,19 +95,23 @@ function audience(ctx:DesktopViewContext):string{
    titleRow('Find your next audience.','Northbound · based on your selected taste references',
      isLive?'Live Qloo · sample tour':ctx.audience.source==='live-fit-unresolved'?'Live run · fit unknown':'Sample taste evidence',action('View sources →','audience-evidence'))+
    '<div class="feature-tabs" role="tablist" aria-label="Audience data source">'+
-   '<button role="tab" type="button" data-action="audience-qloo" aria-selected="'+mode+'">Cultural fit · Qloo</button>'+
-   '<button role="tab" type="button" data-action="audience-fans" aria-selected="'+(!mode)+'">Fan requests</button></div>'+
+   '<button id="audience-tab-qloo" role="tab" type="button" data-action="audience-qloo" aria-selected="'+mode+'" aria-controls="audience-panel-qloo" tabindex="'+(mode?'0':'-1')+'">Cultural fit · Qloo</button>'+
+   '<button id="audience-tab-fans" role="tab" type="button" data-action="audience-fans" aria-selected="'+(!mode)+'" aria-controls="audience-panel-fans" tabindex="'+(!mode?'0':'-1')+'">Fan requests</button></div>'+
    '<p class="audience-disclosure">'+(mode?'ⓘ Relative cultural affinity, not listener counts, ticket sales or predicted attendance.':
    'ⓘ Fan declarations would come from the separate voluntary fan service, never from Qloo.')+'</p>'+
+   (ctx.actionNotice?'<p class="feature-action-notice" role="status">'+esc(ctx.actionNotice)+'</p>':'')+
+   '<div id="audience-panel-'+(mode?'qloo':'fans')+'" role="tabpanel" tabindex="0" aria-labelledby="audience-tab-'+(mode?'qloo':'fans')+'">'+
    (mode?
    '<div class="audience-columns"><section><h2>Cultural fit by city</h2>'+tasteMap(ctx)+'</section>'+
-   '<section class="audience-picks"><h2>Worth a closer look.</h2><div role="radiogroup" aria-label="Cities for cultural-fit comparison">'+
+   '<section class="audience-picks"><h2>Worth a closer look.</h2><div id="audience-cities" role="radiogroup" aria-orientation="vertical" aria-label="Cities for cultural-fit comparison">'+
    places.map(city=>'<button type="button" role="radio" aria-checked="'+(city.cityId===selected.cityId)+'" data-action="audience-select" data-id="'+esc(city.cityId)+
-     '" class="audience-city'+(city.cityId===selected.cityId?' selected':'')+'"><strong>'+esc(city.name)+'</strong>'+
+     '" aria-controls="audience-city-detail" tabindex="'+(city.cityId===selected.cityId?'0':'-1')+'" class="audience-city'+(city.cityId===selected.cityId?' selected':'')+'"><strong>'+esc(city.name)+'</strong>'+
      '<span>'+esc(city.relativeLabel)+(city.routeOptionId?' · route nominated':' · taste lead only')+'</span>'+
      '<small>'+esc(audienceCityReason(city))+
      '</small></button>').join('')+'</div>'+
-   '<div class="audience-insight"><h3>What this tells you</h3><p>Where to investigate a show. Capacity, availability and travel still need independent checks.</p></div>'+
+   '<div id="audience-city-detail" class="audience-insight"><h3>What this tells you</h3>'+
+   '<p><strong>'+esc(selected.name)+':</strong> '+esc(audienceCityReason(selected))+'</p>'+
+   '<p>Where to investigate a show. Capacity, availability and travel still need independent checks.</p></div>'+
    action(selected.routeOptionId?'Try '+selected.name+' in a route →':'Route not checked for '+selected.name,
      'audience-try',true,!selected.routeOptionId)+
    action('Inspect the taste evidence →','audience-evidence')+
@@ -116,6 +121,7 @@ function audience(ctx:DesktopViewContext):string{
    '<p class="soft-status">? Collection, consent and aggregation - Unknown / To confirm</p>'+
    action('Preview the public fan page →','open-fan',true)+
    fallback('No individual location tracking and no invented fan counts. Qloo ranks remain unchanged.')+'</div>')+
+   '</div><div id="audience-panel-'+(mode?'fans':'qloo')+'" role="tabpanel" aria-labelledby="audience-tab-'+(mode?'fans':'qloo')+'" hidden></div>'+
    (ctx.audienceEvidenceOpen?'<div class="audience-evidence"><h3>Evidence provenance</h3><ul>'+
      ctx.projection.evidence.map(item=>'<li>'+esc(item)+'</li>').join('')+'</ul>'+action('Download audit JSON ↓','audit')+'</div>':'')+
    '</section>';
@@ -135,9 +141,10 @@ function simulation(ctx:DesktopViewContext):string{
    titleRow('What if: '+s.cityName+'.','Replace '+ctx.projection.cancelledCity+' on '+s.changedDate,'DRAFT SCENARIO',
      action('Close scenario →','sim-close'))+
    '<div class="feature-tabs" role="tablist" aria-label="Simulation scope">'+
-   '<button type="button" role="tab" data-action="sim-route-tab" aria-selected="'+(ctx.simulationTab==='route')+'">Route</button>'+
-   '<button type="button" role="tab" data-action="sim-budget-tab" aria-selected="'+(ctx.simulationTab==='budget')+'">Budget · ? Needs review</button></div>'+
+   '<button id="simulation-tab-route" type="button" role="tab" data-action="sim-route-tab" aria-selected="'+(ctx.simulationTab==='route')+'" aria-controls="simulation-panel-route" tabindex="'+(ctx.simulationTab==='route'?'0':'-1')+'">Route</button>'+
+   '<button id="simulation-tab-budget" type="button" role="tab" data-action="sim-budget-tab" aria-selected="'+(ctx.simulationTab==='budget')+'" aria-controls="simulation-panel-budget" tabindex="'+(ctx.simulationTab==='budget'?'0':'-1')+'">Budget · ? Needs review</button></div>'+
    '<p class="audience-disclosure">ⓘ Local draft only. The four confirmed shows and the original comparison remain unchanged.</p>'+
+   '<div id="simulation-panel-'+ctx.simulationTab+'" role="tabpanel" aria-labelledby="simulation-tab-'+ctx.simulationTab+'" tabindex="0">'+
    (ctx.simulationTab==='route'?
    '<div class="sim-columns"><section class="sim-itinerary"><h2>The proposed route</h2>'+
    '<p class="muted">Current plan: '+esc(s.baseline)+'</p>'+
@@ -159,7 +166,8 @@ function simulation(ctx:DesktopViewContext):string{
    '<div class="sim-distance-status"><p class="soft-status">'+status(s.checks[3]?.status??'UNKNOWN')+
     ' Extra-distance preference · current cap '+esc(formatExtraKm(s.maxAdditionalDistanceKm))+'</p>'+
     (s.checks[3] && s.checks[3].status!=='PASS'
-      ? '<p class="sim-failed-explanation" role="status">'+esc(s.checks[3].explanation)+'</p>':'')+'</div>'+
+      ? '<p class="sim-failed-explanation" role="status">'+esc(s.checks[3].explanation)+'</p>':'')+
+   (ctx.actionNotice?'<p class="feature-action-notice" role="status">'+esc(ctx.actionNotice)+'</p>':'')+'</div>'+
    '<div class="sim-edit"><label for="sim-cap">What if extra distance were allowed up to (km)?</label>'+
    '<input type="text" id="sim-cap" inputmode="decimal" autocomplete="off" spellcheck="false" value="'+
       esc(ctx.simulationCapDraft ?? String(s.maxAdditionalDistanceKm))+'">'+
@@ -178,6 +186,8 @@ function simulation(ctx:DesktopViewContext):string{
    '<div><strong>Attendance and settlement</strong><p>? Unknown / To confirm - not derivable from Qloo affinity</p></div></div>'+
    action('Review sample economics →','open-economics',true)+
    fallback('The economics preview uses separate, labelled assumptions rather than observed ticket sales.')+'</div>')+
+   '</div><div id="simulation-panel-'+(ctx.simulationTab==='route'?'budget':'route')+
+   '" role="tabpanel" aria-labelledby="simulation-tab-'+(ctx.simulationTab==='route'?'budget':'route')+'" hidden></div>'+
    '</section>';
 }
 function agency(ctx:DesktopViewContext):string{
@@ -186,13 +196,17 @@ function agency(ctx:DesktopViewContext):string{
    titleRow('Your team’s next moves.','Agency overview · 4 fictional active tours','Sample agency',
      action('Share overview →','agency-share'))+
    '<div class="feature-tabs" role="tablist" aria-label="Agency queue">'+
-   '<button type="button" role="tab" data-action="agency-attention" aria-selected="'+(!all)+'">Needs attention 3</button>'+
-   '<button type="button" role="tab" data-action="agency-all" aria-selected="'+all+'">All tours 4</button></div>'+
+   '<button id="agency-tab-attention" type="button" role="tab" data-action="agency-attention" aria-selected="'+(!all)+'" aria-controls="agency-panel-attention" tabindex="'+(!all?'0':'-1')+'">Needs attention 3</button>'+
+   '<button id="agency-tab-all" type="button" role="tab" data-action="agency-all" aria-selected="'+all+'" aria-controls="agency-panel-all" tabindex="'+(all?'0':'-1')+'">All tours 4</button></div>'+
    '<p class="audience-disclosure">ⓘ Times are written in the venue-local zone; all names and incidents are fictional sample data.</p>'+
+   '<div id="agency-panel-'+(all?'all':'attention')+'" role="tabpanel" aria-labelledby="agency-tab-'+(all?'all':'attention')+'" tabindex="0">'+
    '<div class="agency-header"><span>Artist</span><span>Needs a decision</span><span>Owner / deadline</span><span>Next action</span></div>'+
    '<div class="agency-queue">'+list.map(task=>
    '<section class="agency-row"><div class="agency-artist"><strong>'+esc(task.artist)+'</strong><span>'+esc(task.tour)+'</span></div>'+
-   '<div class="agency-issue"><strong>'+esc(task.issue)+'</strong><span>'+esc(task.detail)+'</span></div>'+
+   '<div class="agency-issue"><span class="agency-issue-status agency-issue-status-'+esc(task.id)+'">'+
+     (task.id==='drum'?'● Needs local help':task.id==='leipzig'?'× Canceled':
+       task.owner==='Unassigned'?'● Needs owner':'✓ Owner assigned')+'</span>'+
+     '<strong>'+esc(task.issue)+'</strong><span>'+esc(task.detail)+'</span></div>'+
    '<div class="agency-owner"><strong>'+esc(task.owner==='Unassigned'?'? Unassigned':task.owner)+'</strong>'+
      '<span>'+esc(task.deadline)+'</span></div>'+
    '<div class="agency-action">'+action(task.action+' →',task.id==='drum'?'agency-sos':
@@ -209,6 +223,8 @@ function agency(ctx:DesktopViewContext):string{
        action('See all tours →','agency-all')+'</div>')+
    (ctx.agencyNotice?'<p class="soft-status" role="status">'+esc(ctx.agencyNotice)+'</p>':'')+
    fallback('Designed agency workspace · assignments and outreach do not persist to a remote service.')+
+   '</div><div id="agency-panel-'+(all?'attention':'all')+
+   '" role="tabpanel" aria-labelledby="agency-tab-'+(all?'attention':'all')+'" hidden></div>'+
    '</section>';
 }
 export function renderDesktopFeature(screen:DesktopScreen,ctx:DesktopViewContext):string{

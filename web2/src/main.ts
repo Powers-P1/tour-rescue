@@ -18,6 +18,7 @@ import { hadMountedScreen, selectFocusTarget } from './focus-policy.ts';
 import { projectAudience, projectSimulation, loadSimulation, saveSimulation } from './desktop-model.ts';
 import { auditExport } from './audit-download.ts';
 import { parseExtraDistanceKm } from './simulation-input.ts';
+import { nextRovingIndex } from './keyboard-navigation.ts';
 import type { AudienceSource, AudienceModel, SimulationModel, AgencyOwner } from './desktop-model.ts';
 import { renderDesktopFeature, isDesktopScreen } from './desktop-views.ts';
 import type { DesktopViewContext, DesktopScreen } from './desktop-views.ts';
@@ -179,7 +180,7 @@ function shortlist(): string {
     projection.options.map(option => {
       const selected = option.id === pendingId;
       return '<button type="button" role="radio" aria-checked="' + String(selected) + '" class="option-row' + (selected ? ' selected' : '') +
-        '" data-action="select-option" data-id="' + HTML(option.id) + '">' +
+        '" data-action="select-option" data-id="' + HTML(option.id) + '" tabindex="' + (selected ? '0' : '-1') + '">' +
         '<div class="option-heading"><strong>' + HTML(option.cityName) + '</strong>' +
         (option.recommended ? '<span class="suggested">Suggested by checks</span>' : '') +
         '<span class="fake-radio" aria-hidden="true"></span></div>' +
@@ -361,7 +362,7 @@ function desktopContext(): DesktopViewContext {
     simulationTab,simulationCapDraft:simCapDraft,simulationCapError:simCapError,
     savedDraft:simSaved, changeCityOpen:simChooseCity,
     agencyFilter, agencyOwners, assigningTask:agencyAssignOpen,
-    proposedOwner:agencyProposedOwner, agencyNotice,
+    proposedOwner:agencyProposedOwner, agencyNotice, actionNotice:notice,
   };
 }
 function desktopInner(): string {
@@ -458,7 +459,7 @@ function render(): void {
       ? '<main id="main" class="fan-public" tabindex="-1">' + mobile + '</main>'
       : '<div class="app-layout">' + (desktop ? sidebar() : '') + '<main id="main" class="main-content" tabindex="-1">' +
         (desktop ? '<div class="desktop-only">' + desktopInner() + '</div>' : '<div class="mobile-only">' + mobile + '</div>') +
-        (notice ? '<p role="status" class="toast">' + HTML(notice) + '</p>' : '') + '</main></div>' +
+        (notice && !isDesktopScreen(screen) ? '<p role="status" class="toast">' + HTML(notice) + '</p>' : '') + '</main></div>' +
         liveDialog() + sosDialog());
   printRoot!.innerHTML = screen === 'draft' && chosenProposal ? sheetHtml(chosenProposal) : '';
   document.title = 'Tour Rescue · ' + (screen === 'today' ? 'Today' : screen === 'options' ? 'Rescue options' :
@@ -814,8 +815,8 @@ root!.addEventListener('click', async event => {
     case 'concept-agency': openAgency(); break;
     case 'open-sim': openSimulation(); break;
     case 'feature-back': screen === 'agency' ? goHome() : routeHub(); break;
-    case 'audience-qloo': audienceSource='qloo';render();break;
-    case 'audience-fans': audienceSource='fans';render();break;
+    case 'audience-qloo': audienceSource='qloo';notice='';render();break;
+    case 'audience-fans': audienceSource='fans';notice='';render();break;
     case 'audience-select':
       if(audienceModel.places.some(p=>p.cityId===button.dataset.id))selectedAudienceCityId=button.dataset.id!;
       render();break;
@@ -829,8 +830,8 @@ root!.addEventListener('click', async event => {
       break;
     }
     case 'sim-close':routeHub();break;
-    case 'sim-route-tab':simulationTab='route';render();break;
-    case 'sim-budget-tab':simulationTab='budget';render();break;
+    case 'sim-route-tab':simulationTab='route';notice='';render();break;
+    case 'sim-budget-tab':simulationTab='budget';notice='';render();break;
     case 'sim-change-city':simChooseCity=!simChooseCity;render();break;
     case 'sim-pick':openSimulation(button.dataset.id);break;
     case 'sim-recheck': {
@@ -859,8 +860,8 @@ root!.addEventListener('click', async event => {
       }
       render();break;
     case 'agency-overview':openAgency();break;
-    case 'agency-all':agencyFilter='all';agencyNotice='';render();break;
-    case 'agency-attention':agencyFilter='attention';agencyNotice='';render();break;
+    case 'agency-all':agencyFilter='all';agencyNotice='';notice='';render();break;
+    case 'agency-attention':agencyFilter='attention';agencyNotice='';notice='';render();break;
     case 'agency-sos':openSos();break;
     case 'agency-assign':agencyAssignOpen='presale';agencyProposedOwner=agencyOwners.presale??'Alex';render();break;
     case 'agency-owner-save': {
@@ -1013,17 +1014,30 @@ document.addEventListener('keydown', event => {
     }
     return;
   }
-  if (screen === 'options' && (event.key === 'ArrowDown' || event.key === 'ArrowUp')
-      && event.target instanceof Element && event.target.closest('[data-action="select-option"]')) {
-    event.preventDefault();
-    const index = projection.options.findIndex(option => option.id === pendingId);
-    const step = event.key === 'ArrowDown' ? 1 : -1;
-    const next = projection.options[(index + step + projection.options.length) % projection.options.length];
-    if (!next) return;
-    pendingId = next.id;
-    render();
-    [...root!.querySelectorAll<HTMLElement>('[data-action="select-option"]')]
-      .find(node => node.dataset.id === pendingId)?.focus();
+  // WAI-ARIA: tabs use horizontal arrows, radios use both axes plus Home/End.
+  // Reacquire the new node after the view is re-rendered.
+  if (event.target instanceof Element) {
+    const active = event.target.closest<HTMLElement>('[role="tab"],[role="radio"]');
+    const group = active?.closest<HTMLElement>('[role="tablist"],[role="radiogroup"],fieldset');
+    if (active && group) {
+      const kind = active.getAttribute('role') === 'tab' ? 'tablist' : 'radiogroup';
+      const items = [...group.querySelectorAll<HTMLElement>(
+        kind === 'tablist' ? '[role="tab"]' : '[role="radio"]',
+      )].filter(item => item.getClientRects().length > 0 && !item.hasAttribute('disabled'));
+      const nextIndex = nextRovingIndex(event.key, items.indexOf(active), items.length, kind);
+      if (nextIndex !== null) {
+        event.preventDefault();
+        const next = items[nextIndex]!;
+        const action = next.dataset.action;
+        const id = next.dataset.id;
+        next.click(); // delegate to existing audited state transition
+        const replacement = [...root!.querySelectorAll<HTMLElement>('[role="tab"],[role="radio"]')]
+          .find(node => node.dataset.action === action &&
+            (id === undefined || node.dataset.id === id));
+        replacement?.focus();
+        return;
+      }
+    }
   }
 });
 // Programmatic focus (including screen readers) must not escape an open modal.

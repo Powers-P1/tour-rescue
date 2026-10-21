@@ -95,3 +95,7 @@ The static boards illustrate Leipzig 12 November and Erfurt/Dresden/Halle with 5
 ### Offline artwork fallback
 
 The two Unsplash editorial photographs are optional. Local vector illustrations in `web2/assets/` depict a parked tour van at a backstage loading door and a technician adjusting a drum head. If a screenshot runner or offline viewer cannot reach `images.unsplash.com`, these illustrations prevent blank photography panels. They are openly described as illustrations, not photos or genuine staff/suppliers.
+
+## PR-D accessibility and display polish
+
+Desktop Audience, Simulation and Agency tabs now use roving keyboard focus (ArrowLeft/ArrowRight, Home/End) with linked `aria-controls` / `tabpanel` IDs. Audience city options use an exclusive radiogroup tab stop and ArrowUp/ArrowDown/Left/Right. Mobile rescue and sample SOS choices follow the same radio keyboard policy. Each sample agency issue has an icon and readable status. At 980-1279px the audience schematic displays numbered pins and a **15px HTML city key** instead of SVG city labels that scaled below 14px. Desktop feature notifications are inline instead of fixed bottom-right to avoid covering the Extra-distance row; a visible Back action is available on Audience, Agency and promoter drafts. Unavailable live Qloo research is visibly labelled with an information icon. The visual-evidence workflow verifies these behaviors in a real Chromium browser.
