@@ -1,4 +1,4 @@
-import { allowedOrigin, liveEnabled } from './config.ts';
+import { allowedOrigin, caps, liveEnabled } from './config.ts';
 import type { WorkerEnv } from './config.ts';
 import { API_VERSION, HttpError, inputObject, json, problem, readJson } from './http.ts';
 
@@ -34,7 +34,7 @@ export async function handleWorkerRequest(request: Request, env: WorkerEnv, now 
   if (request.method === 'OPTIONS') return finish(new Response(null, { status: 204 }));
   if (url.search !== '') return finish(problem(400, 'QUERY_NOT_ALLOWED', 'Use the documented path and JSON body; URL parameters are not supported.'));
   if (url.pathname === '/health') return finish(request.method === 'GET'
-    ? json({ ok: true, version: API_VERSION, liveEnabled: liveEnabled(env) })
+    ? json({ ok: true, version: API_VERSION, liveEnabled: liveEnabled(env), caps: caps(env) })
     : problem(405, 'METHOD_NOT_ALLOWED', 'Use GET.'));
   const internal = ({ '/do-check': '/health', '/api/demo': '/demo', '/api/demo/audit': '/demo/audit',
     '/api/live': '/live', '/api/live/search': '/search' } as Record<string, string>)[url.pathname];
