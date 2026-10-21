@@ -234,8 +234,8 @@ export class UsageLedger {
     this.limits = {
       requestsPerSecond: limit(options.requestsPerSecond, 10, 10, 'requestsPerSecond'),
       monthlyQlooRequests: limit(options.monthlyQlooRequests, 50000, 50000, 'monthlyQlooRequests'),
-      dailyLiveRequests: limit(options.dailyLiveRequests, 30, 30, 'dailyLiveRequests'),
-      dailyPerClientRequests: limit(options.dailyPerClientRequests, 10, 10, 'dailyPerClientRequests'),
+      dailyLiveRequests: limit(options.dailyLiveRequests, 150, 1000, 'dailyLiveRequests'),
+      dailyPerClientRequests: limit(options.dailyPerClientRequests, 25, 100, 'dailyPerClientRequests'),
       cacheTtlMs: limit(options.cacheTtlMs, 6 * 60 * 60 * 1000, MAX_TTL, 'cacheTtlMs'),
       cacheMaxEntries: limit(options.cacheMaxEntries, 128, 128, 'cacheMaxEntries'),
       cacheMaxEntryBytes: limit(options.cacheMaxEntryBytes, 256 * 1024, 512 * 1024, 'cacheMaxEntryBytes'),

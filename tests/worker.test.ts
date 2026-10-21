@@ -200,7 +200,7 @@ test('live flow maps 24 cities, audits a changed control decision and runs three
 });
 
 test('repeated live sessions use private cache without provider quota but still enforce the daily client cap', async () => {
-  const s = setup({ env: { DAILY_LIVE_LIMIT: '3', DAILY_PER_IP_LIMIT: '2' } });
+  const s = setup({ env: { LIVE_DAILY_CAP: '3', LIVE_IP_CAP: '2' } });
   const first = await decision(await s.send(post('/api/live', liveBody())));
   s.advance(1000);
   const second = await decision(await s.send(post('/api/live', liveBody())));
@@ -378,4 +378,29 @@ test('the existing HTTP-only UnitLedger adapter is importable in Node and serves
   const demo = await decision(await unit.fetch(new Request('https://unit-ledger.internal/demo')));
   assert.equal(demo.mode, 'demo');
   assert.equal(storage.data.size, 0);
+});
+
+test('a heatmap response above the 8 MB limit yields a failed query and UNKNOWN evidence, not a crash', async () => {
+  const s = setup({ provider: async input => {
+    const artist = new URL(String(input)).searchParams.get('signal.interests.entities')!;
+    return artist === TARGET.toUpperCase()
+      ? new Response('{}', { headers: { 'Content-Type': 'application/json', 'Content-Length': '9000000' } })
+      : Response.json(heatmap(artist));
+  } });
+  const response = await s.send(post('/api/live', liveBody()));
+  assert.equal(response.status, 200);
+  const audit = (await decision(response)).audit;
+  const failed = audit.queries.filter(query => query.status === 'failed');
+  assert.equal(failed.length, 1);
+  assert.ok(failed[0]!.warnings.some(warning => warning.code === 'QLOO_RESPONSE_TOO_LARGE'));
+  assert.equal(audit.zeroViolationsGate.status, 'UNKNOWN');
+});
+
+test('health reports the live switch and effective caps', async () => {
+  const response = await handleWorkerRequest(new Request('https://api.example/health'),
+    { UNIT_LEDGER: {} as never, QLOO_API_KEY: 'k', LIVE_ENABLED: 'true', LIVE_DAILY_CAP: '150', LIVE_IP_CAP: '25' });
+  const body = await response.json() as { liveEnabled: boolean; caps: { liveDaily: number; perClientDaily: number } };
+  assert.equal(body.liveEnabled, true);
+  assert.equal(body.caps.liveDaily, 150);
+  assert.equal(body.caps.perClientDaily, 25);
 });

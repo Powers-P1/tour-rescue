@@ -33,8 +33,8 @@ function warningCount(value: unknown): number {
 }
 
 /** Documented results.heatmap envelope; unrelated fields never become fallback scores. */
-export function parseHeatmapResponse(value: unknown, maximumCells = 5000): ParsedQloo<readonly CellEntry[]> {
-  if (!Number.isSafeInteger(maximumCells) || maximumCells < 1 || maximumCells > 5000) throw new QlooContractError();
+export function parseHeatmapResponse(value: unknown, maximumCells = 60_000): ParsedQloo<readonly CellEntry[]> {
+  if (!Number.isSafeInteger(maximumCells) || maximumCells < 1 || maximumCells > 60_000) throw new QlooContractError();
   const response = record(value);
   if (response.success !== true) throw new QlooContractError();
   const rows = record(response.results).heatmap;

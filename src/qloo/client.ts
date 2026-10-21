@@ -8,8 +8,9 @@ import type { ArtistMatch, ParsedQloo } from './normalize.ts';
 
 export const QLOO_ORIGIN = 'https://hackathon.api.qloo.com';
 const CACHE_VERSION = 'tour-rescue.qloo-cache.v1';
-const MAX_BYTES = 1_000_000;
-const MAX_CELLS = 5000;
+// Popular artists return several MB for a country-sized region (geohash precision is not configurable).
+const MAX_BYTES = 8_000_000;
+const MAX_CELLS = 60_000;
 const MAX_RETRY_SECONDS = 31 * 24 * 60 * 60;
 const known = <T>(value: T): Knowledge<T> => ({ status: 'known', value });
 const unknown = (reason: string): Knowledge<never> => ({ status: 'unknown', reason });

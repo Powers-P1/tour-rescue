@@ -3,10 +3,12 @@ main = "src/index.ts"
 compatibility_date = "2026-10-21"
 
 [vars]
-LIVE_ENABLED = "false"
+# Live mode ON. To disable: set to "false" and run `npx wrangler deploy` (or override once with --var LIVE_ENABLED:false).
+LIVE_ENABLED = "true"
 ALLOWED_ORIGIN = "https://tour-rescue.pages.dev"
-DAILY_LIVE_LIMIT = "30"
-DAILY_PER_IP_LIMIT = "10"
+# Judging-window caps (UTC day): global live analyses and per-client (hashed IP) analyses.
+LIVE_DAILY_CAP = "150"
+LIVE_IP_CAP = "25"
 QLOO_MONTHLY_LIMIT = "50000"
 
 [[durable_objects.bindings]]

@@ -97,8 +97,8 @@ test('storage failure prevents a reservation and rolls back without an in-memory
 test('hard caps, raw addresses, invalid clocks and corrupt persisted quota fail closed', async () => {
   const storage = new MemoryStorage();
   for (const options of [
-    { requestsPerSecond: 11 }, { monthlyQlooRequests: 50001 }, { dailyLiveRequests: 31 },
-    { dailyPerClientRequests: 11 }, { cacheMaxEntries: 129 }, { cacheTtlMs: 86400001 },
+    { requestsPerSecond: 11 }, { monthlyQlooRequests: 50001 }, { dailyLiveRequests: 1001 },
+    { dailyPerClientRequests: 101 }, { cacheMaxEntries: 129 }, { cacheTtlMs: 86400001 },
     { requestsPerSecond: 0 }, { requestsPerSecond: Number.NaN }, { cacheMaxEntryBytes: 1.5 },
   ]) assert.throws(() => new UsageLedger(storage, options), RangeError);
   const { ledger } = fixture();

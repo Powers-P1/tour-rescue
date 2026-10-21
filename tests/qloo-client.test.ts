@@ -202,9 +202,20 @@ test('constructor/request bounds reject world regions, combined artists and malf
   for (const regionWkt of ['POLYGON((-180 -90,180 -90,180 90,-180 90,-180 -90))', 'Berlin', 'POLYGON((5 47,16 56,16 47,5 56,5 47))']) {
     assert.throws(() => createQlooClient({ ...s.options, regionWkt }), RangeError);
   }
-  assert.throws(() => createQlooClient({ ...s.options, maxResponseBytes: 1_000_001 }), RangeError);
+  assert.throws(() => createQlooClient({ ...s.options, maxResponseBytes: 8_000_001 }), RangeError);
   assert.throws(() => createQlooClient({ ...s.options, apiKey: '' }), RangeError);
   await assert.rejects(() => s.client.heatmap(heatmap('q-combined', `${ARTIST},${SECOND}`)), RangeError);
   await assert.rejects(() => s.client.searchArtists({ queryId: 'q-bad', query: SECRET }), RangeError);
   assert.equal(s.calls(), 0); assert.equal(s.reservations(), 0);
+});
+
+test('a multi-megabyte, tens-of-thousands-of-cells payload is accepted under the default 8 MB limit', async () => {
+  const alphabet = '0123456789bcdefghjkmnpqrstuvwxyz';
+  const cells = Array.from({ length: 20000 }, (_, i) => ({
+    location: { geohash: `u${alphabet[Math.floor(i / 1024) % 32]}${alphabet[Math.floor(i / 32) % 32]}${alphabet[i % 32]}x` },
+    query: { affinity: (i % 100) / 100, popularity: 0.5, padding: 'x'.repeat(60) } }));
+  const body = JSON.stringify({ success: true, results: { heatmap: cells } });
+  const s = setup({ fetch: async () => new Response(body, { headers: { 'Content-Type': 'application/json' } }) });
+  const result = await s.client.heatmap(heatmap());
+  assert.equal(result.status, 'success');
 });
