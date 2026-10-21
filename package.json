@@ -5,7 +5,9 @@
   "description": "Deterministic tour repair decisions with Qloo cultural-fit evidence",
   "license": "MIT",
   "type": "module",
-  "engines": { "node": ">=24 <25" },
+  "engines": {
+    "node": ">=24 <25"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "node --test --test-isolation=none tests/*.test.ts",
@@ -13,6 +15,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "wrangler": "^4.151.3"
   }
 }
