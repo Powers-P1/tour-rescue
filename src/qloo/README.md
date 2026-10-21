@@ -4,7 +4,7 @@
 
 ## Verified request and response contracts
 
-- Fixed origin `https://hackathon.api.qloo.com`; GET only; `X-Api-Key` header; redirects fail. The key never appears in URLs, logs, returned data or fixtures.
+- Fixed origin `https://hackathon.api.qloo.com`; GET only; `X-Api-Key` header; redirects are never followed (`redirect: 'manual'`; Workers do not support `'error'`, 3xx is an HTTP error). The key never appears in URLs, logs, returned data or fixtures.
 - `/search` sends `query`, `types=urn:entity:artist`, `take=10`. The verified envelope is a direct `results` array. Rows need `entity_id`, `name` and an explicit artist marker in `subtype`, `type` or `types`. Only `{ id, name }` leaves the parser. It never chooses the first match for the caller.
 - `/v2/insights` sends `filter.type=urn:heatmap`, `output.heatmap.boundary=urn:geohash`, the fixed `filter.location` WKT and **one** artist UUID in `signal.interests.entities`. It sends **no `take` and no entity weights**. Response rows are `results.heatmap[].location.geohash` and `query.affinity` / `query.popularity`, under `success: true`.
 - Runtime validation rejects duplicate cells/artists, mixed cell resolutions, malformed fields and scores outside 0..1. Missing affinity is never replaced with rank, popularity or zero. A valid empty heatmap becomes unknown city evidence.
