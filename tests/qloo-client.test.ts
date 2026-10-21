@@ -47,7 +47,7 @@ test('heatmap transport uses the exact GET contract and normalizes mean affinity
     'signal.interests.entities': ARTIST,
   });
   assert.equal(seenInit!.method, 'GET');
-  assert.equal(seenInit!.redirect, 'error');
+  assert.equal(seenInit!.redirect, 'manual');
   assert.equal(new Headers(seenInit!.headers).get('X-Api-Key'), SECRET);
   assert.equal(s.reservations(), 1);
   assert.ok(!JSON.stringify(result).includes(SECRET));
@@ -105,7 +105,7 @@ test('durable quota denial is fail-closed, consumes no HTTP and never repeats un
 });
 
 test('HTTP failures preserve safe status and retry metadata without response bodies, secrets or automatic retries', async () => {
-  for (const [status, code] of [[429, 'QLOO_RATE_LIMIT'], [401, 'QLOO_AUTH'], [403, 'QLOO_AUTH'], [500, 'QLOO_HTTP_ERROR']] as const) {
+  for (const [status, code] of [[429, 'QLOO_RATE_LIMIT'], [401, 'QLOO_AUTH'], [403, 'QLOO_AUTH'], [500, 'QLOO_HTTP_ERROR'], [302, 'QLOO_HTTP_ERROR']] as const) {
     let calls = 0;
     const s = setup({ fetch: async () => { calls++; return new Response(SECRET, { status, headers: { 'Retry-After': '12' } }); } });
     const result = await s.client.heatmap(heatmap());

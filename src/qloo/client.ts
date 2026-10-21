@@ -219,7 +219,7 @@ export function createQlooClient(options: QlooClientOptions) {
       try {
         body = await Promise.race([deadline, (async () => {
           const response = await fetcher(requestIdentity, { method: 'GET', headers: { Accept: 'application/json', 'X-Api-Key': apiKey },
-            redirect: 'error', signal: controller.signal });
+            redirect: 'manual', signal: controller.signal });
           httpStatus = known(response.status);
           if (!response.ok) {
             void response.body?.cancel().catch(() => {});
