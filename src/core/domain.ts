@@ -1,8 +1,8 @@
 /**
  * Application domain, not a Qloo response contract.
  *
- * PR1 defines data only. PR2 must validate the documented integer, time-zone,
- * reference-integrity and cardinality rules before evaluating a route.
+ * parseTourScenario validates integer, time-zone, reference-integrity and
+ * cardinality rules before evaluateRepairOptions evaluates a route.
  */
 
 export type Known<T> = {
@@ -23,7 +23,7 @@ export type CityId = string;
 export type VenueId = string;
 export type ShowId = string;
 
-/** Non-negative integer units; runtime validation belongs to PR2. */
+/** Non-negative safe-integer units, checked by the runtime scenario parser. */
 export type Metres = number;
 export type Seconds = number;
 export type MinorCurrencyUnits = number;
@@ -98,7 +98,7 @@ export type CancelledShow = ShowBase & {
 
 export type TourShow = ConfirmedShow | CancelledShow;
 
-/** Exactly five input dates; exactly one cancelled date is a PR2 runtime rule. */
+/** Exactly five input dates; the scenario parser requires exactly one cancelled date. */
 export type FiveShowTour = readonly [
   TourShow,
   TourShow,
@@ -113,8 +113,9 @@ export type RouteConstraints = {
   readonly maxDailyDrivingSeconds: Seconds;
   /** Geographic spacing policy is declared explicitly, not inferred from taste. */
   readonly minimumMarketSpacingMetres: Metres;
-  /** PR1 uses road distance; the precise directional policy is settled in PR2. */
+  /** All retained show pairs; the smaller of both directed road distances. */
   readonly marketSpacingMeasure: "road-distance";
+  /** A ceiling; PR2 can check the venue fee only, not unpriced travel/other costs. */
   readonly additionalBudget: Knowledge<Money>;
 };
 
@@ -126,6 +127,7 @@ export type Tour = {
   readonly constraints: RouteConstraints;
 };
 
+/** recorded-road is a frozen road-model response, not a traffic guarantee. */
 export type RoadDataQuality = "recorded-road" | "estimate";
 
 export type RoadTravel = {
@@ -177,7 +179,7 @@ export type DayOffCandidate = {
   readonly cancelledShowId: ShowId;
 };
 
-/** Inputs for PR2 option generation, not verified or recommended bookings. */
+/** Booker-supplied option labels, not verified or recommended bookings. */
 export type RepairCandidate = ShowRepairCandidate | DayOffCandidate;
 
 export type TourScenario = {
