@@ -45,6 +45,16 @@ ChatGPT/Codex writes code via pull requests. The OK Agency side runs live Qloo p
 5. Control run (different artist) and leave-one-artist-out are part of the audit.
 6. The promoter one-pager prints on one A4 page with every field listed in the MVP scope. Its constraint statuses match the audit, UNKNOWN is never shown as PASS, and no raw Qloo response data appears in it.
 
+## AI Rescue mode (Pro tier), PR6
+Principle: AI proposes, the deterministic core verifies. The constraint checker, breakpoints and audit stay deterministic; an agent does the research.
+
+- Agent: Claude Sonnet 5.5 (`claude-sonnet-5-5`) via our Cloudflare Worker; the API key is a Worker secret `ANTHROPIC_API_KEY`. Premium may use Claude Opus 5.5 (`claude-opus-5-5`).
+- Tools: Qloo fit data (our normalised percentiles), OSRM matrix, web search and fetch (venue availability and calendars, festival clashes, public holidays, weather), the deterministic constraint checker and the audit generator.
+- Flow: the agent researches the cancelled date's region, proposes repair options with evidence and links; each option is validated by the deterministic checker (PASS / FAIL / UNKNOWN); breakpoints are computed deterministically; the audit records the sources.
+- Guardrails: the agent cannot mark a constraint PASS (only the checker can); missing facts stay UNKNOWN; every claim carries a source link.
+- Demo: limited live sessions per day, saved transcripts for offline mode. Product: paid tier.
+- Plan: PR6 after PR5. PR4 exposes the checker and audit as pure typed tools for the agent.
+
 ## 7-day plan
 
 | Date | Milestone |
