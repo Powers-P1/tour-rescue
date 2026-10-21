@@ -57,6 +57,10 @@ small { font-size: .78rem; }
 .mode-note { display: block; color: var(--muted); font-size: .67rem; margin-left: auto; }
 .ai-mode-button { width: 100%; border: 1px solid #aebed3; background: #f4f7fa; font-size: .7rem; font-weight: 650; padding: 6px 5px; line-height: 1.3; }
 .ai-mode-button[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+.guide-start-button { width: 100%; padding: 7px 4px; border: 1px solid #b5d9cb; background: #eef9f3; color: #075d39; font-size: .72rem; font-weight: 650; line-height: 1.3; }
+.guide-start-button:disabled { cursor: default; }
+.guide-context-note { flex-basis: 100%; padding-left: 15px; font-weight: 550; }
+.app-home-link { display: inline-block; margin-top: 6px; font-size: .78rem; }
 .ai-card-note { color: #386585; font-size: .76rem; margin-top: 8px; }
 .accepted-research { margin-top: 24px; padding: 22px; }
 .accepted-research > .muted { font-size: .88rem; margin-top: 8px; }
@@ -241,8 +245,8 @@ small { font-size: .78rem; }
   .mode-controls .status-badge { font-size: .58rem; padding: 4px 7px; }
   .live-button { font-size: .72rem; }
   .mode-note { font-size: .59rem; }
-  .step-nav { gap: 6px; }
-  .step { font-size: .65rem; gap: 4px; }
+  .step-nav { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; align-items: start; }
+  .step { font-size: .65rem; gap: 4px; flex-direction: column; text-align: center; }
   .step-number { width: 25px; height: 25px; font-size: .72rem; }
   .main-content { padding: 22px 18px; }
   h1 { font-size: 2.3rem; }

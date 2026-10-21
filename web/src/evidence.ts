@@ -117,6 +117,7 @@ function sensitivitySummary(result: ApiDecisionResult): HTMLElement {
 
 export function renderEvidence(result: ApiDecisionResult, selectedOptionId: string): HTMLElement {
   const layout = el('div', 'evidence-layout');
+  layout.dataset.tour = 'evidence';
   layout.append(renderFitMap(result.audit));
   const right = el('div', 'evidence-stack');
   const sensitivity = panel('Leave one artist out', 'How much does the decision depend on each comparison?');
