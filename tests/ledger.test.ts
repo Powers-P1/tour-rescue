@@ -181,3 +181,12 @@ test('cache writes roll back atomically and corrupt cached payloads become misse
   assert.equal(await ledger.cacheGet('a'), undefined);
   assert.equal(storage.data.has(key), false);
 });
+
+test('default judging caps (150 global, 25 per client) are reachable and persisted state above the old 30/10 caps stays valid', async () => {
+  const { ledger } = fixture({ dailyLiveRequests: 150, dailyPerClientRequests: 25 });
+  for (let i = 0; i < 25; i++) await ledger.reserveSession(hash(1));
+  await assert.rejects(ledger.reserveSession(hash(1)), denied('LIVE_CLIENT_DAILY_LIMIT'));
+  for (let i = 2; i < 7; i++) for (let j = 0; j < 25; j++) await ledger.reserveSession(hash(i));
+  await assert.rejects(ledger.reserveSession(hash(7)), denied('LIVE_DAILY_LIMIT'));
+  await ledger.acquireQlooRequest();
+});

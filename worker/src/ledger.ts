@@ -126,8 +126,8 @@ function quotaState(value: unknown, now: number): QuotaState {
   };
   if (!isObject(value) || value.version !== 1 || !integer(value.lastNow, MAX_TIME)
       || value.day !== dayOf(value.lastNow) || value.month !== monthOf(value.lastNow)
-      || !integer(value.sessions, 30) || !integer(value.qlooRequests, 50000)
-      || !Array.isArray(value.clients) || value.clients.length > 30
+      || !integer(value.sessions, 1000) || !integer(value.qlooRequests, 50000)
+      || !Array.isArray(value.clients) || value.clients.length > 1000
       || !Array.isArray(value.recentStarts) || value.recentStarts.length > 10) {
     throw new Error('Stored quota state is invalid; live requests are disabled until repaired.');
   }
@@ -135,7 +135,7 @@ function quotaState(value: unknown, now: number): QuotaState {
   const seen = new Set<string>();
   for (const row of value.clients) {
     if (!isObject(row) || typeof row.hash !== 'string' || !SHA256.test(row.hash)
-        || seen.has(row.hash) || !integer(row.count, 10) || row.count === 0) {
+        || seen.has(row.hash) || !integer(row.count, 100) || row.count === 0) {
       throw new Error('Stored quota state is invalid; live requests are disabled until repaired.');
     }
     clients.push({ hash: row.hash, count: row.count });
