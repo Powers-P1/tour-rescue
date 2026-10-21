@@ -7,12 +7,21 @@ import { initialIncident, isFocusedRescue, transitionIncident } from './state.ts
 import type { IncidentState } from './state.ts';
 import { projectRescue, UNKNOWN } from './model.ts';
 import type { RescueOption, RescueProjection } from './model.ts';
+import { SAMPLE_PLAN_BRIEF, initialSosSample, selectedSupplier, summarizePlanBrief, transitionSosSample } from './extension-state.ts';
+import type { PlanSummary, SosSampleState, SosStage, SosSupplierId } from './extension-state.ts';
+import { isExtensionScreen, renderExtension } from './extension-views.ts';
+import type { ExtensionContext, ExtensionScreen } from './extension-views.ts';
+import { createAiDemoSession } from '../../src/ai/demo.ts';
+import { createAiClient } from '../../web/src/ai-client.ts';
+import { hadMountedScreen, selectFocusTarget } from './focus-policy.ts';
+import type { AiSessionResult, AiStep } from '../../src/ai/types.ts';
 
 declare const __WORKER_ORIGIN__: string;
 
-type Screen = 'today' | 'options' | 'detail' | 'draft' | 'crew' | 'not-built';
+type Screen = 'today' | 'options' | 'detail' | 'draft' | 'crew' | 'not-built' | ExtensionScreen;
 type ArtistRole = 'target' | 'comparison' | 'control';
 const api = createApiClient(__WORKER_ORIGIN__);
+const aiApi = createAiClient(__WORKER_ORIGIN__);
 const root = document.getElementById('app');
 const printRoot = document.getElementById('print-area');
 if (!root || !printRoot) throw new Error('The application root is missing.');
@@ -20,7 +29,20 @@ if (!root || !printRoot) throw new Error('The application root is missing.');
 let result: ApiDecisionResult = createDemoResult();
 let projection: RescueProjection = projectRescue(result);
 let incident: IncidentState = initialIncident();
-let screen: Screen = 'today';
+let screen: Screen = window.location.hash === '#fan' ? 'fan' : 'today';
+let sos: SosSampleState = initialSosSample();
+let sosReturnScreen: Screen = 'today';
+let planBrief = SAMPLE_PLAN_BRIEF;
+let planSummary: PlanSummary | null = null;
+let economicsExpanded = false;
+let fanPreviewed = false;
+let aiMode: 'demo' | 'live' = 'demo';
+let aiBusy = false;
+let aiNotice = '';
+let aiSession: AiSessionResult | null = null;
+let aiSteps: AiStep[] = [];
+let aiAbort: AbortController | null = null;
+let aiGeneration = 0;
 let pendingId: string = projection.options.find(option => option.recommended)?.id ?? projection.options[0]?.id ?? '';
 let showEvidence = false;
 let liveOpen = false;
@@ -68,7 +90,8 @@ function header(focused: boolean, context = ''): string {
     '<button class="sos-button" type="button" data-action="sos">SOS</button></header>';
 }
 function mobileTabs(): string {
-  const active = screen === 'crew' ? 'Crew' : screen === 'options' ? 'Route' : 'Today';
+  const active = screen === 'crew' ? 'Crew' : isExtensionScreen(screen) && screen !== 'fan' ? 'Route' :
+    ['options', 'detail', 'draft'].includes(screen) ? 'Route' : 'Today';
   return '<nav class="mobile-tabs" aria-label="Main navigation">' +
     (['Today', 'Route', 'Crew'] as const).map(label =>
       '<button type="button" data-action="tab-' + label.toLowerCase() + '" class="' + (label === active ? 'active' : '') + '">' +
@@ -78,7 +101,8 @@ function mobileTabs(): string {
 function sidebar(): string {
   const nav: { label: string; action: string; selected: boolean }[] = [
     { label: 'Overview', action: 'tab-today', selected: screen === 'today' },
-    { label: 'Route', action: 'tab-route', selected: ['options', 'detail', 'draft'].includes(screen) },
+    { label: 'Route', action: 'tab-route', selected: ['options', 'detail', 'draft', 'route', 'plan', 'plan-preview',
+      'economics', 'economics-terms', 'ai'].includes(screen) },
     { label: 'Audience', action: 'concept-audience', selected: screen === 'not-built' && unbuiltName === 'Audience' },
     { label: 'Crew', action: 'tab-crew', selected: screen === 'crew' },
     { label: 'Documents', action: 'documents', selected: screen === 'draft' },
@@ -124,7 +148,8 @@ function shortlist(): string {
           HTML(option.inbound) + ' in <span class="middle-dot">·</span> ' + HTML(option.outbound) + ' onward') + '</div>' +
         '<div class="option-validation">' + statusBadge(option.decisionCheck) + '</div></button>';
     }).join('') + '</fieldset>' +
-    '<div class="focused-bottom">' + primary('Review ' + (optionById(pendingId)?.cityName ?? 'option') + ' →', 'review') +
+    '<div class="focused-bottom">' + primary(optionById(pendingId)?.kind === 'day-off' ?
+      'Keep the day off →' : 'Review ' + (optionById(pendingId)?.cityName ?? 'option') + ' →', 'review') +
     '<p class="tiny-label">Source-labelled estimates · venue/date not confirmed</p>' +
     softButton('Run fresh Qloo evidence →', 'open-live', 'muted-button') + '</div></section>';
 }
@@ -241,18 +266,23 @@ function mapSVG(): string {
   ];
   if (proposed) markers.push([city + ' · Proposed', proposed, 'proposed']);
   const current = [from, cancelled, to].map(pos).join(' ');
-  const proposedLine = proposed ? [from, proposed, to].map(pos).join(' ') : '';
+  const proposedPath = proposed ? 'M ' + from[0] + ' ' + from[1] +
+    ' Q ' + (proposed[0] - 95) + ' ' + (from[1] + 55) + ' ' + proposed[0] + ' ' + proposed[1] +
+    ' Q ' + (proposed[0] - 65) + ' ' + (to[1] - 58) + ' ' + to[0] + ' ' + to[1] : '';
   return '<div class="route-map" role="img" aria-label="Schematic route, current plan versus proposed diversion">' +
     '<svg viewBox="0 0 540 395" preserveAspectRatio="xMidYMid meet" aria-hidden="true">' +
     '<path class="map-outline" d="M196 13L319 24L433 75L452 145L424 204L398 231L384 317L327 365L267 354L217 321L193 275L137 248L165 180L144 112Z"/>' +
     '<path class="map-gridline" d="M164 122L428 211 M161 240L431 101 M290 18L292 353"/>' +
     '<polyline class="route-current" points="' + current + '"/>' +
-    (proposed ? '<polyline class="route-proposed" points="' + proposedLine + '"/>' : '') +
+    (proposed ? '<path class="route-proposed" d="' + proposedPath + '"/>' : '') +
     markers.map(([text, [x, y], type]) =>
       '<circle class="map-pin ' + type + '" cx="' + x + '" cy="' + y + '" r="6"/>' +
-      '<text class="map-label ' + type + '" x="' + (x + 12) + '" y="' + (y - 10) + '">' + HTML(text) + '</text>').join('') +
-    '</svg><div class="map-legend"><span><i class="legend-solid"></i> Solid: current plan</span>' +
+      '<text class="map-label ' + type + '" x="' + (type === 'proposed' ? x - 12 : x + 12) +
+      '" y="' + (type === 'cancelled' ? y + 26 : y - 12) +
+      '" text-anchor="' + (type === 'proposed' ? 'end' : 'start') + '">' + HTML(text) + '</text>').join('') +
+    '</svg><div class="map-bottom"><div class="map-legend"><span><i class="legend-solid"></i> Solid: current plan</span>' +
     '<span><i class="legend-dashed"></i> Dashed: Proposed</span></div>' +
+    '<button type="button" class="text-button map-explore" data-action="concept-audience">Explore audience fit →</button></div>' +
     '<p class="tiny-label">Schematic positions · routing estimates from ' +
     HTML(result.audit.sourceTimestamps.road.method) + ' · not a street map</p></div>';
 }
@@ -265,7 +295,7 @@ function desktopHome(): string {
     '<strong>' + HTML(projection.cancelledCity) + ' canceled · ' + HTML(projection.cancelledDate) + '</strong></div>' +
     primary('Rescue this date →', 'rescue') + '</div>' +
     '<div class="command-body"><section class="command-map"><h2>The next three stops</h2>' +
-    mapSVG() + softButton('Explore audience fit →', 'concept-audience') + '</section>' +
+    mapSVG() + '</section>' +
     '<section class="needs-you"><h2>What needs you.</h2>' +
     '<button type="button" data-action="rescue" class="need-row"><span class="need-dot amber"></span><span><strong>Choose a replacement city</strong>' +
     '<small>' + HTML(projection.cancelledDate) + ' · ' + projection.options.length + ' checked directions</small></span><b>→</b></button>' +
@@ -280,11 +310,16 @@ function desktopHome(): string {
     '<div><span>Next locked stop</span><strong>' + HTML(projection.toCity) + '</strong>' + badge('✓ Confirmed', 'good') + '</div></div>' +
     originNote() + '</section>';
 }
+function extensionContext(): ExtensionContext {
+  return { tabs: mobileTabs(), sos, planBrief, planSummary, showAssumptions: economicsExpanded,
+    fanPreviewed, aiBusy, aiNotice, aiMode, aiSteps, aiSession, sourceMode: projection.mode };
+}
 function desktopInner(): string {
   if (screen === 'today') return desktopHome();
   return '<div class="desktop-centered"><div class="desktop-mini-header"><strong>' + HTML(projection.title) +
     '</strong><span>' + badge(projection.mode === 'demo' ? 'Sample scenario' : 'Live Qloo taste · sample tour') + '</span></div>' +
-    (screen === 'options' ? shortlist() : screen === 'detail' ? details() : screen === 'draft' ? draft() :
+    (isExtensionScreen(screen) ? renderExtension(screen, extensionContext())
+      : screen === 'options' ? shortlist() : screen === 'detail' ? details() : screen === 'draft' ? draft() :
       screen === 'crew' ? crew() : unbuilt()) + '</div>';
 }
 function liveDialog(): string {
@@ -309,6 +344,7 @@ function liveDialog(): string {
     HTML(x.name ?? x.id) + '<span>Choose →</span></button>').join('') + '</div>' +
     '<p role="status" class="live-notice">' + HTML(liveNotice || (liveBusy ? 'Waiting for the Worker…' : 'No search results selected yet.')) + '</p>' +
     primary(liveBusy ? 'Checking Qloo…' : 'Run fresh Qloo evaluation →', 'run-live', liveBusy || !liveTarget || !liveControl) +
+    ((!liveTarget || !liveControl) ? '<p class="tiny-label">To enable: choose a resolved Target artist and Control artist.</p>' : '') +
     '<p class="tiny-label">Nothing here contacts promoters or changes confirmed dates.</p></section></div>';
 }
 function sosDialog(): string {
@@ -335,15 +371,11 @@ function previousFocus(): { id?: string; action?: string; dataId?: string; dataI
   };
 }
 function findPreviousTarget(focus: NonNullable<ReturnType<typeof previousFocus>>, scope: Element): HTMLElement | null {
-  if (focus.id) {
-    const match = document.getElementById(focus.id);
-    if (match instanceof HTMLElement && scope.contains(match)) return match;
-  }
-  if (!focus.action) return null;
-  return [...scope.querySelectorAll<HTMLElement>('[data-action]')].find(node =>
-    node.dataset.action === focus.action
-    && (focus.dataId === undefined || node.dataset.id === focus.dataId)
-    && (focus.dataIndex === undefined || node.dataset.index === focus.dataIndex)) ?? null;
+  const nodes = [...scope.querySelectorAll<HTMLElement>('[data-action], [id]')];
+  return selectFocusTarget(focus, nodes, node => ({
+    id: node.id || undefined, action: node.dataset.action,
+    dataId: node.dataset.id, dataIndex: node.dataset.index,
+  })) ?? null;
 }
 function focusFirstHeading(scope: Element): void {
   const heading = scope.querySelector<HTMLElement>('h1, h2, [role="heading"]');
@@ -357,19 +389,25 @@ function render(): void {
   const focus = previousFocus();
   const priorDialog = focusedDialog();
   const previouslyInDialog = !!(priorDialog && document.activeElement && priorDialog.contains(document.activeElement));
-  const previouslyRendered = root!.querySelector('.app-layout') !== null;
+  // A public fan screen also mounts #main but deliberately has no private .app-layout.
+  const previouslyRendered = hadMountedScreen(root!);
   document.body.classList.toggle('focused-rescue', isFocusedRescue(incident.phase) && ['options','detail','draft'].includes(screen));
   const desktop = desktopMedia.matches;
-  const mobile = screen === 'today' ? homeMobile() : screen === 'options' ? shortlist() :
+  const mobile = isExtensionScreen(screen) ? renderExtension(screen, extensionContext()) :
+    screen === 'today' ? homeMobile() : screen === 'options' ? shortlist() :
     screen === 'detail' ? details() : screen === 'draft' ? draft() : screen === 'crew' ? crew() : unbuilt();
-  // Only one responsive tree is mounted. Every id, label and heading is unique.
+  // One DOM layout. The public fan page never receives private tour navigation or SOS controls.
   root!.innerHTML = '<a href="#main" class="skip-link">Skip to content</a>' +
-    '<div class="app-layout">' + (desktop ? sidebar() : '') + '<main id="main" class="main-content" tabindex="-1">' +
-    (desktop ? '<div class="desktop-only">' + desktopInner() + '</div>' : '<div class="mobile-only">' + mobile + '</div>') +
-    (notice ? '<p role="status" class="toast">' + HTML(notice) + '</p>' : '') +
-    '</main></div>' + liveDialog() + sosDialog();
+    (screen === 'fan'
+      ? '<main id="main" class="fan-public" tabindex="-1">' + mobile + '</main>'
+      : '<div class="app-layout">' + (desktop ? sidebar() : '') + '<main id="main" class="main-content" tabindex="-1">' +
+        (desktop ? '<div class="desktop-only">' + desktopInner() + '</div>' : '<div class="mobile-only">' + mobile + '</div>') +
+        (notice ? '<p role="status" class="toast">' + HTML(notice) + '</p>' : '') + '</main></div>' +
+        liveDialog() + sosDialog());
   printRoot!.innerHTML = screen === 'draft' && chosenProposal ? sheetHtml(chosenProposal) : '';
-  document.title = 'Tour Rescue · ' + (screen === 'today' ? 'Today' : screen === 'options' ? 'Rescue options' : screen === 'detail' ? 'Review' : screen === 'draft' ? 'Promoter draft' : screen === 'crew' ? 'Crew' : unbuiltName);
+  document.title = 'Tour Rescue · ' + (screen === 'today' ? 'Today' : screen === 'options' ? 'Rescue options' :
+    screen === 'detail' ? 'Review' : screen === 'draft' ? 'Promoter draft' : screen === 'crew' ? 'Crew' :
+    isExtensionScreen(screen) ? screen.replace(/-/g, ' ') : unbuiltName);
 
   const dialog = focusedDialog();
   const layout = root!.querySelector<HTMLElement>('.app-layout');
@@ -430,6 +468,21 @@ function prepare(): void {
   render();
 }
 function back(): void {
+  if (screen.startsWith('sos-')) {
+    const earlier = sos.stage;
+    sos = transitionSosSample(sos, { type: 'back' });
+    if (sos.stage === earlier) screen = sosReturnScreen;
+    else screen = sosScreen(sos.stage);
+    render(); return;
+  }
+  if (screen === 'fan') { closeFan(); return; }
+  if (screen === 'plan-preview') { screen = 'plan'; render(); return; }
+  if (screen === 'economics-terms') { screen = 'economics'; render(); return; }
+  if (['plan', 'economics', 'ai'].includes(screen)) {
+    if (screen === 'ai' && aiBusy) stopAgentResearch();
+    screen = 'route'; render(); return;
+  }
+  if (screen === 'route') { goHome(); return; }
   if (screen === 'options') { goHome(); return; }
   if (screen === 'detail') {
     incident = transitionIncident(incident, { type: 'back-to-options' });
@@ -451,6 +504,82 @@ function downloadAudit(): void {
   link.click();
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function sosScreen(stage: SosStage): Screen {
+  return stage === 'problem' ? 'sos-problem' : stage === 'options' ? 'sos-options' :
+    stage === 'quote' ? 'sos-quote' : 'sos-approved';
+}
+function openSos(): void {
+  if (!screen.startsWith('sos-')) sosReturnScreen = screen;
+  sos = initialSosSample();
+  screen = 'sos-problem';
+  render();
+}
+function routeHub(): void {
+  incident = initialIncident();
+  screen = 'route';
+  notice = '';
+  render();
+}
+function closeFan(): void {
+  if (window.location.hash === '#fan') window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  screen = 'route';
+  render();
+}
+function stopAgentResearch(): void {
+  if (!aiBusy) return;
+  ++aiGeneration;
+  aiAbort?.abort(new Error('Research stopped by user.'));
+  aiAbort = null;
+  aiBusy = false;
+  aiNotice = '◷ Stopped - the Worker may still count this reserved AI session; no proposal was accepted.';
+}
+async function researchWithAgent(): Promise<void> {
+  if (aiBusy || result.mode !== 'live') return;
+  const generation = ++aiGeneration;
+  const controller = new AbortController();
+  aiAbort = controller;
+  const active = () => aiGeneration === generation && !controller.signal.aborted;
+  aiBusy = true;
+  aiSession = null;
+  aiSteps = [];
+  aiNotice = '◷ Checking AI availability…';
+  render();
+  try {
+    const health = await aiApi.health(controller.signal);
+    if (!active()) return;
+    if (!health.enabled) throw new Error('Live AI research is disabled by the Worker.');
+    aiNotice = '◷ Research in progress - no proposal can be accepted automatically.';
+    render();
+    const budget = result.audit.replay.scenario.tour.constraints.additionalBudget;
+    const session = await aiApi.rescue({
+      baseRunId: result.audit.runId,
+      policy: result.audit.replay.policy,
+      ...(budget.status === 'known' ? { additionalBudgetMinorUnits: budget.value.minorUnits } : {}),
+    }, result, event => {
+      if (active() && event.type === 'step') {
+        aiSteps.push(event.step);
+        aiSteps = aiSteps.slice(-60);
+        aiNotice = '◷ Research in progress - ' + event.step.message;
+        render();
+      }
+    }, controller.signal);
+    if (!active()) return;
+    aiSession = session;
+    aiSteps = [...session.steps];
+    aiNotice = session.stopReason === 'completed'
+      ? '✓ Research complete - proposals are checked, not automatically applied.'
+      : '? Research incomplete (' + session.stopReason + ') - no proposals were accepted.';
+  } catch (err) {
+    if (!active()) return;
+    aiNotice = '× Failed - existing decision kept. ' + (err instanceof Error ? err.message : 'Agent research unavailable.');
+  } finally {
+    if (aiGeneration === generation) {
+      aiAbort = null;
+      aiBusy = false;
+      render();
+    }
+  }
 }
 function openConcept(name: string): void {
   unbuiltName = name;
@@ -486,7 +615,8 @@ async function runLive(): Promise<void> {
   } catch (err) {
     incident = priorIncident;
     screen = priorScreen;
-    liveNotice = err instanceof Error ? err.message : 'Qloo evidence unavailable; existing decision retained.';
+    liveNotice = '× Failed - previous decision kept. ' +
+      (err instanceof Error ? err.message : 'Qloo evidence unavailable.');
   } finally {
     liveBusy = false;
     render();
@@ -506,7 +636,8 @@ root!.addEventListener('submit', async event => {
     liveChoices = await api.search(query);
     liveNotice = liveChoices.length ? 'Choose a resolved result for ' + liveRole + '.' : 'No artist results. Try a different search.';
   } catch (err) {
-    liveNotice = err instanceof Error ? err.message : 'Search failed. No artist was selected.';
+    liveNotice = '× Failed - previous decision kept. ' +
+      (err instanceof Error ? err.message : 'Search failed. No artist was selected.');
   } finally { liveBusy = false; render(); }
 });
 root!.addEventListener('change', event => {
@@ -549,7 +680,7 @@ root!.addEventListener('click', async event => {
     case 'print-sheet': window.print(); break;
     case 'audit': downloadAudit(); break;
     case 'tab-today': goHome(); break;
-    case 'tab-route': startRescue(); break;
+    case 'tab-route': routeHub(); break;
     case 'tab-crew': incident = initialIncident(); screen = 'crew'; render(); break;
     case 'documents':
       if (chosenProposal) { screen = 'draft'; render(); } else openConcept('Documents'); break;
@@ -560,7 +691,7 @@ root!.addEventListener('click', async event => {
       try { await navigator.clipboard.writeText(window.location.href); notice = 'Preview link copied (not a booking).'; }
       catch { notice = 'Copy this page URL to share the preview.'; }
       render(); break;
-    case 'sos': dialogReturnAction = 'sos'; showSOS = true; render(); break;
+    case 'sos': openSos(); break;
     case 'close-sos': showSOS = false; render(); break;
     case 'open-live': dialogReturnAction = 'open-live'; liveOpen = true; notice = ''; render(); break;
     case 'close-live': liveOpen = false; render(); break;
@@ -574,7 +705,83 @@ root!.addEventListener('click', async event => {
       liveNotice = (choice.name ?? choice.id) + ' selected as ' + liveRole + '.';
       render(); break;
     }
-    case 'run-live': await runLive(); break;
+    case 'open-plan': screen = 'plan'; render(); break;
+    case 'plan-build': {
+      const field = root!.querySelector<HTMLTextAreaElement>('#plan-brief');
+      if (!field) break;
+      try {
+        planBrief = field.value;
+        planSummary = summarizePlanBrief(planBrief);
+        screen = 'plan-preview';
+        notice = '';
+      } catch(err) {
+        notice = err instanceof Error ? err.message : 'Invalid planner brief.';
+      }
+      render(); break;
+    }
+    case 'concept-profile': openConcept('Band profile editor'); break;
+    case 'open-economics': screen = 'economics'; render(); break;
+    case 'econ-toggle': economicsExpanded = !economicsExpanded; render(); break;
+    case 'econ-terms': screen = 'economics-terms'; render(); break;
+    case 'econ-copy':
+      try {
+        await navigator.clipboard.writeText('Check the ticket split, total costs, room capacity, fee, date, settlement and break-even before committing.');
+        notice = 'Sample checklist copied. No message sent.';
+      } catch { notice = 'Clipboard unavailable; review the items above manually.'; }
+      render(); break;
+    case 'open-fan': screen = 'fan'; window.location.hash = 'fan'; render(); break;
+    case 'close-fan': closeFan(); break;
+    case 'fan-preview': {
+      const email = root!.querySelector<HTMLInputElement>('#fan-email');
+      if (email && !email.checkValidity()) { email.reportValidity(); break; }
+      // The optional address is deliberately not captured, stored or transmitted.
+      fanPreviewed = true;
+      render(); break;
+    }
+    case 'sos-find': {
+      const problem = root!.querySelector<HTMLTextAreaElement>('#sos-problem');
+      const location = root!.querySelector<HTMLInputElement>('#sos-location');
+      const required = root!.querySelector<HTMLInputElement>('#sos-deadline');
+      const budget = root!.querySelector<HTMLInputElement>('#sos-budget');
+      if (!problem || !location || !required || !budget) break;
+      try {
+        sos = transitionSosSample(sos, { type: 'edit-problem', problem: problem.value, location: location.value,
+          requiredLocal: required.value, budgetCapVnd: Number(budget.value) });
+        sos = transitionSosSample(sos, { type: 'find-sample-options' });
+        screen = 'sos-options'; notice = '';
+      } catch(err) { notice = err instanceof Error ? err.message : 'Check required fields.'; }
+      render(); break;
+    }
+    case 'sos-select':
+      try {
+        sos = transitionSosSample(sos, { type: 'choose-sample-supplier', id: button.dataset.id as SosSupplierId });
+      } catch(err) { notice = err instanceof Error ? err.message : 'Select a listed sample supplier.'; }
+      render(); break;
+    case 'sos-quote':
+      sos = transitionSosSample(sos, { type: 'review-sample-quote' });
+      screen = 'sos-quote'; render(); break;
+    case 'sos-approve':
+      try {
+        sos = transitionSosSample(sos, { type: 'preview-approval' });
+        screen = 'sos-approved';
+      } catch(err) { notice = err instanceof Error ? err.message : 'Cannot preview approval.'; }
+      render(); break;
+    case 'sos-self-call':
+      notice = 'Self-call is outside Tour Rescue. No supplier has been contacted.';
+      render(); break;
+    case 'sos-restart': sos = initialSosSample(); screen = 'sos-problem'; render(); break;
+    case 'open-ai': screen = 'ai'; render(); break;
+    case 'ai-mode-demo': if (!aiBusy) { aiMode = 'demo'; aiNotice = ''; aiSession = null; aiSteps = []; render(); } break;
+    case 'ai-mode-live': if (!aiBusy) { aiMode = 'live'; aiNotice = ''; aiSession = null; aiSteps = []; render(); } break;
+    case 'ai-replay':
+      if (aiBusy) break;
+      aiSession = createAiDemoSession('corridor-repair');
+      aiSteps = [...aiSession.steps];
+      aiNotice = '✓ Saved demo replayed - synthetic transcript; no live AI or provider request.';
+      render(); break;
+    case 'ai-run-live': await researchWithAgent(); break;
+    case 'ai-stop': stopAgentResearch(); render(); break;
+        case 'run-live': await runLive(); break;
   }
 });
 document.addEventListener('keydown', event => {
@@ -624,6 +831,11 @@ document.addEventListener('keydown', event => {
 document.addEventListener('focusin', event => {
   const dialog = focusedDialog();
   if (dialog && event.target instanceof Node && !dialog.contains(event.target)) focusFirstHeading(dialog);
+});
+window.addEventListener('hashchange', () => {
+  if (window.location.hash === '#fan') screen = 'fan';
+  else if (screen === 'fan') screen = 'route';
+  render();
 });
 // The old web/ shell and deployment remain unchanged until PR-D.
 render();

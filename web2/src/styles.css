@@ -269,3 +269,111 @@ fieldset { border: 0; min-width: 0; padding: 0; margin: 0; }
   #print-area .sheet-grid > div { break-inside: avoid; }
   #print-area .sheet-paper { break-after: avoid; }
 }
+
+
+/* PR-B: sample extensions, accessible actions and mobile layout polish. */
+.option-validation { display: flex; align-items: center; margin-top: 5px; }
+.option-validation .status { font-size: 14px; }
+.mobile-tabs button { font-size: 14px; }
+.status { font-size: 14px; }
+.live-dialog > p { font-size: 16px; }
+.next-up [data-action="tab-crew"] { border: 1px solid var(--border); border-radius: var(--radius-control); padding: 12px 16px; }
+@media (max-width: 979px) {
+  .home-view { padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
+  .home-view .mobile-tabs {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+    margin: 0; padding-bottom: max(10px, env(safe-area-inset-bottom, 10px));
+  }
+}
+.extension-view { --extension-gap: 24px; }
+.extension-view > label { margin-top: 32px; }
+.extension-view .intro { margin-bottom: 16px; }
+.extension-view textarea { background: var(--surface); min-height: 145px; font-size: 16px; }
+.extension-view .extension-lead {
+  background: var(--surface); border-left: 3px solid var(--danger); border-radius: 0 var(--radius-panel) var(--radius-panel) 0;
+  padding: 22px; margin: 18px 0 35px;
+}
+.extension-lead h2 { margin-bottom: 9px; }
+.extension-lead p { color: var(--muted); }
+.extension-links { border-top: 1px solid var(--border); margin: 8px 0 22px; }
+.extension-links button {
+  width: 100%; min-height: 70px; padding: 15px 0; border: 0; border-bottom: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px;
+  color: var(--text); background: transparent; font-size: 17px; font-weight: 680; text-align: left;
+}
+.extension-links button:hover { color: var(--accent); }
+.extension-links button span { color: var(--muted); font-size: 14px; font-weight: 400; }
+.extension-links.compact button { min-height: 58px; }
+.extension-sample { margin-top: 17px; margin-bottom: 21px; }
+.extension-fieldrow { border-top: 1px solid var(--border); padding: 18px 0; display: flex; flex-direction: column; gap: 8px; }
+.extension-fieldrow label { margin: 0; font-size: 14px; color: var(--muted); }
+.extension-fieldrow input { background: transparent; border-color: var(--border); }
+.extension-fieldrow p { margin: 0; }
+.extension-fieldrow strong { font-size: 17px; }
+.extension-choices .option-row { min-height: 160px; }
+.extension-choices .option-heading .fake-radio { margin-left: auto; }
+.extension-choices .tiny-label { font-size: 14px; }
+.extension-facts { margin: 16px 0 20px; border-top: 1px solid var(--border); }
+.extension-facts > div { display: flex; flex-direction: column; gap: 5px; padding: 20px 0; border-bottom: 1px solid var(--border); }
+.extension-facts span { font-size: 14px; color: var(--muted); }
+.extension-facts strong { font-size: 17px; line-height: 1.4; }
+.extension-facts small { font-size: 14px; color: var(--muted); }
+.quote-amount, .economics-result strong { font-weight: 780; font-variant-numeric: tabular-nums; letter-spacing: -.055em; line-height: 1.1; }
+.quote-amount { font-size: clamp(28px, 8vw, 42px); margin-top: 30px; white-space: nowrap; }
+.extension-callout { background: var(--surface); padding: 24px; border-left: 3px solid var(--muted); border-radius: 0 12px 12px 0; }
+.extension-callout p { margin: 10px 0 0; color: var(--muted); }
+.economics-result { margin: 40px 0 35px; padding-bottom: 35px; border-bottom: 1px solid var(--border); }
+.economics-result p { margin-bottom: 14px; }
+.economics-result strong { font-size: clamp(30px, 7.5vw, 48px); white-space: nowrap; }
+.extension-view .soft-status { color: var(--muted); }
+.fan-public { width: 100%; min-height: 100svh; }
+.fan-public .fan-page { max-width: 560px; margin: 0 auto; padding-bottom: 24px; }
+.fan-page > .eyebrow { margin-top: 28px; }
+.fan-page .fan-art { display: block; width: 100%; aspect-ratio: 520 / 220; border-radius: var(--radius-panel); overflow: hidden; margin: 10px 0 0; }
+.fan-page .intro { margin-top: 28px; }
+.fan-page .focused-bottom { padding-top: 44px; }
+.fan-page .focused-bottom > p { text-align: center; }
+.agent-results { border-top: 1px solid var(--border); margin-top: 24px; padding-top: 22px; }
+.agent-results h2 { font-size: 21px; }
+.agent-proposal { border-bottom: 1px solid var(--border); padding: 19px 0; }
+.agent-proposal > strong { font-size: 18px; }
+.agent-proposal .status { margin-left: 12px; }
+.agent-proposal p { margin: 12px 0 0; }
+.agent-results details { margin: 20px 0; }
+.agent-results summary { cursor: pointer; min-height: 48px; color: var(--accent); }
+.agent-results li { color: var(--muted); font-size: 14px; margin-bottom: 11px; overflow-wrap: anywhere; }
+@media (min-width: 980px) {
+  .desktop-centered .extension-view { padding-bottom: 48px; }
+  .desktop-centered .extension-view .focused-bottom { padding-top: 40px; }
+  .desktop-centered .extension-view .mobile-header { display: none; }
+  .desktop-centered .extension-view h1 { font-size: 40px; }
+}
+@media (min-width:980px) and (max-width:1390px) {
+  .desktop-command { padding-top: 30px; padding-bottom: 28px; }
+  .desktop-top { margin-bottom: 24px; }
+  .desktop-incident { margin-bottom: 25px; padding: 12px 18px; }
+  .command-body { gap: 26px; }
+  .command-body h2 { margin-bottom: 14px; }
+  .route-map svg { height: min(28vw, 320px); min-height: 250px; }
+  .need-row { padding: 15px 0; }
+  .next-show { padding-top: 18px; }
+  .stops-strip { margin-top: 22px; padding-top: 15px; }
+  .desktop-command .source-note { margin-top: 15px; }
+}
+
+/* Keep the audience action inside the map panel, aligned with its legend. */
+.map-bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.map-bottom .map-legend { margin: 6px 0 0; }
+.map-bottom .map-explore { min-height: 48px; color: var(--accent); font-size: 14px; white-space: nowrap; }
+
+/* PR-B review: source links are touch targets; unresolved itinerary is explicit. */
+.agent-results a { display: inline-flex; align-items: center; min-height: 48px; padding: 12px 2px; line-height: 1.5; }
+.agent-results a:focus-visible { outline-offset: 3px; }
+.draft-risks { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border); }
+.draft-risks h2 { font-size: 19px; margin: 6px 0 16px; }
+.draft-corridor { list-style: none; margin: 0 0 28px; padding: 0; border-top: 1px solid var(--border); }
+.draft-corridor li { display: flex; gap: 12px; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border); }
+.draft-corridor strong { font-size: 16px; font-weight: 650; }
+.draft-corridor span { flex: 0 0 auto; font-size: 14px; color: var(--muted); }
+.weak-links { margin: 0; padding-left: 22px; }
+.weak-links li { margin: 10px 0; font-size: 16px; line-height: 1.5; }
