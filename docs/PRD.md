@@ -126,9 +126,9 @@ The core is deterministic, dependency-light TypeScript with no network access. I
 
 The eventual public UI is static on Cloudflare Pages. A Worker owns the Qloo secret, bounded calls, per-IP limits, a daily cap, a kill switch and private response caching. Real response data must not be committed to the public repository. Public offline fixtures are hand-written and explicitly synthetic. The application must remain available free of charge without login through 16 November 2026.
 
-An LLM may summarize already computed evidence. It cannot invent entities, fill missing values, decide whether constraints passed or change numeric results. A template summary provides the complete workflow without an LLM.
+Except in the AI Rescue mode (PR6), an LLM may only summarize already computed evidence. It cannot invent entities, fill missing values, decide whether constraints passed or change numeric results. A template summary provides the complete workflow without an LLM. In PR6 the LLM agent researches and proposes, but the deterministic checker and audit decide; PR4 exposes them as pure typed tools.
 
-## Five-PR roadmap
+## Roadmap (five PRs plus PR6)
 
 | PR | Deliverable | Acceptance boundary |
 |---|---|---|
@@ -137,6 +137,7 @@ An LLM may summarize already computed evidence. It cannot invent entities, fill 
 | 3 | Explicit recommendation policy, bounded breakpoint and comparison-artist sensitivity engine | Report a witnessed one-assumption change or an honest bounded not-found/unknown result; preserve constraints, city set and omission provenance. |
 | 4 | Reproducible audit, different-target control run, sensitivity export, verified Qloo client and Worker | Logged parameters omit secrets; data provenance and unresolved checks survive export; limits and kill switch work. |
 | 5 | Front-end comparison, audit download, promoter one-pager (A4 print stylesheet, optional PNG export) and Cloudflare configuration | Usable responsive flow and labelled offline fallback; one-pager prints on one A4 page with constraint statuses matching the audit and no server or LLM; maintainers run live probes, review, deploy and merge. |
+| 6 | AI Rescue mode (Pro tier) | Agent (Claude Sonnet 5.5 via Worker, key as secret `ANTHROPIC_API_KEY`; premium may use Claude Opus 5.5) with tools: Qloo fit data, OSRM matrix, web search/fetch, deterministic constraint checker, audit generator. Agent proposes options with evidence and links; every option validated PASS/FAIL/UNKNOWN by the checker; breakpoints deterministic; audit records sources. Demo: limited live sessions per day with saved transcripts; product: paid tier. The agent can never set a constraint to PASS. |
 
 The five PRs are reviewable increments within the brief's seven-day build window. Maintainers supply real Qloo recordings and the OSRM freeze, review the contract assumptions, and perform deployment. PR1 does not promise a live integration or a deployed service.
 
