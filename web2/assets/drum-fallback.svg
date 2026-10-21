@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-label="Illustrative technician replacing a drum head backstage">
+<defs>
+ <linearGradient id="room" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#253943"/><stop offset="1" stop-color="#121A20"/></linearGradient>
+ <radialGradient id="lamp" cx=".75" cy=".15" r=".85"><stop stop-color="#e9b472" stop-opacity=".40"/><stop offset="1" stop-color="#e9b472" stop-opacity="0"/></radialGradient>
+ <linearGradient id="shell" x1="0" x2="1"><stop stop-color="#4b646f"/><stop offset=".5" stop-color="#263a45"/><stop offset="1" stop-color="#6a7f8a"/></linearGradient>
+</defs>
+<rect width="1200" height="760" fill="url(#room)"/><rect width="1200" height="760" fill="url(#lamp)"/>
+<path d="M0 200 L1200 155 M0 250 L1200 214" stroke="#445b64" stroke-width="7" opacity=".34"/>
+<path d="M0 642 H1200 V760 H0Z" fill="#1a282f"/>
+<!-- Drum -->
+<ellipse cx="646" cy="497" rx="305" ry="125" fill="#334b59" stroke="#91a3ab" stroke-width="15"/>
+<path d="M340 494 V655 C340 715 958 723 954 655 V494" fill="url(#shell)" stroke="#94a1a9" stroke-width="13"/>
+<ellipse cx="647" cy="488" rx="293" ry="110" fill="#dae3e3" stroke="#6c7f88" stroke-width="19"/>
+<ellipse cx="647" cy="488" rx="256" ry="89" fill="#c3cecf" opacity=".72"/>
+<g stroke="#d5e1e4" stroke-width="8">
+ <path d="M395 560 V684 M515 597 V713 M644 604 V720 M781 599 V704 M897 563 V681"/>
+</g>
+<g fill="#c2cbd0"><rect x="383" y="547" width="24" height="29" rx="3"/><rect x="506" y="581" width="24" height="32" rx="3"/><rect x="766" y="579" width="25" height="34" rx="3"/><rect x="888" y="546" width="24" height="30" rx="3"/></g>
+<!-- Drum tech forearms/working hands -->
+<path d="M230 0 Q302 58 351 179 L474 350 L405 406 Q267 262 187 168 L75 0Z" fill="#1a2c34" stroke="#3c5260" stroke-width="10"/>
+<path d="M1060 0 Q1000 77 940 193 L813 358 L873 424 Q1028 266 1114 144 L1200 0Z" fill="#1d3039" stroke="#425966" stroke-width="10"/>
+<path d="M405 400 Q425 361 465 353 L503 395 L483 429 L453 436Z" fill="#b58d73" stroke="#8e715e" stroke-width="4"/>
+<path d="M878 409 Q849 362 814 357 L784 398 L800 439 L839 450Z" fill="#bb9379" stroke="#8e715e" stroke-width="4"/>
+<path d="M478 414 L555 479" stroke="#71838b" stroke-width="10" stroke-linecap="round"/>
+<path d="M804 420 L742 483" stroke="#71838b" stroke-width="10" stroke-linecap="round"/>
+<g opacity=".18" stroke="#f6e0c5" stroke-width="4"><path d="M165 683 H322"/><path d="M970 680 H1140"/></g>
+</svg>

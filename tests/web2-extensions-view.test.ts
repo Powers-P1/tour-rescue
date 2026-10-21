@@ -59,3 +59,14 @@ test('agent status contains an icon and an explicit text label', () => {
   assert.match(renderExtension('ai', { ...defaults, aiNotice: '◷ Research in progress' }),
     /◷ Research in progress/);
 });
+
+test('SOS sample suppliers have a single keyboard tab stop in the radio group',()=>{
+ const list=renderExtension('sos-options',defaults);
+ assert.equal((list.match(/role="radio"[^>]*tabindex="0"/g)??[]).length,1);
+ assert.equal((list.match(/role="radio"[^>]*tabindex="-1"/g)??[]).length,1);
+});
+test('unavailable AI live mode includes informational glyph and text',()=>{
+ const html=renderExtension('ai',{...defaults,aiMode:'live',sourceMode:'demo'});
+ assert.match(html,/ⓘ Unavailable - run fresh Qloo first/);
+ assert.match(html,/disabled/);
+});

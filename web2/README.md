@@ -77,3 +77,28 @@ Board **06** uses `recomputeResult` from the existing pure core when a user adju
 Board **07** shows three fictitious agency issues and a fourth issue-free sample tour. Owner assignment changes only in-memory display; opening the SOS / rescue cases returns to the already labelled existing demo flows. Local time zones are written explicitly. Share copies a **sample** overview rather than contacting the agency.
 
 **Deviations from boards 05–07:** the screenshot map has designed Erfurt/Dresden/Halle regions but the frozen core nominates Nuremberg/Frankfurt (as approved), so cities and relative evidence come from actual audit instead. Fan requests have no collector and therefore a truthful empty state rather than fake declarations. The map uses fixture geography, not a rendered basemap. The 06 simulation may be FAIL/UNKNOWN under actual rules rather than artificially PASS and does not assume a 5-hour limit (actual 6h). The 07 sample agency is intentionally not a real connected task system. No deploy switch before PR-D.
+
+## PR-D: public landing, judges page and Pages switch
+
+- **08 Landing** at `/`: calm graphite/amber hero, editorial production photography and mobile incident inset, separate core rescue and fictional local SOS, warm paper agency band. Actual option labels/check status and optional breakpoint are projected from `createLandingModel(createDemoResult())`.
+- **09 Judges** at `/judges/`: visible **Judges · Start here** utility header, one click to ready Leipzig example, computed three-way sample comparison, exact core evidence links, JSON audit export, separate implemented-vs-concept scope, public MIT source and Qloo+OSRM+agent limitations.
+- Public Pages command `npm run web:build` produces `web/dist` using **v2**, without editing `web/` source or Cloudflare settings. `npm run web2:build` produces `web2/dist`. `npm run web:legacy-build` preserves rollback.
+- Editorial photographs under the **Unsplash License**: behind-the-scenes film crew photo by Logan Ward (<https://unsplash.com/photos/EDZLyd6re_M>) and drummer adjusting a snare by Rogelio Gonzalez (<https://unsplash.com/photos/ZB-VdffP1UY>). These are contextual images; the exact ImageGen blue-hour touring van and repair shot are **not** available as clean licensed photo assets, so no false identity/location is implied.
+- Main navigation links are real `/app/`, `/judges/`, GitHub repository, docs and audit actions. No checkout, sign-up or outbound promoter email.
+- Existing root app hash links are redirected to the new ready demo. Public `#fan` opens the no-persistence sample artist page under `/app/#fan`.
+- The illustrated Berlin-Leipzig-[Nuremberg/Frankfurt]-Munich corridor uses audited core values for chosen city and all option statuses; its SVG is a labelled *schematic*, not routed geodata.
+
+### Design deviations
+
+The static boards illustrate Leipzig 12 November and Erfurt/Dresden/Halle with 5-hour limits. Per maintainer decision, the deployed application and public landing use **the unchanged validated core**: Leipzig 14 November, Nuremberg/Frankfurt/day off, six-hour limit. The marketing photo has backstage production crew instead of a specifically staged van/tour manager and a real drummer adjusting a snare instead of the fictional 22-inch kick repair; photo licensing and representation are honest. SOS, agency, plan, fan features remain sample/demo-only. AI/Worker provider access is not proved by build-only screenshots. The judges page never marks synthetic artist evidence as a live Qloo recording.
+
+### Offline artwork fallback
+
+The two Unsplash editorial photographs are optional. Local vector illustrations in `web2/assets/` depict a parked tour van at a backstage loading door and a technician adjusting a drum head. If a screenshot runner or offline viewer cannot reach `images.unsplash.com`, these illustrations prevent blank photography panels. They are openly described as illustrations, not photos or genuine staff/suppliers.
+
+## PR-D accessibility and display polish
+
+Desktop Audience, Simulation and Agency tabs now use roving keyboard focus (ArrowLeft/ArrowRight, Home/End) with linked `aria-controls` / `tabpanel` IDs. Audience city options use an exclusive radiogroup tab stop and ArrowUp/ArrowDown/Left/Right. Mobile rescue and sample SOS choices follow the same radio keyboard policy. Each sample agency issue has an icon and readable status. At 980-1279px the audience schematic displays numbered pins and a **15px HTML city key** instead of SVG city labels that scaled below 14px. Desktop feature notifications are inline instead of fixed bottom-right to avoid covering the Extra-distance row; a visible Back action is available on Audience, Agency and promoter drafts. Unavailable live Qloo research is visibly labelled with an information icon. The visual-evidence workflow verifies these behaviors in a real Chromium browser.
+
+### Confirmed Pages deployment mode
+The `tour-rescue` Pages project uses **direct-upload** (`source: null`), not Git integration. There is no Cloudflare-side build command or merge-triggered deployment. Repository scripts `npm run web:build`, `npm run web2:build`, and `npm run web:legacy-build` only generate local output. To release v2, manually run `npx wrangler pages deploy web/dist --project-name tour-rescue --branch main` after authorisation. For rollback, use `npm run web:legacy-build` then explicitly upload `web/dist`; no remote build-setting change is needed.

@@ -13,7 +13,7 @@ const base:DesktopViewContext={
  selectedAudienceCityId:audience.places[0]!.cityId,audienceEvidenceOpen:false,mapZoom:1,
  simulation:projectSimulation(demo,'replacement-nuremberg',350),
  simulationTab:'route',simulationCapDraft:null,simulationCapError:'',savedDraft:false,changeCityOpen:false,agencyFilter:'attention',
- agencyOwners:{},assigningTask:null,proposedOwner:'Alex',agencyNotice:'',
+ agencyOwners:{},assigningTask:null,proposedOwner:'Alex',agencyNotice:'',actionNotice:'',
 };
 
 test('board 05 renders audited source and never merges fan declarations with Qloo',()=>{
@@ -75,4 +75,37 @@ test('mobile map provides numbered glyphs and an HTML key with city names',()=>{
  const html=renderDesktopFeature('audience',base);
  assert.match(html,/taste-map-mobile-number/);
  assert.match(html,/taste-mobile-key/);
+});
+
+test('all desktop tab controls point to existing tab panels; roving tab index is exclusive',()=>{
+ for(const page of ['audience','simulation','agency'] as const){
+   const html=renderDesktopFeature(page,base);
+   const refs=[...html.matchAll(/role="tab"[^>]*aria-controls="([^"]+)"/g)].map(m=>m[1]);
+   assert.equal(refs.length,2,page);
+   for(const id of refs) assert.ok(html.includes('id="'+id+'"'),page+' missing '+id);
+   assert.equal((html.match(/role="tab"[^>]*tabindex="0"/g)??[]).length,1,page);
+   assert.equal((html.match(/role="tab"[^>]*tabindex="-1"/g)??[]).length,1,page);
+ }
+ const audienceHtml=renderDesktopFeature('audience',base);
+ assert.match(audienceHtml,/role="radio"[^>]*aria-controls="audience-city-detail"/);
+ assert.match(audienceHtml,/id="audience-city-detail"/);
+ assert.equal((audienceHtml.match(/role="radio"[^>]*tabindex="0"/g)??[]).length,1);
+ const fan=renderDesktopFeature('audience',{...base,audienceSource:'fans'});
+ assert.doesNotMatch(fan,/class="taste-map"/);
+ assert.match(fan,/id="audience-panel-qloo"[^>]*hidden/);
+});
+test('each agency issue shows a truthful sample glyph and a text state',()=>{
+ const html=renderDesktopFeature('agency',base);
+ assert.match(html,/● Needs local help/);
+ assert.match(html,/× Canceled/);
+ assert.match(html,/● Needs owner/);
+ const ownerSet=renderDesktopFeature('agency',{...base,agencyOwners:{presale:'Alex'}});
+ assert.match(ownerSet,/✓ Owner assigned/);
+});
+test('recheck message is inline with extra-distance status rather than a fixed toast',()=>{
+ const html=renderDesktopFeature('simulation',{...base,actionNotice:'× Recalculated. A declared check fails.'});
+ assert.match(html,/sim-distance-status/);
+ assert.match(html,/class="feature-action-notice" role="status"/);
+ assert.match(html,/× Recalculated. A declared check fails/);
+ assert.doesNotMatch(html,/class="toast"/);
 });

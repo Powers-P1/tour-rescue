@@ -131,3 +131,46 @@
  .taste-mobile-key span{display:inline-flex;align-items:center;gap:6px}
  .taste-mobile-key b{font-size:14px;color:var(--accent)}
 }
+
+/* PR-D: restore a visible Back control to desktop Audience, Agency and proposal. */
+.desktop-proposal-back,.feature-head-actions .feature-back{min-height:48px;color:var(--muted)}
+@media(min-width:980px){
+ .desktop-centered .desktop-proposal-back{display:inline-flex;margin-top:14px;margin-bottom:0}
+}
+
+/* PR-D: accessible states and inline decision feedback. */
+.feature-page [role="tabpanel"][hidden]{display:none!important}
+.feature-action-notice{
+ margin:12px 0 18px;padding:12px 15px;border-left:3px solid var(--accent);
+ background:var(--surface);color:var(--text);font-size:15px;line-height:1.5
+}
+.agency-row .agency-issue-status{
+ display:inline-flex;align-items:center;font-size:14px;font-weight:700;line-height:1.3
+}
+.agency-row .agency-issue-status-drum{color:var(--accent)}
+.agency-row .agency-issue-status-leipzig{color:var(--danger)}
+.agency-row .agency-issue-status-presale{color:#9cbcd2}
+/* 980–1279: SVG gets scaled below readable size. Show numbered map glyphs
+   and a real 15px HTML legend carrying the city names. */
+@media(min-width:980px) and (max-width:1279px){
+ .taste-map-label{display:none}
+ .taste-map-mobile-number{
+  display:block;font:700 44px Inter,"IBM Plex Sans",sans-serif;
+  fill:var(--text);stroke:#121A20;stroke-width:7px;paint-order:stroke
+ }
+ .taste-mobile-key{
+  display:flex;flex-wrap:wrap;gap:8px 16px;margin:12px 0;
+  font-size:15px;line-height:1.5;color:var(--text)
+ }
+ .taste-mobile-key span{display:inline-flex;align-items:center;gap:6px}
+ .taste-mobile-key b{font-size:15px;color:var(--accent)}
+}
+
+/* Desktop Review needs a visible in-flow Back (mobile keeps its own header). */
+.desktop-centered .desktop-review-back { display: none; }
+@media (min-width: 980px) {
+  .desktop-centered .desktop-review-back {
+    display: inline-flex; align-items: center; min-height: 48px;
+    color: var(--muted); margin-top: 14px; margin-bottom: 0;
+  }
+}
