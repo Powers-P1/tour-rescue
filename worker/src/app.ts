@@ -133,6 +133,7 @@ export function createUnitHandler(deps: UnitDependencies): (request: Request) =>
         await deps.probeStorage?.();
         return json({ ok: true, version: API_VERSION, storage: 'available' });
       }
+      if (path === '/ai/usage' && request.method === 'GET') return json(await deps.ledger.aiToday());
       if ((path === '/demo' || path === '/demo/audit') && request.method === 'GET') {
         const result = demoResult();
         return path === '/demo' ? json(result) : json(result.audit, 200,

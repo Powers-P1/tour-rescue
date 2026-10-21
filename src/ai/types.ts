@@ -62,6 +62,9 @@ export interface AiUsage {
   readonly toolCalls: number;
   readonly webSearchCalls: number;
   readonly webFetchCalls: number;
+  /** Approximate USD estimate from list-price constants; see costBasis. Absent in older sessions and demos. */
+  readonly estimatedCostUsd?: number;
+  readonly costBasis?: string;
 }
 
 export type AiStopReason = 'completed' | 'step-limit' | 'token-limit' | 'tool-limit' | 'cancelled' | 'provider-error' | 'incomplete';

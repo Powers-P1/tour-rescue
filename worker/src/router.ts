@@ -33,9 +33,19 @@ export async function handleWorkerRequest(request: Request, env: WorkerEnv, now 
   const url = new URL(request.url);
   if (request.method === 'OPTIONS') return finish(new Response(null, { status: 204 }));
   if (url.search !== '') return finish(problem(400, 'QUERY_NOT_ALLOWED', 'Use the documented path and JSON body; URL parameters are not supported.'));
-  if (url.pathname === '/health') return finish(request.method === 'GET'
-    ? json({ ok: true, version: API_VERSION, liveEnabled: liveEnabled(env), aiEnabled: aiEnabled(env), caps: caps(env) })
-    : problem(405, 'METHOD_NOT_ALLOWED', 'Use GET.'));
+  if (url.pathname === '/health') {
+    if (request.method !== 'GET') return finish(problem(405, 'METHOD_NOT_ALLOWED', 'Use GET.'));
+    let aiToday: unknown = null;
+    if (aiEnabled(env)) {
+      try {
+        const stub = env.UNIT_LEDGER.get(env.UNIT_LEDGER.idFromName(LEDGER_NAME));
+        const reply = await stub.fetch(new Request('https://unit-ledger.internal/ai/usage', { method: 'GET' }));
+        if (reply.ok) aiToday = await reply.json();
+      } catch { aiToday = null; }
+    }
+    return finish(json({ ok: true, version: API_VERSION, liveEnabled: liveEnabled(env), aiEnabled: aiEnabled(env),
+      caps: caps(env), aiToday }));
+  }
   const internal = ({ '/do-check': '/health', '/api/demo': '/demo', '/api/demo/audit': '/demo/audit',
     '/api/live': '/live', '/api/live/search': '/search', '/api/ai/live': '/ai/live' } as Record<string, string>)[url.pathname];
   if (internal === undefined) return finish(problem(404, 'NOT_FOUND', 'No such API route.'));

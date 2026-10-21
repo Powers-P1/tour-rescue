@@ -3,7 +3,7 @@ import type { DecisionAudit } from '../../src/core/audit-types.ts';
 import { parseDecisionPolicy } from '../../src/core/decision.ts';
 import type { AiStreamEvent } from '../../src/ai/types.ts';
 import type { ApiDecisionResult } from './app.ts';
-import { aiEnabled } from './config.ts';
+import { aiEnabled, aiMaxInputTokens } from './config.ts';
 import type { WorkerEnv } from './config.ts';
 import { HttpError, inputObject, problem, readJson } from './http.ts';
 import type { UsageLedger } from './ledger.ts';
@@ -100,6 +100,7 @@ export async function handleAiLive(request: Request, deps: AiRouteDependencies):
   if (clientHash === null || !/^[a-f0-9]{64}$/.test(clientHash)) {
     return problem(400, 'CLIENT_ID_UNAVAILABLE', 'A server-derived client identity is required.');
   }
+  const maxInputTokens = aiMaxInputTokens(deps.env);
   const buildContext = await prepareAiContext(request, deps, clientHash);
   if (request.signal.aborted) return problem(499, 'AI_CANCELLED', 'The AI session was cancelled before it started.');
   // This must settle durably before the stream or any paid provider request starts.
@@ -123,9 +124,14 @@ export async function handleAiLive(request: Request, deps: AiRouteDependencies):
       try {
         const result = await (deps.runAi ?? runAiSession)({
           baseResult, sessionId: deps.runId(), apiKey: deps.env.ANTHROPIC_API_KEY!, now: deps.now,
-          signal: cancellation.signal, onEvent: emit,
+          signal: cancellation.signal, onEvent: emit, maxInputTokens,
           ...(deps.fetch === undefined ? {} : { fetch: deps.fetch }),
         });
+        // Record reported usage for today's /health total; storage trouble must not hide the result.
+        try {
+          await deps.ledger.recordAiUsage({ inputTokens: result.usage.inputTokens, outputTokens: result.usage.outputTokens,
+            costUsd: result.usage.estimatedCostUsd ?? 0 });
+        } catch { /* usage totals are best effort */ }
         emit({ type: 'result', result });
       } catch {
         emit({ type: 'error', error: { code: 'AI_SERVICE_UNAVAILABLE',

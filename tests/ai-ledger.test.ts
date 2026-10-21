@@ -46,13 +46,15 @@ test('AI daily rotation does not reopen an allowance on clock rollback and stora
 
 test('AI quota configuration accepts only bounded positive integers and hashes', async () => {
   const storage = new MemoryLedgerStorage();
-  for (const options of [{ dailyAiSessions: 31 }, { dailyAiSessions: 0 }, { dailyAiPerClientSessions: 11 }, { dailyAiPerClientSessions: 1.5 }]) {
+  for (const options of [{ dailyAiSessions: 201 }, { dailyAiSessions: 0 }, { dailyAiPerClientSessions: 21 }, { dailyAiPerClientSessions: 1.5 }]) {
     assert.throws(() => new UsageLedger(storage, options), RangeError);
   }
   const env: WorkerEnv = { UNIT_LEDGER: { idFromName: name => name, get: () => ({ fetch }) } };
-  assert.equal(ledgerOptions(env, () => start).dailyAiSessions, 10);
-  assert.equal(ledgerOptions(env, () => start).dailyAiPerClientSessions, 3);
-  assert.throws(() => ledgerOptions({ ...env, DAILY_AI_LIMIT: '31' }, () => start), RangeError);
+  assert.equal(ledgerOptions(env, () => start).dailyAiSessions, 40);
+  assert.equal(ledgerOptions(env, () => start).dailyAiPerClientSessions, 5);
+  assert.throws(() => ledgerOptions({ ...env, AI_DAILY_CAP: '201' }, () => start), RangeError);
+  assert.equal(ledgerOptions({ ...env, AI_DAILY_CAP: '200', AI_CLIENT_CAP: '20' }, () => start).dailyAiSessions, 200);
+  assert.throws(() => ledgerOptions({ ...env, AI_CLIENT_CAP: '21' }, () => start), RangeError);
   await assert.rejects(new UsageLedger(storage).reserveAiSession('198.51.100.1'), /never a raw address/);
   await storage.put('tour-rescue:ai-quotas:v1', { version: 1, sessions: 0 });
   await assert.rejects(new UsageLedger(storage).reserveAiSession(client(1)), /Stored quota state is invalid/);

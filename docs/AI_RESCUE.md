@@ -37,13 +37,13 @@ The source registry accepts metadata only from matching native server tool resul
 
 | Bound | Production default / maximum |
 |---|---|
-| AI sessions per UTC day | 10 global, 3 per daily client hash; configuration can set positive values up to 30 / 10 |
+| AI sessions per UTC day | 40 global, 5 per daily client hash (`AI_DAILY_CAP`, `AI_CLIENT_CAP`); hard ceilings 200 / 20 |
 | Messages requests per session | 6, no automatic retries |
-| Generated output per session | **8,000 tokens** cumulatively, including thinking/tool output counted by Anthropic; each request at most 2,000 and the remaining allowance |
-| Input usage stop | Stop further calls when reported cumulative input reaches 80,000 tokens; checked after each response |
+| Generated output per session | **8,000 tokens** cumulatively, including thinking/tool output counted by Anthropic; each request at most 1,500 and the remaining allowance |
+| Input usage stop | Stop further calls when reported cumulative input reaches `AI_MAX_INPUT_TOKENS` (default 150,000, ceiling 400,000); checked after each response. At 80% of the step, output or input budget the next request adds a FINALIZE NOW instruction so the session ends with `submit_proposals` |
 | Deterministic/client tool calls | 24 per session |
 | Web calls | At most one search and one fetch per Messages request, hence at most 6 searches and 6 fetches per session |
-| Fetched context | `max_content_tokens: 1500` per page fetch |
+| Fetched context | `max_content_tokens: 1000` per page fetch; replayed context keeps at most 6 search results (each at most 1,500 characters, larger ones are dropped) and 4,000 characters of fetched text; the source registry keeps every link |
 | Time | 90 seconds per session; 40 seconds per Messages request, including body download |
 | HTTP payloads | 16 KiB public request; 128 KiB Messages request; 512 KiB Messages response; browser stream capped at 8 MiB |
 
@@ -64,3 +64,7 @@ The integration follows Anthropic's official [Sonnet 5.5 changes](https://platfo
 Live Anthropic access, web-tool enablement, real citation coverage and latency from the deployed Worker are **UNKNOWN until the maintainer probe**. No real secret or paid Anthropic request was used during implementation. Enable `LIVE_ENABLED` and `AI_ENABLED` with both existing secrets, load a live Qloo decision, then run AI Rescue once. Verify real source links, exact model, usage, incomplete-result handling, explicit acceptance and exported audit. A model/account error must remain visible; it must not fall back to a different Claude model or demo.
 
 “Pro” labels the proposed product tier. PR6 implements a quota-limited public demo, not billing, entitlement checks or a checkout.
+
+## Cost accounting
+
+Each session reports input/output tokens and an `estimatedCostUsd` with its `costBasis`. The estimate is approximate: Sonnet 5.5 list price $2 / $10 per million input / output tokens and $10 per 1,000 searches (Anthropic pricing page, checked 2026-10-21), all input at the base rate. `/health` shows `aiToday` (reserved and recorded sessions, tokens, estimated USD for the UTC day); sessions that fail without reporting usage add nothing, so the figure can understate.

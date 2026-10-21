@@ -3,7 +3,7 @@ import test from 'node:test';
 import { createDecisionAudit } from '../src/core/audit.ts';
 import { germanyDemoInputs, syntheticQueryEvidence } from '../src/demo/germany.ts';
 import type { AiDecisionContext, AiStep } from '../src/ai/types.ts';
-import { AI_SESSION_LIMITS, AI_TOOLS, runAiSession } from '../worker/src/ai-agent.ts';
+import { AI_SESSION_LIMITS, AI_TOOLS, FINALIZE_INSTRUCTION, compactReplay, runAiSession } from '../worker/src/ai-agent.ts';
 import { AI_MODEL } from '../worker/src/ai-provider.ts';
 
 const stamp = '2026-10-21T10:00:00.000Z';
@@ -129,14 +129,19 @@ test('unsupported facts and forged source IDs are rejected even inside submit_pr
 });
 
 test('the cumulative output allowance is not reset by pause_turn continuation', async () => {
-  const script = scripted(Array.from({ length: 4 }, () => response([], 'pause_turn', { usage: { input_tokens: 10, output_tokens: 2000 } })));
-  const result = await runAiSession({ baseResult: baseline(), sessionId: 'ai-token-cap', apiKey: 'key', now, fetch: script.fetcher });
-  assert.equal(result.stopReason, 'token-limit'); assert.equal(result.usage.outputTokens, 8000);
-  assert.equal(result.usage.modelCalls, 4); assert.equal(script.requests.length, 4);
+  const requests: number[] = [];
+  const fetcher: typeof fetch = (async (_url, init) => {
+    const max = (JSON.parse(String(init?.body)) as { max_tokens: number }).max_tokens;
+    requests.push(max);
+    return Response.json(response([], 'pause_turn', { usage: { input_tokens: 10, output_tokens: max } }));
+  }) as typeof fetch;
+  const result = await runAiSession({ baseResult: baseline(), sessionId: 'ai-token-cap', apiKey: 'key', now, fetch: fetcher });
+  assert.deepEqual(requests, [1500, 1500, 1500, 1500, 1500, 500]);
+  assert.equal(result.usage.outputTokens, 8000); assert.equal(result.usage.modelCalls, 6);
 });
 
 test('input usage stops follow-up requests after observed provider research usage crosses the threshold', async () => {
-  const script = scripted([response([], 'pause_turn', { usage: { input_tokens: 80000, output_tokens: 100 } })]);
+  const script = scripted([response([], 'pause_turn', { usage: { input_tokens: 150000, output_tokens: 100 } })]);
   const result = await runAiSession({ baseResult: baseline(), sessionId: 'ai-input-cap', apiKey: 'key', now, fetch: script.fetcher });
   assert.equal(result.stopReason, 'token-limit'); assert.equal(script.requests.length, 1);
 });
@@ -200,6 +205,63 @@ test('native research definitions impose hard per-call bounds and disallow model
   const search = AI_TOOLS.find(tool => tool.name === 'web_search')!;
   const fetchTool = AI_TOOLS.find(tool => tool.name === 'web_fetch')!;
   assert.equal(search.max_uses, 1); assert.equal(fetchTool.max_uses, 1);
-  assert.equal(fetchTool.max_content_tokens, 1500);
+  assert.equal(fetchTool.max_content_tokens, 1000);
   assert.deepEqual(fetchTool.url_sources, { user_input: { type: 'none' }, client_tool_results: { type: 'none' }, server_tool_results: { type: 'all' } });
+});
+
+test('replayed research is compacted: six search results at most, oversize payloads dropped, fetched text capped, sources kept', async () => {
+  const big = 'x'.repeat(4000);
+  const rows = Array.from({ length: 9 }, (_, index) => ({ type: 'web_search_result', url: `https://example.org/${index}`,
+    title: `Page ${index}`, encrypted_content: index === 0 ? big : 'ok' }));
+  const compact = compactReplay([
+    { type: 'web_search_tool_result', tool_use_id: 'a', content: rows },
+    { type: 'web_fetch_tool_result', tool_use_id: 'b', content: { type: 'web_fetch_result', url: 'https://example.org/p',
+      content: { type: 'document', title: 'p', source: { type: 'text', media_type: 'text/plain', data: 'y'.repeat(9000) } } } },
+    { type: 'thinking', thinking: 't', signature: 's' },
+  ]);
+  const search = compact[0]!.content as unknown[];
+  assert.equal(search.length, 6);
+  assert.ok(search.every(row => JSON.stringify(row).length <= AI_SESSION_LIMITS.maxReplayedSearchResultChars));
+  const data = ((compact[1]!.content as { content: { source: { data: string } } }).content.source.data);
+  assert.equal(data.length, AI_SESSION_LIMITS.maxReplayedFetchChars);
+  assert.deepEqual(compact[2], { type: 'thinking', thinking: 't', signature: 's' });
+
+  const script = scripted([
+    response([{ type: 'server_tool_use', id: 'research-search', name: 'web_search', input: { query: 'q' } },
+      { type: 'web_search_tool_result', tool_use_id: 'research-search', content: rows }, call('fit', 'get_fit_data', {})], 'tool_use',
+      { usage: { input_tokens: 200, output_tokens: 100, server_tool_use: { web_search_requests: 1 } } }),
+    response([call('submit', 'submit_proposals', { proposals: drafts })]),
+  ]);
+  const result = await runAiSession({ baseResult: baseline(), sessionId: 'ai-compact', apiKey: 'key', now, fetch: script.fetcher });
+  assert.equal(result.sources.length, 9);
+  const replayed = (script.requests[1]!.messages as { content: { content?: unknown[] }[] }[])[1]!.content.find(b => Array.isArray(b.content));
+  assert.equal(replayed!.content!.length, 6);
+  assert.equal(result.stopReason, 'completed');
+  assert.equal(result.usage.estimatedCostUsd, Math.round((300 / 1e6 * 2 + 200 / 1e6 * 10 + 0.01) * 10_000) / 10_000);
+  assert.match(result.usage.costBasis ?? '', /approximate/);
+});
+
+test('the next request carries a finalize instruction when the step budget is nearly exhausted, and a session ends with checked proposals', async () => {
+  const filler = (index: number) => response([call(`f${index}`, 'get_fit_data', {})]);
+  const search = { type: 'web_search_tool_result', tool_use_id: 'research-search', content: searchBlocks[2]!.content };
+  const withSources = scripted([
+    response([searchBlocks[1]!, search, call('f1', 'get_fit_data', {})], 'tool_use', { usage: { input_tokens: 100, output_tokens: 100, server_tool_use: { web_search_requests: 1 } } }),
+    filler(2), filler(3), filler(4),
+    response([call('submit', 'submit_proposals', { proposals: drafts })]),
+  ]);
+  const result = await runAiSession({ baseResult: baseline(), sessionId: 'ai-finalize', apiKey: 'key', now, fetch: withSources.fetcher });
+  const lastUser = (n: number) => JSON.stringify((withSources.requests[n]!.messages as unknown[]).at(-1));
+  assert.ok(!lastUser(2).includes('FINALIZE NOW'));
+  assert.ok(lastUser(4).includes(FINALIZE_INSTRUCTION.slice(0, 20)));
+  assert.equal(result.stopReason, 'completed'); assert.equal(result.proposals.length, 2);
+});
+
+test('the input-token stop is configurable and finalize triggers at 80 percent of it', async () => {
+  const script = scripted([
+    response([call('f', 'get_fit_data', {})], 'tool_use', { usage: { input_tokens: 90, output_tokens: 10 } }),
+    response([], 'pause_turn', { usage: { input_tokens: 20, output_tokens: 10 } }),
+  ]);
+  const result = await runAiSession({ baseResult: baseline(), sessionId: 'ai-config-stop', apiKey: 'key', now, fetch: script.fetcher, maxInputTokens: 100 });
+  assert.ok(JSON.stringify(script.requests[1]!.messages).includes('FINALIZE NOW'));
+  assert.equal(result.stopReason, 'token-limit');
 });

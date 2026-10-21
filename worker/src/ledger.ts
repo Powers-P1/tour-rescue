@@ -92,6 +92,7 @@ interface CacheEntry {
 
 const QUOTA_KEY = 'tour-rescue:quotas:v1';
 const AI_QUOTA_KEY = 'tour-rescue:ai-quotas:v1';
+const AI_COST_KEY = 'tour-rescue:ai-cost:v1';
 const CACHE_INDEX_KEY = 'tour-rescue:cache-index:v1';
 const cacheKey = (key: string) => `tour-rescue:cache:v1:${key}`;
 const MAX_TIME = 253402300799999; // Last millisecond of year 9999, a supported ISO calendar.
@@ -245,8 +246,8 @@ export class UsageLedger {
       monthlyQlooRequests: limit(options.monthlyQlooRequests, 50000, 50000, 'monthlyQlooRequests'),
       dailyLiveRequests: limit(options.dailyLiveRequests, 150, 1000, 'dailyLiveRequests'),
       dailyPerClientRequests: limit(options.dailyPerClientRequests, 25, 100, 'dailyPerClientRequests'),
-      dailyAiSessions: limit(options.dailyAiSessions, 10, 30, 'dailyAiSessions'),
-      dailyAiPerClientSessions: limit(options.dailyAiPerClientSessions, 3, 10, 'dailyAiPerClientSessions'),
+      dailyAiSessions: limit(options.dailyAiSessions, 40, 200, 'dailyAiSessions'),
+      dailyAiPerClientSessions: limit(options.dailyAiPerClientSessions, 5, 20, 'dailyAiPerClientSessions'),
       cacheTtlMs: limit(options.cacheTtlMs, 6 * 60 * 60 * 1000, MAX_TTL, 'cacheTtlMs'),
       cacheMaxEntries: limit(options.cacheMaxEntries, 128, 128, 'cacheMaxEntries'),
       cacheMaxEntryBytes: limit(options.cacheMaxEntryBytes, 256 * 1024, 512 * 1024, 'cacheMaxEntryBytes'),
@@ -283,6 +284,35 @@ export class UsageLedger {
       else client.count += 1;
       state.sessions += 1;
       await transaction.put(key, state);
+    });
+  }
+
+  /** Add one finished session's reported usage to today's AI totals (UTC day). Failures that report nothing add nothing. */
+  async recordAiUsage(usage: { inputTokens: number; outputTokens: number; costUsd: number }): Promise<void> {
+    await this.storage.transaction(async transaction => {
+      const day = dayOf(timeValue(this.now()));
+      const prior = await transaction.get<unknown>(AI_COST_KEY);
+      const base = isObject(prior) && prior.day === day && integer(prior.sessions, 1e9) && integer(prior.inputTokens, 1e12)
+        && integer(prior.outputTokens, 1e12) && typeof prior.costUsd === 'number' && Number.isFinite(prior.costUsd)
+        ? prior : { day, sessions: 0, inputTokens: 0, outputTokens: 0, costUsd: 0 };
+      await transaction.put(AI_COST_KEY, { day, sessions: (base.sessions as number) + 1,
+        inputTokens: (base.inputTokens as number) + usage.inputTokens, outputTokens: (base.outputTokens as number) + usage.outputTokens,
+        costUsd: Math.round(((base.costUsd as number) + usage.costUsd) * 10_000) / 10_000 });
+    });
+  }
+
+  /** Today's recorded AI totals and reserved-session count (reserved includes failed sessions that reported no usage). */
+  async aiToday(): Promise<{ day: string; reservedSessions: number; recordedSessions: number; inputTokens: number; outputTokens: number; estimatedCostUsd: number }> {
+    return this.storage.transaction(async transaction => {
+      const observedNow = timeValue(this.now());
+      const day = dayOf(observedNow);
+      const cost = await transaction.get<unknown>(AI_COST_KEY);
+      const quota = await transaction.get<unknown>(AI_QUOTA_KEY);
+      const c = isObject(cost) && cost.day === day ? cost : undefined;
+      const q = isObject(quota) && quota.day === day && integer(quota.sessions, 1e9) ? quota.sessions : 0;
+      const n = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : 0);
+      return { day, reservedSessions: q, recordedSessions: n(c?.sessions), inputTokens: n(c?.inputTokens),
+        outputTokens: n(c?.outputTokens), estimatedCostUsd: n(c?.costUsd) };
     });
   }
 
