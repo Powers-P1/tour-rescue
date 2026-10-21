@@ -1,0 +1,11 @@
+name = "tour-rescue-api"
+main = "src/index.ts"
+compatibility_date = "2026-10-21"
+
+[[durable_objects.bindings]]
+name = "UNIT_LEDGER"
+class_name = "UnitLedger"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["UnitLedger"]
