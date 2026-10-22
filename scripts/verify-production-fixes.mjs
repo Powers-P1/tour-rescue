@@ -10,7 +10,7 @@ let browser;const rows=[];
 try{
  for(let i=0;i<60;i++){try{if((await fetch(base)).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
  browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_EXECUTABLE_PATH}:{})});
- for(const width of [375,768,980,1099,1100,1440]){
+ for(const width of [375,768,980,1099,1100,1280,1440]){
   const page=await browser.newPage({viewport:{width,height:900},serviceWorkers:'block'});
   await page.route('**/*',r=>new URL(r.request().url()).origin===new URL(base).origin?r.continue():r.abort());
   for(const path of width>=980?['/app/','/']:['/']){
@@ -30,6 +30,8 @@ try{
   for(const details of await page.locator('details:visible').all())if(!await details.evaluate(d=>d.open))await details.locator('summary').click();
   const small=await page.evaluate(()=>[...document.querySelectorAll('#judges-root *')].filter(e=>[...e.childNodes].some(n=>n.nodeType===3&&n.textContent.trim())&&e.getBoundingClientRect().width&&e.getBoundingClientRect().height&&getComputedStyle(e).visibility!=='hidden'&&parseFloat(getComputedStyle(e).fontSize)<14).map(e=>({text:e.textContent.slice(0,100),font:getComputedStyle(e).fontSize,cls:e.className})));
   assert.deepEqual(small,[],'judge text below 14px at '+width+': '+JSON.stringify(small));
+  const svgLabels=await page.locator('.judge-map-preview .geo-direct-label text:visible').evaluateAll(es=>es.map(e=>parseFloat(getComputedStyle(e).fontSize)*Math.hypot(e.getScreenCTM().a,e.getScreenCTM().b)));
+  assert.ok(svgLabels.every(size=>size>=14),'Scaled jury labels below14px: '+JSON.stringify(svgLabels));
   for(const summary of await page.locator('summary:visible').all())assert.ok(await summary.evaluate(e=>e.getBoundingClientRect().height)>=48);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'no overflow');
   await page.screenshot({path:out+'/judges-'+width+'.png',fullPage:true});
