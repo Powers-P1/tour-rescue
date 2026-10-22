@@ -1,3 +1,6 @@
+@import './fonts.css';
+.site-brand .ui-icon{width:25px;height:25px;stroke:currentColor;vertical-align:middle}
+.site-brand .brand-turn{display:inline-flex;color:#f3b65b}
 /* Tour Rescue v2 public marketing and judges - no UI framework. */
 :root {
  --bg:#121A20;--surface:#1C2831;--line:#344550;--fg:#F4F6F8;

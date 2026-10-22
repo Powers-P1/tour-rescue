@@ -52,7 +52,7 @@ test('mobile feature header hides duplicate desktop Back while retaining desktop
 
 test('hero caption is short and pinned above the phone overlay',()=>{
  const page=landingMarkup(site);
- assert.match(page,/Backstage scene · illustrative/);
+ assert.match(page,/Backstage scene · AI illustration/);
  assert.doesNotMatch(page,/Backstage illustration · editorial photo when available/);
  const css=read('web2/src/marketing.css');
  assert.match(css,/\.hero-picture figcaption\s*\{[\s\S]*?top:12px;bottom:auto/);

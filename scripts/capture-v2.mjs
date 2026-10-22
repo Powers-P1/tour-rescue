@@ -23,13 +23,13 @@ async function ready(){
  }
  throw new Error('Preview server did not start. '+transcript);
 }
-const out='artifacts/screenshots/v2';
+const out=process.env.QA_OUTPUT ?? 'artifacts/screenshots/v2';
 await mkdir(out,{recursive:true});
 let browser;
 const rows=[];
 try{
  await ready();
- browser=await chromium.launch({headless:true});
+ browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_EXECUTABLE_PATH}:{})});
  const shots=[
   {name:'08-landing-desktop.png',path:'/',width:1536,height:1024},
   {name:'08-landing-mobile.png',path:'/',width:390,height:844},
@@ -247,6 +247,7 @@ try{
  // The recheck status must be inline (no fixed toast covering the Extra-distance row).
  {
    const page=await openApp('/app/#simulation',1280,800);
+   await page.locator('.sim-edit summary').click();
    await page.locator('#sim-cap').fill('100');
    await page.locator('[data-action="sim-recheck"]').click();
    if(await page.locator('p.toast').count()!==0)

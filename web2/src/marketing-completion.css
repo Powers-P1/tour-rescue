@@ -1,0 +1,111 @@
+/* Boards 08/09. Editorial product page; a short, evidence-first jury path. */
+.site-brand {font-size:18px;letter-spacing:.04em;}
+.site-brand .ui-icon {width:24px;height:24px;}
+.hero-picture img,.sos-photo img {opacity:1;transition:none;}
+.product-site .hero-copy h1 span,.judge-copy h1 span {color:var(--fg);}
+.product-site .section-copy .eyebrow,.product-site .agency-band .eyebrow {display:none;}
+.line-facts {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;border:0;}
+.line-facts p {display:flex;align-items:flex-start;flex-direction:column;gap:15px;border-bottom:0;font-size:16px;line-height:1.4;}
+.line-facts p+p {border-left:1px solid var(--line);padding-left:20px;}
+.line-facts .ui-icon {width:28px;height:28px;color:var(--muted);}
+.product-site .landing-judges-promo {padding-top:32px;padding-bottom:40px;}
+.product-site .landing-judges-promo h2 {font-size:36px;}
+.product-site .landing-judges-promo .eyebrow {font-size:13px;margin-bottom:12px;}
+.judge-example-body {display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:20px;}
+.judge-map-preview .germany-geo-svg {height:300px;}
+.judge-map-preview .geo-route-legend {font-size:12px;gap:6px;}
+.judge-map-preview .geo-map-footer {display:none;}
+.judge-map-preview .geo-direct-label text {font-size:29px;}
+.judge-map-preview .geo-number-callout {display:none;}
+.judge-map-preview .geo-direct-label {display:block;}
+.example-options {margin-top:0;}
+.judges-example {padding:24px;background:transparent;}
+.example-top h3 {font-size:28px;}
+.example-option strong {font-size:19px;}
+.example-option {padding:16px 0;flex-wrap:wrap;gap:10px;}
+.example-disclosure {line-height:1.5;}
+.judge-optional {border-top:1px solid var(--line);}
+.judge-optional > summary {cursor:pointer;min-height:64px;display:flex;align-items:center;gap:16px;font-size:18px;list-style:none;}
+.judge-optional > summary:before {content:'+';color:var(--amber);font-size:24px;}
+.judge-optional[open] > summary:before {content:'−';}
+.judge-optional > summary::-webkit-details-marker {display:none;}
+.judge-optional .site-shell {padding-left:0;padding-right:0;}
+.judge-optional .judge-limits,.judge-optional .scope-section,.judge-optional .judge-last {padding-top:28px;padding-bottom:32px;border:0;}
+.judge-optional .section-title h2,.judge-optional .judge-last h2 {font-size:32px;}
+.judges-hero {min-height:0;padding-top:40px;padding-bottom:40px;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:32px;}
+.judge-copy h1 {font-size:clamp(40px,4.1vw,64px);}
+.judge-copy .eyebrow {margin-bottom:18px;}
+.judge-copy>p:not(.eyebrow,.mini-disclosure) {font-size:18px;}
+.judge-steps {padding-top:30px;padding-bottom:36px;}
+.judge-steps .section-title,.judge-why .section-title,.judges-proof .section-title {margin-bottom:24px;}
+.judge-steps .section-title h2,.judge-why .section-title h2,.judges-proof .section-title h2 {font-size:38px;}
+.judge-steps .eyebrow,.judge-why .section-title .eyebrow,.judges-proof .section-title .eyebrow {display:none;}
+.judge-step-columns h3 {font-size:23px;margin-top:16px;}
+.judge-step-columns p {font-size:16px;margin-bottom:0;}
+.judge-why {padding-top:32px;padding-bottom:36px;}
+.judges-proof {padding-top:36px;padding-bottom:40px;}
+.evidence-rows a {min-height:80px;}
+.judge-tools {margin-top:20px;}
+@media(min-width:791px) {
+  .product-site .site-header {position:absolute;top:0;left:0;right:0;background:transparent;border:0;}
+  .product-site .site-header nav {gap:18px;}
+  .product-site .site-header nav>.text-link {font-size:14px;}
+  .product-site .site-hero {max-width:none;grid-template-columns:46% 54%;gap:0;min-height:0;padding:0;align-items:stretch;}
+  .product-site .hero-copy {padding:128px 28px 64px clamp(32px,3.5vw,60px);}
+  .product-site .hero-copy h1 {font-size:clamp(42px,4.35vw,70px);margin-bottom:24px;}
+  .product-site .hero-deck {font-size:18px;line-height:1.55;max-width:38ch;}
+  .product-site .hero-actions {align-items:flex-start;flex-direction:column;gap:8px;margin-top:24px;}
+  .product-site .hero-visual {padding:0;min-height:100%;}
+  .product-site .hero-picture {position:absolute;inset:0;margin:0;height:100%;border:0;border-radius:0;}
+  .product-site .hero-picture img {object-position:center;}
+  .product-site .hero-picture figcaption {top:auto;bottom:16px;left:auto;right:16px;max-width:calc(100% - 240px);}
+  .product-site .phone-preview {left:-14px;right:auto;bottom:0;box-shadow:none;border-bottom-left-radius:0;border-bottom-right-radius:0;}
+  .product-site .landing-section {padding-top:32px;padding-bottom:36px;}
+  .product-site .rescue-section {grid-template-columns:minmax(0,.8fr) minmax(0,1.15fr);gap:38px;}
+  .product-site .journey-diagram {padding:14px;border-radius:0;background:transparent;}
+  .product-site .journey-diagram .germany-geo-svg {height:320px;}
+  .product-site .journey-meta {display:none;}
+  .product-site .section-copy h2 {font-size:clamp(38px,4.1vw,64px);margin-bottom:22px;}
+  .product-site .section-copy h2 span {color:var(--fg);}
+  .product-site .section-copy>p:not(.eyebrow,.mini-disclosure) {font-size:17px;}
+  .product-site .sos-section {padding-top:0;padding-bottom:0;background:var(--bg);border-top:1px solid var(--line);}
+  .product-site .sos-grid {grid-template-columns:46% 54%;gap:0;padding:0;max-width:none;}
+  .product-site .sos-grid .section-copy {padding:42px 40px 36px clamp(32px,3.5vw,60px);}
+  .product-site .sos-photo {height:100%;min-height:390px;margin:0;border:0;border-radius:0;}
+  .product-site .sos-photo img {position:absolute;inset:0;border-radius:0;}
+  .product-site .sos-card {bottom:18px;right:24px;box-shadow:none;}
+  .product-site .sos-photo figcaption {bottom:14px;left:12px;max-width:calc(100% - 305px);}
+  .product-site .agency-band {padding:28px 0;}
+  .product-site .agency-band h2 {font-size:44px;margin:0;}
+  .product-site .agency-band h2 span {color:var(--bg);}
+  .product-site .agency-band-inner>div+div {border-left:1px solid #a6aaa7;padding-left:36px;}
+}
+@media(max-width:1100px) and (min-width:791px){
+  .product-site .site-brand {font-size:16px;}
+  .product-site .site-header nav {gap:12px;}
+  .product-site .site-header .m-button,.product-site .judges-nav {font-size:13px;padding:10px;}
+  .product-site .hero-copy {padding-top:116px;}
+  .product-site .phone-preview {width:200px;padding:15px 12px;}
+  .product-site .hero-copy h1 {font-size:42px;}
+  .judge-example-body {grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;}
+  .judge-map-preview {display:block;}
+  .judge-copy h1 {font-size:42px;}
+}
+@media(max-width:790px){
+  .site-brand {font-size:14px;}
+  .product-site .site-hero {padding-top:32px;}
+  .product-site .hero-copy h1 {font-size:42px;}
+  .product-site .hero-visual {margin-top:12px;}
+  .product-site .hero-picture {border-radius:0;}
+  .judges-hero {grid-template-columns:minmax(0,1fr);padding-top:32px;}
+  .judge-copy h1 {font-size:42px;}
+  .judge-example-body {grid-template-columns:1fr;}
+  .judge-map-preview {display:none;}
+  .judges-example {padding:20px;}
+  .example-option {flex-wrap:nowrap;}
+  .judge-step-columns h3 {font-size:22px;}
+  .judge-steps .section-title h2,.judge-why .section-title h2,.judges-proof .section-title h2 {font-size:31px;}
+  .product-site .line-facts {grid-template-columns:minmax(0,1fr);gap:0;}
+  .product-site .line-facts p {flex-direction:row;align-items:center;min-height:64px;}
+  .product-site .line-facts p+p {border-left:0;border-top:1px solid var(--line);padding-left:0;}
+}

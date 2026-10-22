@@ -1,6 +1,10 @@
 import './styles.css';
 import './desktop.css';
 import './germany-map.css';
+import './completion.css';
+import { icon, brand } from './icons.ts';
+import { isWorkspaceScreen, workspaceView } from './workspace-views.ts';
+import type { WorkspaceScreen } from './workspace-views.ts';
 import { renderGermanyGeographicMap } from './germany-map.ts';
 import { createDemoResult, createApiClient } from '../../web/src/data.ts';
 import type { ApiDecisionResult, ArtistChoice, LiveSelection } from '../../web/src/data.ts';
@@ -10,8 +14,8 @@ import { initialIncident, isFocusedRescue, transitionIncident } from './state.ts
 import type { IncidentState } from './state.ts';
 import { projectRescue, UNKNOWN } from './model.ts';
 import type { RescueOption, RescueProjection } from './model.ts';
-import { SAMPLE_PLAN_BRIEF, initialSosSample, selectedSupplier, summarizePlanBrief, transitionSosSample } from './extension-state.ts';
-import type { PlanSummary, SosSampleState, SosStage, SosSupplierId } from './extension-state.ts';
+import { SAMPLE_ECONOMICS, evaluateEconomics, SAMPLE_PLAN_BRIEF, initialSosSample, selectedSupplier, summarizePlanBrief, transitionSosSample } from './extension-state.ts';
+import type { EconomicsAssumptions, PlanSummary, SosSampleState, SosStage, SosSupplierId } from './extension-state.ts';
 import { isExtensionScreen, renderExtension } from './extension-views.ts';
 import type { ExtensionContext, ExtensionScreen } from './extension-views.ts';
 import { createAiDemoSession } from '../../src/ai/demo.ts';
@@ -28,7 +32,7 @@ import type { AiSessionResult, AiStep } from '../../src/ai/types.ts';
 
 declare const __WORKER_ORIGIN__: string;
 
-type Screen = 'today' | 'options' | 'detail' | 'draft' | 'crew' | 'not-built' | ExtensionScreen | DesktopScreen;
+type Screen = 'today' | 'options' | 'detail' | 'draft' | 'crew' | ExtensionScreen | DesktopScreen | WorkspaceScreen;
 type ArtistRole = 'target' | 'comparison' | 'control';
 const api = createApiClient(__WORKER_ORIGIN__);
 const aiApi = createAiClient(__WORKER_ORIGIN__);
@@ -45,6 +49,14 @@ let sosReturnScreen: Screen = 'today';
 let planBrief = SAMPLE_PLAN_BRIEF;
 let planSummary: PlanSummary | null = null;
 let economicsExpanded = false;
+let economics: EconomicsAssumptions = {...SAMPLE_ECONOMICS};
+let economicsError = "";
+let economicsDraft: Record<string,string> = {};
+let bandProfile = (() => { try { return localStorage.getItem('tour-rescue.band-profile.v1') ?? 'Five-piece indie band. Club shows. We prefer university cities and avoid night drives.'; } catch { return 'Five-piece indie band. Club shows. We prefer university cities and avoid night drives.'; } })();
+let workspaceReturn: Screen = 'route';
+let workspaceAgency = false;
+let lastRenderedScreen: Screen | null = null;
+let followingLocation = false;
 let fanPreviewed = false;
 let aiMode: 'demo' | 'live' = 'demo';
 let aiBusy = false;
@@ -65,6 +77,7 @@ let simCapDraft:string|null=null;
 let simCapError='';
 let simChooseCity = false;
 let proposalFromSimulation = false;
+let proposalReturn: Screen | null = null;
 let proposalSource: ApiDecisionResult | null = null;
 let agencyFilter: 'attention' | 'all' = 'attention';
 const agencyOwners: Partial<Record<'drum'|'leipzig'|'presale',AgencyOwner>> = {};
@@ -81,13 +94,11 @@ let liveNotice = '';
 let liveTarget: ArtistChoice | null = null;
 let liveControl: ArtistChoice | null = null;
 let liveComparisons: ArtistChoice[] = [];
-let showSOS = false;
 let notice = '';
 let proposalContact = '';
 let proposalMessage = '';
 let reviewingMessage = false;
 let chosenProposal: PromoterSheetModel | null = null;
-let unbuiltName = '';
 const HTML = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, char =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char] ?? char);
 
@@ -113,8 +124,8 @@ function softButton(label: string, action: string, extra = ''): string {
 function header(focused: boolean, context = ''): string {
   return '<header class="mobile-header">' +
     (focused
-      ? '<button type="button" class="back-button" data-action="back" aria-label="Go back">← <span>' + HTML(context || 'Back') + '</span></button>'
-      : '<div class="wordmark"><span class="turn-arrow">↱</span> TOUR RESCUE</div>') +
+      ? '<button type="button" class="back-button" data-action="back" aria-label="Go back">' + icon('back') + '<span>' + HTML(context || 'Back') + '</span></button>'
+      : '<div class="wordmark">' + brand() + '</div>') +
     '<button class="sos-button" type="button" data-action="sos">SOS</button></header>';
 }
 function mobileTabs(): string {
@@ -123,20 +134,20 @@ function mobileTabs(): string {
   return '<nav class="mobile-tabs" aria-label="Main navigation">' +
     (['Today', 'Route', 'Crew'] as const).map(label =>
       '<button type="button" data-action="tab-' + label.toLowerCase() + '" class="' + (label === active ? 'active' : '') + '">' +
-      '<span aria-hidden="true">' + (label === 'Today' ? '◫' : label === 'Route' ? '↝' : '☷') + '</span>' + label + '</button>').join('') +
+      icon(label === 'Today' ? 'calendar' : label === 'Route' ? 'pin' : 'people') + label + '</button>').join('') +
     '</nav>';
 }
 function sidebar(): string {
-  if (screen === 'agency') {
+  if (screen === 'agency' || (isWorkspaceScreen(screen) && workspaceAgency)) {
     const nav = [
       { label:'Overview', action:'agency-overview' }, { label:'Tours', action:'agency-all' },
       { label:'Team', action:'agency-team' }, { label:'Documents', action:'agency-documents' },
     ];
     return '<aside class="sidebar" aria-label="Agency workspace">' +
-      '<div class="wordmark brand-desktop"><span class="turn-arrow">↱</span> TOUR RESCUE</div>' +
+      '<div class="wordmark brand-desktop">' + brand() + '</div>' +
       '<p class="eyebrow">AGENCY · SAMPLE</p><nav class="side-nav" aria-label="Agency navigation">' +
       nav.map(item => '<button type="button" data-action="'+item.action+'"'+
-        (item.label==='Overview'?' class="active" aria-current="page"':'')+'>'+item.label+'</button>').join('')+
+        ((item.label==='Overview'&&screen==='agency'&&agencyFilter==='attention')||(item.label==='Tours'&&screen==='agency'&&agencyFilter==='all')||(item.label==='Team'&&screen==='team')||(item.label==='Documents'&&screen==='documents')?' class="active" aria-current="page"':'')+'>'+icon(item.label==='Overview'?'home':item.label==='Tours'?'calendar':item.label==='Team'?'people':'document')+item.label+'</button>').join('')+
       '</nav><div class="side-spacer"></div>' +
       '<button class="sos-button wide-sos" type="button" data-action="sos">Tour SOS</button>' +
       '<div class="side-bottom"><strong>Roadline Agency</strong><span>Fictional roster</span>' +
@@ -144,16 +155,16 @@ function sidebar(): string {
   }
   const nav: { label: string; action: string; selected: boolean }[] = [
     { label: 'Overview', action: 'tab-today', selected: screen === 'today' },
-    { label: 'Route', action: 'tab-route', selected: ['options', 'detail', 'draft', 'route', 'plan', 'plan-preview',
+    { label: 'Route', action: 'tab-route', selected: ['options', 'detail', 'route', 'plan', 'plan-preview',
       'economics', 'economics-terms', 'ai', 'simulation'].includes(screen) },
     { label: 'Audience', action: 'concept-audience', selected: screen === 'audience' },
     { label: 'Crew', action: 'tab-crew', selected: screen === 'crew' },
-    { label: 'Documents', action: 'documents', selected: screen === 'draft' },
+    { label: 'Documents', action: 'documents', selected: screen === 'documents' || screen === 'draft' },
   ];
   return '<aside class="sidebar" aria-label="Tour workspace">' +
-    '<div class="wordmark brand-desktop"><span class="turn-arrow">↱</span> TOUR RESCUE</div>' +
+    '<div class="wordmark brand-desktop">' + brand() + '</div>' +
     '<nav class="side-nav" aria-label="Desktop navigation">' +
-    nav.map(item => '<button type="button" data-action="' + item.action + '"' + (item.selected ? ' class="active" aria-current="page"' : '') + '>' + HTML(item.label) + '</button>').join('') +
+    nav.map(item => '<button type="button" data-action="' + item.action + '"' + (item.selected ? ' class="active" aria-current="page"' : '') + '>' + icon(item.label==='Overview'?'home':item.label==='Route'?'pin':item.label==='Audience'?'people':item.label==='Crew'?'crew':'document') + HTML(item.label) + '</button>').join('') +
     '</nav><div class="side-spacer"></div>' +
     '<button class="sos-button wide-sos" type="button" data-action="sos">Tour SOS</button>' +
     '<div class="side-bottom"><strong>Northbound</strong><span>Sample workspace</span>' +
@@ -171,12 +182,12 @@ function homeMobile(): string {
     '<p class="muted">' + HTML(projection.cancelledDate) + ' · next stop ' + HTML(projection.toCity) + '</p>' +
     primary('Rescue this date →', 'rescue') + '</div>' +
     '<div class="next-up"><h2>Next up</h2><div class="next-time">16:00</div>' +
-    '<h3>Load-in</h3><p class="muted">Sample crew note · ' + HTML(projection.fromCity) + '</p>' +
+    '<h3>' + icon('crew') + 'Load-in</h3><p class="muted">Sample crew note · ' + HTML(projection.fromCity) + '</p>' +
     softButton('Open today’s sheet →', 'tab-crew') + '</div>' +
     '<p class="tiny-label">Sample tour · venue and crew details unverified</p>' + mobileTabs() + '</section>';
 }
 function shortlist(): string {
-  return '<section class="mobile-view rescue-view">' + header(true, projection.cancelledDate) +
+  return '<section class="mobile-view rescue-view shortlist-view">' + header(true, projection.cancelledDate) +
     '<div class="intro"><h1>Three ways forward.</h1><p class="muted">' + HTML(projection.fromCity) + ' → replacement → ' + HTML(projection.toCity) + '</p></div>' +
     '<fieldset class="options-list" role="radiogroup" aria-labelledby="rescue-options-legend"><legend class="sr-only" id="rescue-options-legend">Choose a rescue option</legend>' +
     projection.options.map(option => {
@@ -184,12 +195,12 @@ function shortlist(): string {
       return '<button type="button" role="radio" aria-checked="' + String(selected) + '" class="option-row' + (selected ? ' selected' : '') +
         '" data-action="select-option" data-id="' + HTML(option.id) + '" aria-controls="rescue-choice-summary" tabindex="' + (selected ? '0' : '-1') + '">' +
         '<div class="option-heading"><strong>' + HTML(option.cityName) + '</strong>' +
-        (option.recommended ? '<span class="suggested">Suggested by checks</span>' : '') +
+        (option.recommended ? '<span class="suggested">Suggested</span>' : '') +
         '<span class="fake-radio" aria-hidden="true"></span></div>' +
         '<div class="option-reason">' + HTML(option.reason) + '</div>' +
         '<div class="drive-line">' + (option.kind === 'day-off' ? 'No added show · locked dates retained' :
           HTML(option.inbound) + ' in <span class="middle-dot">·</span> ' + HTML(option.outbound) + ' onward') + '</div>' +
-        '<div class="option-validation">' + statusBadge(option.decisionCheck) + '</div></button>';
+        '<div class="option-validation">' + (option.decisionCheck === 'FAIL' ? '<span class="danger-text">× Fails declared limits</span>' : option.decisionCheck === 'UNKNOWN' ? '<span>? More evidence needed</span>' : '<span class="success-text">✓ Passes declared checks</span>') + '</div></button>';
     }).join('') + '</fieldset>' +
     '<div id="rescue-choice-summary" class="focused-bottom">' + primary(optionById(pendingId)?.kind === 'day-off' ?
       'Keep the day off →' : 'Review ' + (optionById(pendingId)?.cityName ?? 'option') + ' →', 'review') +
@@ -207,7 +218,7 @@ function details(): string {
     '</strong></div><div><span>Audience fit</span><strong>' + HTML(option.relativeFit) + '</strong></div></div>' +
     '<div class="why-block"><h2>Why this option</h2><p>' + HTML(option.reason) + '</p>' +
     '<p class="soft-status">' + statusBadge(option.routeCheck) + ' Route check · declared daily limit ' + HTML(projection.limit) + '</p>' +
-    '<p class="soft-status">' + statusBadge(option.decisionCheck) + ' Decision checks</p>' +
+    (option.decisionCheck !== option.routeCheck ? '<p class="soft-status">' + statusBadge(option.decisionCheck) + ' Decision checks</p>' : '') +
     (option.kind === 'day-off' ? '<p class="pending-venue">ⓘ No promoter or venue needed for a day off.</p>'
       : '<p class="pending-venue">◷ Venue and date still to confirm.</p>') + '</div>' +
     (showEvidence ? evidencePanel(option) : '') +
@@ -281,12 +292,6 @@ function crew(): string {
     '<p class="tiny-label">Last verified synchronization: Unknown / To confirm</p>' +
     mobileTabs() + '</section>';
 }
-function unbuilt(): string {
-  return '<section class="mobile-view home-view">' + header(false) +
-    '<div class="intro"><p class="eyebrow">Designed extension · not implemented</p><h1>' + HTML(unbuiltName) + '.</h1>' +
-    '<p>Visible in boards 02-03 and 05-09, scheduled for later PRs. There is no hidden live integration behind this entry.</p></div>' +
-    softButton('Back to the tour →', 'tab-today') + mobileTabs() + '</section>';
-}
 function mapSVG():string {
  const proposalOptions=projection.options.filter(option=>option.kind!=='day-off'&&option.cityId);
  const recommended=proposalOptions.find(option=>option.recommended)??proposalOptions[0];
@@ -295,11 +300,7 @@ function mapSVG():string {
    renderGermanyGeographicMap({
      scope:'command',from:projection.fromCity,cancelled:projection.cancelledCity,
      to:projection.toCity,proposalIds,preferredProposalId:recommended?.cityId,
-   })+
-   '<div class="map-bottom"><button type="button" class="text-button map-explore" '+
-   'data-action="concept-audience">Explore audience fit →</button></div>'+
-   '<p class="tiny-label">Nuremberg is a candidate, not a booked venue. '+
-   'Road checks use a separate OSRM snapshot.</p></div>';
+   })+'</div>';
 }
 function desktopHome(): string {
   return '<section class="desktop-command">' +
@@ -326,8 +327,8 @@ function desktopHome(): string {
     originNote() + '</section>';
 }
 function extensionContext(): ExtensionContext {
-  return { tabs: mobileTabs(), sos, planBrief, planSummary, showAssumptions: economicsExpanded,
-    fanPreviewed, aiBusy, aiNotice, aiMode, aiSteps, aiSession, sourceMode: projection.mode };
+  return { tabs: mobileTabs(), sos, planBrief, planSummary, bandProfile, showAssumptions: economicsExpanded,
+    economics, economicsError, economicsDraft, fanPreviewed, aiBusy, aiNotice, aiMode, aiSteps, aiSession, sourceMode: projection.mode };
 }
 function desktopContext(): DesktopViewContext {
   return {
@@ -339,7 +340,10 @@ function desktopContext(): DesktopViewContext {
     proposedOwner:agencyProposedOwner, agencyNotice, actionNotice:notice,
   };
 }
+function renderWorkspace(): string { return workspaceView(screen as WorkspaceScreen, {profile:bandProfile,hasProposal:!!chosenProposal,agency:workspaceAgency,presaleOwner:agencyOwners.presale??'Unassigned'}); }
+function openWorkspace(next: WorkspaceScreen, agency=false):void { workspaceReturn=screen; workspaceAgency=agency; screen=next;notice='';render(); }
 function desktopInner(): string {
+  if (isWorkspaceScreen(screen)) return '<div class="desktop-centered">'+renderWorkspace()+'</div>';
   if (isDesktopScreen(screen)) return renderDesktopFeature(screen, desktopContext());
   if (screen === 'today') return desktopHome();
   return '<div class="desktop-centered"><div class="desktop-mini-header"><strong>' + HTML(projection.title) +
@@ -348,7 +352,7 @@ function desktopInner(): string {
       : screen === 'options' ? shortlist() :
         screen === 'detail' ? '<button type="button" class="text-button desktop-review-back" data-action="back">← Back to rescue directions</button>'+details() :
         screen === 'draft' ? '<button type="button" class="text-button desktop-proposal-back" data-action="back">← Back to checked route</button>'+draft() :
-      screen === 'crew' ? crew() : unbuilt()) + '</div>';
+      crew()) + '</div>';
 }
 function liveDialog(): string {
   if (!liveOpen) return '';
@@ -374,13 +378,6 @@ function liveDialog(): string {
     primary(liveBusy ? 'Checking Qloo…' : 'Run fresh Qloo evaluation →', 'run-live', liveBusy || !liveTarget || !liveControl) +
     ((!liveTarget || !liveControl) ? '<p class="tiny-label">To enable: choose a resolved Target artist and Control artist.</p>' : '') +
     '<p class="tiny-label">Nothing here contacts promoters or changes confirmed dates.</p></section></div>';
-}
-function sosDialog(): string {
-  if (!showSOS) return '';
-  return '<div class="modal-backdrop"><section class="sos-dialog" role="dialog" aria-modal="true" aria-label="Local SOS">' +
-    '<p class="overline accent-text">LOCAL SOS</p><h2 tabindex="-1">Designed for the next increment.</h2>' +
-    '<p>The supplier shortlist and spend approval shown in board 02 are sample concepts, not working bookings or dispatch.</p>' +
-    primary('Return to the tour', 'close-sos') + '</section></div>';
 }
 const desktopMedia = window.matchMedia('(min-width: 980px)');
 let dialogReturnAction: 'open-live' | 'sos' | null = null;
@@ -420,32 +417,40 @@ function tryRestoreFocus(node: HTMLElement | null): boolean {
   return document.activeElement === node;
 }
 function render(): void {
-  const focus = previousFocus();
+  const screenChanged = lastRenderedScreen !== screen;
+  const focus = screenChanged ? null : previousFocus();
+  const detailsKey = (node: HTMLDetailsElement) => node.id || node.className + ':' + node.querySelector('summary')?.textContent;
+  const openDetails = screenChanged ? new Set<string>() : new Set([...root!.querySelectorAll<HTMLDetailsElement>('details[open]')].map(detailsKey));
   const priorDialog = focusedDialog();
   const previouslyInDialog = !!(priorDialog && document.activeElement && priorDialog.contains(document.activeElement));
   // A public fan screen also mounts #main but deliberately has no private .app-layout.
   const previouslyRendered = hadMountedScreen(root!);
   document.body.classList.toggle('focused-rescue', isFocusedRescue(incident.phase) && ['options','detail','draft'].includes(screen));
   const desktop = desktopMedia.matches;
-  const mobile = isDesktopScreen(screen)
+  const mobile = isWorkspaceScreen(screen) ? renderWorkspace() : isDesktopScreen(screen)
     ? '<div class="feature-mobile-top"><button type="button" class="back-button" data-action="feature-back">← Back to tour</button>' +
       (screen === 'agency' ? '' : '<button type="button" class="sos-button" data-action="sos">SOS</button>') +
       '</div>' + renderDesktopFeature(screen, desktopContext())
     : isExtensionScreen(screen) ? renderExtension(screen, extensionContext()) :
     screen === 'today' ? homeMobile() : screen === 'options' ? shortlist() :
-    screen === 'detail' ? details() : screen === 'draft' ? draft() : screen === 'crew' ? crew() : unbuilt();
+    screen === 'detail' ? details() : screen === 'draft' ? draft() : crew();
   // One DOM layout. The public fan page never receives private tour navigation or SOS controls.
   root!.innerHTML = '<a href="#main" class="skip-link">Skip to content</a>' +
     (screen === 'fan'
       ? '<main id="main" class="fan-public" tabindex="-1">' + mobile + '</main>'
       : '<div class="app-layout">' + (desktop ? sidebar() : '') + '<main id="main" class="main-content" tabindex="-1">' +
         (desktop ? '<div class="desktop-only">' + desktopInner() + '</div>' : '<div class="mobile-only">' + mobile + '</div>') +
-        (notice && !isDesktopScreen(screen) ? '<p role="status" class="toast">' + HTML(notice) + '</p>' : '') + '</main></div>' +
-        liveDialog() + sosDialog());
+        '</main></div>' +
+        liveDialog());
+  if(notice && !isDesktopScreen(screen)) {
+    const anchor=root!.querySelector('#main .intro, #main .desktop-top');
+    anchor?.insertAdjacentHTML('afterend','<p role="status" class="screen-notice">'+HTML(notice)+'</p>');
+  }
+  for(const node of root!.querySelectorAll<HTMLDetailsElement>('details')) if(openDetails.has(detailsKey(node))) node.open=true;
   printRoot!.innerHTML = screen === 'draft' && chosenProposal ? sheetHtml(chosenProposal) : '';
   document.title = 'Tour Rescue · ' + (screen === 'today' ? 'Today' : screen === 'options' ? 'Rescue options' :
     screen === 'detail' ? 'Review' : screen === 'draft' ? 'Promoter draft' : screen === 'crew' ? 'Crew' :
-    (isExtensionScreen(screen) || isDesktopScreen(screen)) ? screen.replace(/-/g, ' ') : unbuiltName);
+    screen.replace(/-/g, ' '));
 
   const dialog = focusedDialog();
   const layout = root!.querySelector<HTMLElement>('.app-layout');
@@ -457,10 +462,18 @@ function render(): void {
     const opener = root!.querySelector<HTMLElement>('[data-action="' + dialogReturnAction + '"]');
     dialogReturnAction = null;
     if (!tryRestoreFocus(opener)) focusFirstHeading(root!.querySelector('#main') ?? root!);
+  } else if (screenChanged && previouslyRendered) {
+    focusFirstHeading(root!.querySelector('#main') ?? root!);
   } else if (previouslyRendered && focus) {
     const restored = findPreviousTarget(focus, root!);
     if (!tryRestoreFocus(restored)) focusFirstHeading(root!.querySelector('#main') ?? root!);
   }
+  if (screenChanged) {
+    window.scrollTo({top:0,behavior:'instant'});
+    const hash = screen === 'today' ? '' : '#' + (screen === 'options' ? 'rescue' : screen);
+    if (!followingLocation && location.hash !== hash) history.pushState({screen,chosenOptionId:incident.chosenOptionId}, '', location.pathname+location.search+hash);
+  }
+  lastRenderedScreen = screen;
 }
 desktopMedia.addEventListener('change', () => render());
 function goHome(): void {
@@ -489,6 +502,7 @@ function review(): void {
   render();
 }
 function prepare(): void {
+  proposalReturn = null;
   const selected = currentOption();
   if (!selected || selected.kind === 'day-off') return;
   if (selected.routeCheck === 'FAIL' || selected.decisionCheck === 'FAIL') {
@@ -505,6 +519,8 @@ function prepare(): void {
   render();
 }
 function back(): void {
+  notice = '';
+  if (isWorkspaceScreen(screen)) { screen=workspaceReturn;notice='';render();return; }
   if (isDesktopScreen(screen)) { screen === 'agency' ? goHome() : routeHub(); return; }
   if (screen.startsWith('sos-')) {
     const earlier = sos.stage;
@@ -526,6 +542,7 @@ function back(): void {
     incident = transitionIncident(incident, { type: 'back-to-options' });
     screen = 'options';
   } else if (screen === 'draft') {
+    if(proposalReturn) { screen=proposalReturn;proposalReturn=null;render();return; }
     if (proposalFromSimulation) {
       incident = initialIncident(); screen = 'simulation'; proposalFromSimulation = false; proposalSource = null;
     } else {
@@ -553,9 +570,9 @@ function sosScreen(stage: SosStage): Screen {
     stage === 'quote' ? 'sos-quote' : 'sos-approved';
 }
 function openSos(): void {
+  notice = '';
   if (!screen.startsWith('sos-')) sosReturnScreen = screen;
-  sos = initialSosSample();
-  screen = 'sos-problem';
+  screen = sosScreen(sos.stage);
   render();
 }
 function routeHub(): void {
@@ -601,6 +618,7 @@ function saveCurrentSimulation(): void {
   render();
 }
 function previewSimulationProposal(): void {
+  proposalReturn=null;
   if(!simulationModel)return;
   const source=simulationModel.sourceResult;
   const selected=source.audit.analysis.decision.options.find(option=>option.optionId===simulationModel!.optionId);
@@ -624,7 +642,6 @@ function openAgency():void {
   screen='agency';agencyFilter='attention';agencyNotice='';notice='';render();
 }
 function closeFan(): void {
-  if (window.location.hash === '#fan') window.history.replaceState(null, '', window.location.pathname + window.location.search);
   screen = 'route';
   render();
 }
@@ -682,12 +699,6 @@ async function researchWithAgent(): Promise<void> {
       render();
     }
   }
-}
-function openConcept(name: string): void {
-  unbuiltName = name;
-  screen = 'not-built';
-  incident = initialIncident();
-  render();
 }
 async function runLive(): Promise<void> {
   if (liveBusy || !liveTarget || !liveControl) return;
@@ -757,10 +768,18 @@ root!.addEventListener('input', event => {
   const node = event.target;
   if (node instanceof HTMLTextAreaElement && node.id === 'proposal-message') proposalMessage = node.value;
   if (node instanceof HTMLInputElement && node.id === 'promoter-contact') proposalContact = node.value;
+  if (node instanceof HTMLTextAreaElement && node.id === 'plan-brief') planBrief = node.value;
+  if (node instanceof HTMLTextAreaElement && node.id === 'band-profile') bandProfile = node.value;
+  if (node instanceof HTMLTextAreaElement && node.id === 'sos-problem') sos = {...sos,problem:node.value};
+  if (node instanceof HTMLInputElement && node.id === 'sos-location') sos = {...sos,location:node.value};
+  if (node instanceof HTMLInputElement && node.id === 'sos-deadline') sos = {...sos,requiredLocal:node.value};
+  if (node instanceof HTMLInputElement && node.id.startsWith('econ-')) economicsDraft[node.id.slice(5)]=node.value;
+  if (node instanceof HTMLInputElement && node.id === 'sos-budget') sos = {...sos,budgetCapVnd:Number(node.value)};
 });
 root!.addEventListener('click', async event => {
   const element = event.target;
   if (!(element instanceof Element)) return;
+  if(element.closest('.skip-link')) {event.preventDefault();root!.querySelector<HTMLElement>('#main')?.focus();return;}
   const button = element.closest<HTMLElement>('[data-action]');
   if (!button) return;
   const action = button.dataset.action;
@@ -787,8 +806,17 @@ root!.addEventListener('click', async event => {
     case 'tab-today': goHome(); break;
     case 'tab-route': routeHub(); break;
     case 'tab-crew': incident = initialIncident(); screen = 'crew'; render(); break;
-    case 'documents':
-      if (chosenProposal) { screen = 'draft'; render(); } else openConcept('Documents'); break;
+    case 'documents': openWorkspace('documents'); break;
+    case 'workspace-back': screen=workspaceReturn;notice='';render();break;
+    case 'document-proposal': if(chosenProposal){proposalReturn='documents';screen='draft';render();}break;
+    case 'team-assignment': openAgency();agencyAssignOpen='presale';render();break;
+    case 'profile-save': {
+      const field=root!.querySelector<HTMLTextAreaElement>('#band-profile');
+      if(!field?.value.trim()){notice='Describe the band before saving.';render();break;}
+      bandProfile=field.value.trim();
+      try{localStorage.setItem('tour-rescue.band-profile.v1',bandProfile);notice='✓ Profile saved on this device.';}catch{notice='Profile kept for this session; device storage unavailable.';}
+      screen='plan';render();break;
+    }
     case 'concept-audience': openAudience(); break;
     case 'concept-agency': openAgency(); break;
     case 'open-sim': openSimulation(); break;
@@ -861,16 +889,15 @@ root!.addEventListener('click', async event => {
         agencyNotice='✓ Sample overview copied, not sent.';
       }catch{agencyNotice='× Clipboard unavailable; nothing was shared.';}
       render();break;
-    case 'agency-team':agencyNotice='ⓘ Sample owners: Marta, You and Alex. No real staff directory connected.';render();break;
-    case 'agency-documents':agencyNotice='ⓘ Agency documents are planned, not connected to any external service.';render();break;
+    case 'agency-team':openWorkspace('team',true);break;
+    case 'agency-documents':openWorkspace('documents',true);break;
     case 'agency-artist':goHome();break;
-    case 'concept-presale': openConcept('Presale / ticketing'); break;
+    case 'concept-presale': openWorkspace('presale'); break;
     case 'share':
       try { await navigator.clipboard.writeText(window.location.href); notice = 'Preview link copied (not a booking).'; }
       catch { notice = 'Copy this page URL to share the preview.'; }
       render(); break;
     case 'sos': openSos(); break;
-    case 'close-sos': showSOS = false; render(); break;
     case 'open-live': dialogReturnAction = 'open-live'; liveOpen = true; notice = ''; render(); break;
     case 'close-live': liveOpen = false; render(); break;
     case 'pick-artist': {
@@ -897,9 +924,19 @@ root!.addEventListener('click', async event => {
       }
       render(); break;
     }
-    case 'concept-profile': openConcept('Band profile editor'); break;
+    case 'concept-profile': openWorkspace('profile'); break;
     case 'open-economics': screen = 'economics'; render(); break;
     case 'econ-toggle': economicsExpanded = !economicsExpanded; render(); break;
+    case 'econ-apply': {
+      const fields=['price','share','costs','min','max'].map(id=>root!.querySelector<HTMLInputElement>('#econ-'+id)!);
+      if(fields.some(field=>!field.reportValidity()))break;
+      const values=fields.map(field=>Number(field.value));
+      try{
+        const next={ticketPriceEur:values[0]!,artistShare:values[1]!/100,fixedCostsEur:values[2]!,minAttendance:values[3]!,maxAttendance:values[4]!};
+        evaluateEconomics(next);economics=next;economicsDraft={};economicsError='';economicsExpanded=false;notice='✓ Scenario recalculated from your assumptions.';
+      }catch{economicsError='Check the values: attendance must be whole numbers, with the higher case at least equal to the lower case.';}
+      render();break;
+    }
     case 'econ-terms': screen = 'economics-terms'; render(); break;
     case 'econ-copy':
       try {
@@ -907,7 +944,7 @@ root!.addEventListener('click', async event => {
         notice = 'Sample checklist copied. No message sent.';
       } catch { notice = 'Clipboard unavailable; review the items above manually.'; }
       render(); break;
-    case 'open-fan': screen = 'fan'; window.location.hash = 'fan'; render(); break;
+    case 'open-fan': screen = 'fan'; render(); break;
     case 'close-fan': closeFan(); break;
     case 'fan-preview': {
       const email = root!.querySelector<HTMLInputElement>('#fan-email');
@@ -969,7 +1006,6 @@ document.addEventListener('keydown', event => {
       event.preventDefault();
       event.stopPropagation();
       if (liveOpen) liveOpen = false;
-      else showSOS = false;
       render();
       return;
     }
@@ -1024,16 +1060,36 @@ document.addEventListener('focusin', event => {
   if (dialog && event.target instanceof Node && !dialog.contains(event.target)) focusFirstHeading(dialog);
 });
 function followAppHash():void {
-  const hash=window.location.hash.slice(1);
-  if(hash==='fan'){screen='fan';render();return;}
-  if(hash==='rescue'||hash==='options'){incident=initialIncident();startRescue();return;}
-  if(hash==='agency'){openAgency();return;}
-  if(hash==='audience'){openAudience();return;}
-  if(hash==='simulation'){openSimulation();return;}
-  if(hash==='sos'){openSos();return;}
-  if(screen==='fan')screen='route';
-  render();
+  followingLocation=true;
+  try {
+    const hash=window.location.hash.slice(1);
+    if(hash==='rescue'||hash==='options'){incident=initialIncident();startRescue();return;}
+    if(hash==='agency'){openAgency();return;}
+    if(hash==='audience'){openAudience();return;}
+    if(hash==='simulation'){openSimulation();return;}
+    if(hash==='sos'){openSos();return;}
+    if(hash==='detail'||hash==='draft'){
+      const chosenId=history.state?.chosenOptionId;
+      if(typeof chosenId==='string' && optionById(chosenId)) {
+        incident=transitionIncident(initialIncident(),{type:'start-search'});
+        incident=transitionIncident(incident,{type:'proposals-ready',runId:projection.runId,optionIds:projection.options.map(o=>o.id)});
+        incident=transitionIncident(incident,{type:'choose',optionId:chosenId});
+      }
+      if(hash==='draft' && chosenProposal){
+        if(incident.phase==='chosen')incident=transitionIncident(incident,{type:'prepare-draft'});
+        screen='draft';render();return;
+      }
+      if(hash==='detail' && currentOption()){screen='detail';render();return;}
+      startRescue();return;
+    }
+    if(hash.startsWith('sos-')){screen=sosScreen(sos.stage);render();return;}
+    if(['fan','crew','route','plan','economics','economics-terms','ai','documents','team','profile','presale'].includes(hash)){
+      screen=hash as Screen;if(screen==='team')workspaceAgency=true;render();return;
+    }
+    if(hash==='plan-preview' && planSummary){screen='plan-preview';render();return;}
+    screen='today';render();
+  } finally { followingLocation=false; }
 }
 window.addEventListener('hashchange', followAppHash);
-// PR-D preserves the old web/ source and builds this app under /app/.
+window.addEventListener('popstate', followAppHash);
 followAppHash();

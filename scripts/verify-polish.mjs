@@ -93,7 +93,7 @@ async function focusMatchesSelected(page,role,label){
 }
 try{
  await ready();
- browser=await chromium.launch({headless:true});
+ browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_EXECUTABLE_PATH}:{})});
  // City-name labels at every desktop width where original SVG text shrunk.
  for(const width of [980,1024,1100,1279]){
   const page=await open('/app/#audience',width,800);
@@ -192,13 +192,14 @@ try{
       caption.top>=fig.top&&caption.bottom<=fig.bottom,intersection,
       text:document.querySelector('.hero-picture figcaption')?.textContent?.trim()};
   });
-  check(r.present&&r.inside&&r.intersection===0&&r.text==='Backstage scene · illustrative',
+  check(r.present&&r.inside&&r.intersection===0&&r.text==='Backstage scene · AI illustration',
     'Caption overlaps phone at '+width,r);
   await page.close();
  }
  // The Judges page includes the openly described technical and product limits.
  for(const width of [390,1280]){
   const page=await open('/judges/',width);
+  await page.locator('.judge-optional summary').first().click();
   const limits=page.locator('#known-limits');
   const text=await limits.textContent();
   check(await limits.isVisible()&&(await limits.locator('h3').count())===5&&

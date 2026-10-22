@@ -91,15 +91,16 @@ function tasteMap(ctx:DesktopViewContext):string{
    '<div id="taste-map-key" class="taste-mobile-key" aria-label="Cultural-fit city labels">'+
    p.map((city,i)=>'<span><b>'+(i+1)+'</b> '+esc(city.name)+'</span>').join('')+
    '<span>• Berlin</span><span>• Munich</span></div>'+
-   '<div class="taste-geographic-key" aria-label="Other actual city-centre references">'+
+   '<details class="map-reference-details"><summary>Other cities &amp; map source</summary><div class="taste-geographic-key" aria-label="Other actual city-centre references">'+
    GEOGRAPHIC_KEY_IDS.filter(id=>!visibleIds.has(id)&&id!=='de-berlin'&&id!=='de-munich').map(id=>
      '<span>'+esc(cityById(id)!.name)+'</span>').join('')+'</div>'+
+   fallback('Natural Earth 1:10m public-domain Germany outline. City centres use WGS84 coordinates; fit circles are not people or road data.')+'</details>'+
    '<div class="taste-map-bottom"><div><span>Relative cultural fit</span>'+
    '<div class="taste-scale" aria-hidden="true"><i></i><i></i><i></i><i></i></div>'+
    '<small>Low - High · within this candidate set</small></div>'+
    '<div class="map-zoom-actions"><button type="button" data-action="audience-zoom-out" aria-label="Zoom out">−</button>'+
    '<button type="button" data-action="audience-zoom-in" aria-label="Zoom in">+</button></div></div>'+
-   fallback('Germany outline: Natural Earth 1:10m public-domain boundary. City centres are real coordinates; cultural fit is a relative index, not road or demographic data.')+'</div>';
+'</div>';
 }
 function audience(ctx:DesktopViewContext):string{
  const mode=ctx.audienceSource==='qloo';
@@ -183,11 +184,11 @@ function simulation(ctx:DesktopViewContext):string{
     (s.checks[3] && s.checks[3].status!=='PASS'
       ? '<p class="sim-failed-explanation" role="status">'+esc(s.checks[3].explanation)+'</p>':'')+
    (ctx.actionNotice?'<p class="feature-action-notice" role="status">'+esc(ctx.actionNotice)+'</p>':'')+'</div>'+
-   '<div class="sim-edit"><label for="sim-cap">What if extra distance were allowed up to (km)?</label>'+
+   '<details class="sim-edit map-reference-details"><summary>Adjust extra-distance preference</summary><label for="sim-cap">What if extra distance were allowed up to (km)?</label>'+
    '<input type="text" id="sim-cap" inputmode="decimal" autocomplete="off" spellcheck="false" value="'+
       esc(ctx.simulationCapDraft ?? String(s.maxAdditionalDistanceKm))+'">'+
    (ctx.simulationCapError ? '<p class="sim-input-error" role="alert">× Invalid distance cap: '+esc(ctx.simulationCapError)+'</p>':'')+
-   action('Recheck one assumption →','sim-recheck')+'</div>'+
+   action('Recheck one assumption →','sim-recheck')+'</details>'+
    '<div class="sim-final-action">'+action(ctx.savedDraft?'Save updated draft →':'Save draft scenario →','sim-save',true)+
    (ctx.savedDraft?'<p class="soft-status">✓ Saved on this device only - no tour, venue or booking updated.</p>':'')+
    action(s.verdict==='FAIL'?'View why it fails →':'Preview promoter proposal →',

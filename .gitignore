@@ -6,3 +6,6 @@ dist/
 .dev.vars
 *.log
 .DS_Store
+
+# Generated local/CI browser evidence
+artifacts/

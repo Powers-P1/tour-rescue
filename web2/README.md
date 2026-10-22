@@ -1,4 +1,13 @@
-# Tour Rescue v2 - PR-A preview
+# Tour Rescue v2
+
+Current frontend: see [UX completion and validation](../docs/UX_COMPLETION.md) and
+[editorial asset provenance](../docs/mockups/v2/ASSETS.md). Both local build commands
+use v2. No build command uploads or publishes anything. Inter and selected image
+assets are bundled locally; they do not require Google Fonts or a photo service.
+
+The sections below preserve the implementation history and documented boundaries.
+
+## PR-A implementation history
 
 This directory is the **new**, independent mobile-first front end. It does **not** replace or deploy `web/`; the deployment switch is PR-D.
 
