@@ -1,5 +1,5 @@
 import { build } from 'esbuild';
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile, cp } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
 // With --deploy keep the existing Cloudflare Pages contract:
@@ -41,6 +41,7 @@ await Promise.all([
   writeFile(new URL('assets/drum-fallback.svg',destUrl),
     await readFile(new URL('./assets/drum-fallback.svg',import.meta.url))),
 ]);
+await cp(new URL('./assets/',import.meta.url), new URL('assets/',destUrl), {recursive:true});
 await writeFile(new URL('_headers',destUrl),`/*
   Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com; connect-src 'self' ${origin.origin}; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'
   X-Content-Type-Options: nosniff

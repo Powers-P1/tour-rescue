@@ -41,6 +41,7 @@ async function open(path,width){
 async function evaluateMap(page,context,width){
  const locator=page.locator('[data-map-scope="'+context+'"]');
  ok(await locator.count()===1,'Map not present: '+context+'/'+width);
+ await locator.locator('.map-reference-details summary').click();
  const result=await locator.evaluate(element=>{
   const visible=e=>e.getClientRects().length>0;
   const svg=element.querySelector('svg');
@@ -91,7 +92,7 @@ async function evaluateMap(page,context,width){
 }
 try{
  await ready();
- browser=await chromium.launch({headless:true});
+ browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_EXECUTABLE_PATH}:{})});
  for(const width of [1280,390]){
   const page=await open('/',width);
   await evaluateMap(page,'landing',width);

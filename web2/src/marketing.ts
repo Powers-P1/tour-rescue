@@ -1,3 +1,4 @@
+import { brand, icon } from './icons.ts';
 import type { PublicSiteModel } from './marketing-model.ts';
 import { renderGermanyGeographicMap } from './germany-map.ts';
 import { PUBLIC_REPOSITORY, PUBLIC_LICENSE, PUBLIC_API_DOCS, PUBLIC_AGENT_DOCS, publicOptionStatus, linkedEvidence } from './marketing-model.ts';
@@ -8,9 +9,9 @@ const ext=(href:string,label:string,className='')=>'<a'+(className?' class="'+es
   ' target="_blank" rel="noopener noreferrer" href="'+escape(href)+'">'+escape(label)+'</a>';
 const link=(href:string,label:string,cls='text-link')=>'<a class="'+cls+'" href="'+escape(href)+'">'+escape(label)+'</a>';
 const badge=(message:string,variant='neutral')=>'<span class="m-badge m-badge-'+variant+'">'+escape(message)+'</span>';
-const wordmark='<a class="site-brand" href="/"><span class="site-brand-arrow" aria-hidden="true">↱</span> TOUR RESCUE</a>';
-const heroPhoto='https://images.unsplash.com/photo-1670482204474-acdc61c4cd75?auto=format&fit=crop&w=1350&q=82';
-const drumPhoto='https://images.unsplash.com/photo-1599594407616-af1c058be616?auto=format&fit=crop&w=1250&q=82';
+const wordmark='<a class="site-brand" href="/">'+brand()+'</a>';
+const heroPhoto='/assets/touring-backstage-v2.webp';
+const drumPhoto='/assets/touring-drum-v2.webp';
 
 function header(judges:boolean):string {
  if(judges) return '<div class="judges-utility"><span>Qloo Agentic Hackathon</span><strong>Judges · Start here</strong></div>'+
@@ -54,7 +55,7 @@ function journeyDiagram(model:PublicSiteModel,compact=false):string {
 }
 function miniaturePhone(model:PublicSiteModel):string {
  return '<div class="phone-preview" aria-label="Illustrative mobile Today view">'+
-  '<div class="phone-top"><span class="turn">↱</span> TOUR RESCUE <span>SOS</span></div>'+
+  '<div class="phone-top">TOUR RESCUE <span class="turn">↱</span> <span>SOS</span></div>'+
   '<small>'+escape(model.rescue.title)+' · sample</small><h3>Here’s the plan.</h3>'+
   '<div class="phone-alert"><small>! NEEDS A DECISION</small>'+
   '<strong>'+escape(model.rescue.cancelledCity)+' canceled.</strong>'+
@@ -68,12 +69,12 @@ function proposalPreview(model:PublicSiteModel):string {
  return '<div class="judges-example" aria-label="Illustrative option comparison from the maintained synthetic core">'+
   '<div class="example-top"><small>FROZEN GERMANY SAMPLE</small><h3>Three ways forward.</h3><p>'+
   escape(model.rescue.fromCity)+' → '+escape(model.rescue.cancelledCity)+' → '+escape(model.rescue.toCity)+'</p></div>'+
-  '<div class="example-options">'+cards.map(row=>
+  '<div class="judge-example-body"><div class="judge-map-preview">'+renderGermanyGeographicMap({scope:'audience',from:model.rescue.fromCity,cancelled:model.rescue.cancelledCity,to:model.rescue.toCity,proposalIds:model.rescue.options.filter(o=>o.cityId).map(o=>o.cityId!),preferredProposalId:model.rescue.options.find(o=>o.recommended)?.cityId})+'</div><div class="example-options">'+cards.map(row=>
   '<div class="example-option"><div><strong>'+escape(row.cityName)+'</strong>'+
     '<span>'+escape(row.kind==='day-off'?'Rest day':row.fitText+' relative fit')+'</span></div>'+
     badge(publicOptionStatus(row.decisionStatus),
       row.decisionStatus==='PASS'?'ok':row.decisionStatus==='FAIL'?'fail':'unknown')+'</div>').join('')+
-   '</div><p class="example-disclosure">✓ Recorded road snapshot · ? Venue terms not verified · no bookings</p></div>';
+   '</div></div><p class="example-disclosure">✓ Recorded road snapshot · ? Venue terms not verified · no bookings</p></div>';
 }
 function scopeTable():string {
  const implemented=[
@@ -105,32 +106,24 @@ function breakpoint(model:PublicSiteModel):string{
   '<p>From '+escape(point.beforeCity)+' to '+escape(point.afterCity)+
   '. Changes only the allowed extra distance, not the six-hour driving limit.</p></div>';
 }
-function cards(model:PublicSiteModel):string{
- return '<div class="proof-options">'+model.landing.options.map(x=>
-   '<div><span>'+escape(x.letter)+'</span><strong>'+escape(x.cityName)+'</strong>'+
-   badge(publicOptionStatus(x.decisionStatus),
-     x.decisionStatus==='PASS'?'ok':x.decisionStatus==='FAIL'?'fail':'unknown')+
-   '<small>'+escape(x.note)+'</small></div>').join('')+'</div>';
-}
 export function landingMarkup(model:PublicSiteModel):string{
  return header(false)+
  '<main id="main-content">'+
  '<section class="site-hero site-shell"><div class="hero-copy">'+
- '<p class="eyebrow">A CALMER WAY THROUGH THE CRISIS</p>'+
  '<h1>A canceled date.<span>A way forward.</span></h1>'+
  '<p class="hero-deck">Plan where your audience fits. Rescue the show when the route, people or gear let you down.</p>'+
  '<div class="hero-actions">'+link(model.appHref,'Rescue a sample date →','m-button')+
  link('#how-it-works','Explore the product ↗')+'</div>'+
  '<p class="mini-disclosure">ⓘ Sample tour · No sign-up to explore · Never a booked show</p></div>'+
  '<div class="hero-visual"><figure class="hero-picture" role="img" aria-label="Illustrative backstage loading scene with a parked van and road cases">'+
- '<img src="'+heroPhoto+'" alt="Photograph of a production team behind the scenes, illustrative of backstage work" width="1200" height="900" fetchpriority="high"/>'+
- '<figcaption>Backstage scene · illustrative</figcaption></figure>'+
+ '<img src="'+heroPhoto+'" alt="AI-generated illustration of a working crew loading a worn road case into a touring van" width="1200" height="900" fetchpriority="high"/>'+
+ '<figcaption>Backstage scene · AI illustration</figcaption></figure>'+
  miniaturePhone(model)+'</div></section>'+
  '<section id="how-it-works" class="landing-section site-shell rescue-section"><div class="landing-map">'+
  journeyDiagram(model)+'</div><div class="section-copy"><p class="eyebrow">01 / DATE RESCUE · CORE</p>'+
  '<h2>Three directions.<span>One next move.</span></h2>'+
  '<p>Compare cultural fit and realistic travel. Pick a direction. Prepare a one-page proposal for the promoter.</p>'+
- '<div class="line-facts"><p>↗ Taste fit · Qloo</p><p>↗ Road and timing checks</p><p>↗ Draft outreach, ready to review</p></div>'+
+ '<div class="line-facts"><p>'+icon('people')+'<strong>Taste fit · Qloo</strong></p><p>'+icon('route')+'<strong>Road and timing checks</strong></p><p>'+icon('document')+'<strong>Draft outreach, ready to review</strong></p></div>'+
  link(model.appHref,'Explore the rescue →','text-amber')+
  '<p class="mini-disclosure">The demo uses synthetic taste profiles and a frozen OSRM matrix. Fresh Qloo is a separate action.</p></div></section>'+
  '<section id="local-sos" class="sos-section"><div class="site-shell sos-grid">'+
@@ -138,8 +131,8 @@ export function landingMarkup(model:PublicSiteModel):string{
  '<p>Say what happened, where you are and when it is needed. Review a concrete scope, arrival estimate and price before approving any spend.</p>'+
  link('/app/#sos','See a sample local rescue →','text-amber')+
  '<p class="mini-disclosure">No supplier is contacted. Quote and travel values are fictional.</p></div>'+
- '<figure class="sos-photo" role="img" aria-label="Illustrative drum fitting, not a real supplier visit"><img src="'+drumPhoto+'" alt="Editorial photograph of a drummer adjusting a drum in a rehearsal setting" loading="lazy" width="1200" height="760"/>'+
- '<figcaption>Illustrative drum setup · not the sample supplier</figcaption>'+
+ '<figure class="sos-photo" role="img" aria-label="Illustrative drum fitting, not a real supplier visit"><img src="'+drumPhoto+'" alt="AI-generated illustration of a drum technician working on a bass drum" loading="lazy" width="1200" height="760"/>'+
+ '<figcaption>AI illustration · not the sample supplier</figcaption>'+
  '<div class="sos-card"><small>SAMPLE QUOTE · NOT RECEIVED</small><h3>Ready to review.</h3><p>Minh Backline</p>'+
  '<div><strong>22-inch head + fitting</strong><span>Today, 15:40 · estimate</span></div>'+
  '<strong class="sos-money">1,800,000 VND</strong>'+
@@ -148,9 +141,6 @@ export function landingMarkup(model:PublicSiteModel):string{
  '<div><p class="eyebrow">03 / AGENCY · SAMPLE WORKSPACE</p><h2>One calm desk.<span>Every tour.</span></h2></div>'+
  '<div><p>A clear queue of decisions, a named owner and venue-local deadlines. Switch from agency view to the artist in one step.</p>'+
  link('/app/#agency','Explore the sample agency workspace →')+'</div></div></section>'+
- '<section class="site-shell landing-proof"><div class="section-title"><p class="eyebrow">DEMO EVIDENCE</p>'+
- '<h2>A decision you can challenge.</h2><p>These are computed by the same frozen core used inside the app.</p></div>'+
- cards(model)+breakpoint(model)+'</section>'+
  '<section class="landing-judges-promo site-shell"><p class="eyebrow">FOR HACKATHON JUDGES</p>'+
  '<h2>Open the demo.<span>Try to overturn it.</span></h2><p>A short, reproducible route from cancellation to checked proposal.</p>'+
  link(model.judgesHref,'Judges · Start here ↗','m-button')+'</section>'+
@@ -218,10 +208,10 @@ export function judgesMarkup(model:PublicSiteModel):string{
  ext(PUBLIC_AGENT_DOCS,'Agent contract ↗','judges-external-link')+'</div>'+
  '<p class="mini-disclosure">Saved demo is generated from openly available, explicitly synthetic artist inputs; a fresh Qloo evaluation requires a separate user action and a live Worker.</p>'+
  '</section>'+
- knownLimitsSection()+
- scopeTable()+
- '<section class="site-shell judge-last"><p class="eyebrow">CAN YOU CHANGE THE OUTCOME?</p>'+
+ '<details class="judge-optional site-shell"><summary>Scope and known limits</summary>'+knownLimitsSection()+
+ scopeTable()+'</details>'+
+ '<details class="judge-optional site-shell"><summary>Challenge one assumption</summary><section class="judge-last"><p class="eyebrow">CAN YOU CHANGE THE OUTCOME?</p>'+
  '<h2>Change one assumption.</h2>'+breakpoint(model)+
- link(model.appHref,'Try the rescue demo →','m-button')+'</section>'+
+ link(model.appHref,'Try the rescue demo →','m-button')+'</section></details>'+
  '</main>'+footer(true);
 }

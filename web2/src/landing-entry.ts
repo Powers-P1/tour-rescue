@@ -1,5 +1,6 @@
 import './marketing.css';
 import './germany-map.css';
+import './marketing-completion.css';
 import { publicSiteModel } from './marketing-model.ts';
 import { landingMarkup } from './marketing.ts';
 /** Preserve older root app hash links without claiming an old tour UI exists. */
@@ -10,7 +11,7 @@ if(legacyHashes.has(current)){
 }else{
   const root=document.getElementById('site-root');
   if(root){
-    try{root.innerHTML=landingMarkup(publicSiteModel());
+    try{root.className='product-site';root.innerHTML=landingMarkup(publicSiteModel());
     // A blocked editorial photo must not hide the original local illustration.
     for(const photo of document.querySelectorAll<HTMLImageElement>('.hero-picture img, .sos-photo img')){
       const ready=()=>{if(photo.naturalWidth>0)photo.classList.add('photo-ready');};
