@@ -1,4 +1,6 @@
 import type { PublicSiteModel } from './marketing-model.ts';
+import './germany-map.css';
+import { renderGermanyGeographicMap } from './germany-map.ts';
 import { PUBLIC_REPOSITORY, PUBLIC_LICENSE, PUBLIC_API_DOCS, PUBLIC_AGENT_DOCS, publicOptionStatus, linkedEvidence } from './marketing-model.ts';
 
 const escape=(v:unknown):string=>String(v??'').replace(/[&<>"']/g,x=>
@@ -33,27 +35,23 @@ function footer(judges:boolean):string {
   '</p></div></footer>';
 }
 
-function journeyDiagram(model:PublicSiteModel, compact=false):string {
- const recommendationId=model.landing.recommendedOptionId;
- const recommendation=recommendationId.status==='known'
-   ? model.rescue.options.find(row=>row.id===recommendationId.value) : undefined;
- const pivot=recommendation?.kind!=='day-off'&&recommendation?recommendation:model.rescue.options.find(x=>x.kind!=='day-off');
- const city=pivot?.cityName??'Proposed city';
- const proposedLine=pivot?
-   '<path d="M 394 78 Q 228 126 235 218 Q 202 270 331 378" stroke="#F3B65B" stroke-width="4" stroke-dasharray="9 8" fill="none"/>':'';
+function journeyDiagram(model:PublicSiteModel,compact=false):string {
+ const recommended=model.landing.recommendedOptionId;
+ const recId=recommended.status==='known'?recommended.value:null;
+ const option=model.rescue.options.find(o=>o.id===recId && o.kind!=='day-off') ??
+   model.rescue.options.find(o=>o.kind!=='day-off');
+ const proposalIds=model.rescue.options.filter(o=>o.kind!=='day-off'&&o.cityId)
+   .map(o=>o.cityId!);
+ const city=option?.cityName??'Proposed city';
  return '<div class="journey-diagram'+(compact?' journey-compact':'')+'">'+
-   '<div class="journey-meta">'+badge('Schematic geography · demo')+
-   '<span>Solid: current route &nbsp; · &nbsp; Dashed: Proposed</span></div>'+
-   '<svg viewBox="0 0 570 445" role="img" aria-label="Illustrative route from Berlin via cancelled Leipzig to Munich, and a proposed alternate direction">'+
-   '<path fill="#22323A" stroke="#435965" stroke-width="2" d="M204 20 L370 25 483 93 490 192 447 247 451 340 384 418 312 431 237 386 191 304 139 265 150 150 170 70Z"/>'+
-   '<path d="M 394 78 L 366 182 L 331 378" stroke="#B5C3CC" stroke-width="3.3" fill="none"/>'+proposedLine+
-   '<circle cx="394" cy="78" r="7" fill="#F4F6F8"/><circle cx="331" cy="378" r="7" fill="#F4F6F8"/>'+
-   '<circle cx="366" cy="182" r="8" fill="#E78B82"/><path d="M361 177l10 10m0-10l-10 10" stroke="#121A20" stroke-width="2"/>'+
-   '<circle cx="235" cy="218" r="8" fill="#F3B65B"/>'+
-   '<g font-size="17" font-weight="650" font-family="Inter,system-ui" fill="#F4F6F8">'+
-   '<text x="409" y="68">Berlin</text><text x="378" y="208" fill="#E78B82">Leipzig · Canceled</text>'+
-   '<text x="346" y="407">Munich</text><text x="223" y="194" fill="#F3B65B" text-anchor="end">'+escape(city)+'</text></g>'+
-   '</svg><p class="diagram-caption">'+escape(city)+' is a candidate, <strong>not</strong> a booked venue. Road checks use a separate OSRM snapshot.</p></div>';
+   '<div class="journey-meta">'+badge('Germany · real outline')+
+   '<span>City centres · geographic context</span></div>'+
+   renderGermanyGeographicMap({
+     scope:'landing',from:model.rescue.fromCity,cancelled:model.rescue.cancelledCity,
+     to:model.rescue.toCity,proposalIds,preferredProposalId:option?.cityId,
+   })+
+   '<p class="diagram-caption">'+escape(city)+
+   ' is a candidate, not a booked venue. Road checks use a separate OSRM snapshot.</p></div>';
 }
 function miniaturePhone(model:PublicSiteModel):string {
  return '<div class="phone-preview" aria-label="Illustrative mobile Today view">'+

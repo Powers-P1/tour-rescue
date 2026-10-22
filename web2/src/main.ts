@@ -1,5 +1,7 @@
 import './styles.css';
 import './desktop.css';
+import './germany-map.css';
+import { renderGermanyGeographicMap } from './germany-map.ts';
 import { createDemoResult, createApiClient } from '../../web/src/data.ts';
 import type { ApiDecisionResult, ArtistChoice, LiveSelection } from '../../web/src/data.ts';
 import { buildPromoterModel } from '../../web/src/promoter-model.ts';
@@ -285,47 +287,19 @@ function unbuilt(): string {
     '<p>Visible in boards 02-03 and 05-09, scheduled for later PRs. There is no hidden live integration behind this entry.</p></div>' +
     softButton('Back to the tour →', 'tab-today') + mobileTabs() + '</section>';
 }
-function mapSVG(): string {
-  const point: Record<string, [number, number]> = {
-    Berlin: [405, 88], Leipzig: [360, 153], Munich: [302, 329],
-    Erfurt: [278, 184], Dresden: [429, 164], Halle: [326, 132],
-    Nuremberg: [300, 270], Frankfurt: [205, 227], Stuttgart: [200, 303],
-    Hamburg: [292, 37], Cologne: [155, 205],
-  };
-  const option = projection.options.find(item => item.recommended && item.cityId) ??
-    projection.options.find(item => item.cityId);
-  const city = option?.cityName ?? '';
-  const from = point[projection.fromCity] ?? point.Berlin!;
-  const to = point[projection.toCity] ?? point.Munich!;
-  const cancelled = point[projection.cancelledCity] ?? point.Leipzig!;
-  const proposed = point[city];
-  const pos = ([x, y]: [number, number]): string => x + ',' + y;
-  const markers: [string, [number, number], string][] = [
-    [projection.fromCity, from, 'confirmed'],
-    [projection.cancelledCity, cancelled, 'cancelled'],
-    [projection.toCity, to, 'confirmed'],
-  ];
-  if (proposed) markers.push([city + ' · Proposed', proposed, 'proposed']);
-  const current = [from, cancelled, to].map(pos).join(' ');
-  const proposedPath = proposed ? 'M ' + from[0] + ' ' + from[1] +
-    ' Q ' + (proposed[0] - 95) + ' ' + (from[1] + 55) + ' ' + proposed[0] + ' ' + proposed[1] +
-    ' Q ' + (proposed[0] - 65) + ' ' + (to[1] - 58) + ' ' + to[0] + ' ' + to[1] : '';
-  return '<div class="route-map" role="img" aria-label="Schematic route, current plan versus proposed diversion">' +
-    '<svg viewBox="0 0 540 395" preserveAspectRatio="xMidYMid meet" aria-hidden="true">' +
-    '<path class="map-outline" d="M196 13L319 24L433 75L452 145L424 204L398 231L384 317L327 365L267 354L217 321L193 275L137 248L165 180L144 112Z"/>' +
-    '<path class="map-gridline" d="M164 122L428 211 M161 240L431 101 M290 18L292 353"/>' +
-    '<polyline class="route-current" points="' + current + '"/>' +
-    (proposed ? '<path class="route-proposed" d="' + proposedPath + '"/>' : '') +
-    markers.map(([text, [x, y], type]) =>
-      '<circle class="map-pin ' + type + '" cx="' + x + '" cy="' + y + '" r="6"/>' +
-      '<text class="map-label ' + type + '" x="' + (type === 'proposed' ? x - 12 : x + 12) +
-      '" y="' + (type === 'cancelled' ? y + 26 : y - 12) +
-      '" text-anchor="' + (type === 'proposed' ? 'end' : 'start') + '">' + HTML(text) + '</text>').join('') +
-    '</svg><div class="map-bottom"><div class="map-legend"><span><i class="legend-solid"></i> Solid: current plan</span>' +
-    '<span><i class="legend-dashed"></i> Dashed: Proposed</span></div>' +
-    '<button type="button" class="text-button map-explore" data-action="concept-audience">Explore audience fit →</button></div>' +
-    '<p class="tiny-label">Schematic positions · routing estimates from ' +
-    HTML(result.audit.sourceTimestamps.road.method) + ' · not a street map</p></div>';
+function mapSVG():string {
+ const proposalOptions=projection.options.filter(option=>option.kind!=='day-off'&&option.cityId);
+ const recommended=proposalOptions.find(option=>option.recommended)??proposalOptions[0];
+ const proposalIds=proposalOptions.map(option=>option.cityId!);
+ return '<div class="route-map" aria-label="Germany geography and tour map">'+
+   renderGermanyGeographicMap({
+     scope:'command',from:projection.fromCity,cancelled:projection.cancelledCity,
+     to:projection.toCity,proposalIds,preferredProposalId:recommended?.cityId,
+   })+
+   '<div class="map-bottom"><button type="button" class="text-button map-explore" '+
+   'data-action="concept-audience">Explore audience fit →</button></div>'+
+   '<p class="tiny-label">Nuremberg is a candidate, not a booked venue. '+
+   'Road checks use a separate OSRM snapshot.</p></div>';
 }
 function desktopHome(): string {
   return '<section class="desktop-command">' +
