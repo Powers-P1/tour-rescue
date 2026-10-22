@@ -131,6 +131,17 @@ test('base identity, expiration and input validation reject before reserving AI 
   assert.equal(s.calls.length, 0);
 });
 
+test('tour knowledge and procedure reach only this research request and never enter shared cache',async()=>{
+ const s=setup(),base=await live(s);
+ const knowledge={schemaVersion:'tour-rescue.knowledge.v1',workspaceId:'workspace-alpha',documents:[{id:'rider',title:'Private rider',text:'ALPHA_ONLY_PIANO needs a piano.',updatedAt:new Date(NOW).toISOString()}]};
+ for(const extra of [{knowledge:{...knowledge,documents:Array(9).fill(knowledge.documents[0])}},{skill:'book-and-pay'}])assert.equal((await s.send(post('/api/ai/live',{baseRunId:base.audit.runId,...extra}))).status,400);
+ assert.equal(s.calls.length,0);assert.equal(s.storage.data.has('tour-rescue:ai-quotas:v1'),false);
+ await events(await s.send(post('/api/ai/live',{baseRunId:base.audit.runId,knowledge,skill:'evidence-gaps'})));
+ assert.deepEqual(s.calls[0]?.knowledge,knowledge);assert.equal(s.calls[0]?.skill,'evidence-gaps');
+ await events(await s.send(post('/api/ai/live',{baseRunId:base.audit.runId})));
+ assert.equal(s.calls[1]?.knowledge,undefined);assert.equal(JSON.stringify([...s.storage.data.entries()]).includes('ALPHA_ONLY_PIANO'),false);
+});
+
 test('AI kill switch, missing secret and untrusted origins never start the runner', async () => {
   for (const patch of [{ AI_ENABLED: 'false' }, { ANTHROPIC_API_KEY: '' }, { LIVE_ENABLED: 'false' }]) {
     const s = setup(patch);

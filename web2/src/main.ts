@@ -30,6 +30,8 @@ import type { GuidedTourController } from '../../web/src/guided-tour.ts';
 import { downloadPromoterPng } from '../../web/src/promoter.ts';
 import { mountEvidence, recommendationName } from './evidence-view.ts';
 import { initPwa } from './pwa.ts';
+import {loadKnowledge,saveKnowledge,putDocument,withBandProfile} from './knowledge-store.ts';
+import type {TourSkill} from '../../src/ai/knowledge.ts';
 import { LIVE_PRESETS } from './live-presets.ts';
 import { projectLiveStudy } from './live-study.ts';
 import { createAiClient } from '../../web/src/ai-client.ts';
@@ -67,6 +69,9 @@ let economicsError = "";
 let economicsDraft: Record<string,string> = {};
 let bandProfile = (() => { try { return localStorage.getItem('tour-rescue.band-profile.v1') ?? 'Five-piece indie band. Club shows. We prefer university cities and avoid night drives.'; } catch { return 'Five-piece indie band. Club shows. We prefer university cities and avoid night drives.'; } })();
 let workspaceReturn: Screen = 'route';
+let tourKnowledge=loadKnowledge();
+let noteId='',noteTitle='',noteText='';
+let aiSkill:TourSkill='corridor-repair';
 let workspaceAgency = false;
 let lastRenderedScreen: Screen | null = null;
 let followingLocation = false;
@@ -432,7 +437,7 @@ function desktopHome(): string {
 function extensionContext(): ExtensionContext {
   return { tabs: mobileTabs(), sos, planBrief, planSummary, bandProfile, showAssumptions: economicsExpanded,
     economics, economicsError, economicsDraft, fanPreviewed, aiBusy, aiNotice, aiMode, aiSteps, aiSession,
-    aiDemoScenario, aiAccepted: researchHistory.accepted, aiLiveReady:!!liveResearchBaseRunId, sourceMode: projection.mode };
+    aiDemoScenario, aiSkill,aiAccepted: researchHistory.accepted, aiLiveReady:!!liveResearchBaseRunId, sourceMode: projection.mode };
 }
 function desktopContext(): DesktopViewContext {
   return {
@@ -444,7 +449,7 @@ function desktopContext(): DesktopViewContext {
     proposedOwner:agencyProposedOwner, agencyNotice, actionNotice:notice,
   };
 }
-function renderWorkspace(): string { return workspaceView(screen as WorkspaceScreen, {profile:bandProfile,hasProposal:!!chosenProposal,agency:workspaceAgency,presaleOwner:agencyOwners.presale??'Unassigned'}); }
+function renderWorkspace(): string { return workspaceView(screen as WorkspaceScreen, {profile:bandProfile,knowledge:tourKnowledge,noteId,noteTitle,noteText,hasProposal:!!chosenProposal,agency:workspaceAgency,presaleOwner:agencyOwners.presale??'Unassigned'}); }
 function openWorkspace(next: WorkspaceScreen, agency=false):void { workspaceReturn=screen; workspaceAgency=agency; screen=next;notice='';render(); }
 function desktopInner(): string {
   if(screen==='live-preset')return livePresetView();
@@ -794,6 +799,7 @@ async function researchWithAgent(): Promise<void> {
     render();
     const budget = result.audit.replay.scenario.tour.constraints.additionalBudget;
     const session = await aiApi.rescue({
+      knowledge:withBandProfile(tourKnowledge,bandProfile),skill:aiSkill,
       baseRunId: liveResearchBaseRunId,
       policy: result.audit.replay.policy,
       ...(budget.status === 'known' ? { additionalBudgetMinorUnits: budget.value.minorUnits } : {}),
@@ -882,9 +888,16 @@ root!.addEventListener('submit', async event => {
       (err instanceof Error ? err.message : 'Search failed. No artist was selected.');
   } finally { liveBusy = false; render(); }
 });
-root!.addEventListener('change', event => {
+root!.addEventListener('change', async event => {
   const node = event.target;
   if (!(node instanceof HTMLElement)) return;
+  if(node instanceof HTMLSelectElement&&node.id==='ai-skill'){aiSkill=node.value as TourSkill;return;}
+  if(node instanceof HTMLInputElement&&node.id==='knowledge-file'){
+    const file=node.files?.[0];if(!file)return;
+    if(file.size>8000||!/[.](txt|md)$/i.test(file.name)){notice='Use a TXT or Markdown file up to 2000 characters.';render();return;}
+    const text=await file.text();if(text.length>2000){notice='The note exceeds 2000 characters. Shorten it first.';render();return;}
+    noteTitle=file.name;noteText=text;notice='Text loaded into the editor. Review and save it.';render();return;
+  }
   if (node.id === 'live-role' && node instanceof HTMLSelectElement) {
     liveRole = node.value as ArtistRole; liveChoices = []; render();
   }
@@ -896,6 +909,8 @@ root!.addEventListener('input', event => {
   if (node instanceof HTMLInputElement && node.id === 'promoter-contact') proposalContact = node.value;
   if (node instanceof HTMLTextAreaElement && node.id === 'plan-brief') planBrief = node.value;
   if (node instanceof HTMLTextAreaElement && node.id === 'band-profile') bandProfile = node.value;
+  if(node instanceof HTMLInputElement&&node.id==='knowledge-title')noteTitle=node.value;
+  if(node instanceof HTMLTextAreaElement&&node.id==='knowledge-text')noteText=node.value;
   if (node instanceof HTMLTextAreaElement && node.id === 'sos-problem') sos = {...sos,problem:node.value};
   if (node instanceof HTMLInputElement && node.id === 'sos-location') sos = {...sos,location:node.value};
   if (node instanceof HTMLInputElement && node.id === 'sos-deadline') sos = {...sos,requiredLocal:node.value};
@@ -935,6 +950,15 @@ root!.addEventListener('click', async event => {
     case 'tab-crew': incident = initialIncident(); screen = 'crew'; render(); break;
     case 'documents': openWorkspace('documents'); break;
     case 'workspace-back': screen=workspaceReturn;notice='';render();break;
+    case 'knowledge-new': noteId='';noteTitle='';noteText='';render();break;
+    case 'knowledge-edit': {const doc=tourKnowledge.documents.find(row=>row.id===button.dataset.id);if(doc){noteId=doc.id;noteTitle=doc.title;noteText=doc.text;}render();break;}
+    case 'knowledge-delete': {const next={...tourKnowledge,documents:tourKnowledge.documents.filter(row=>row.id!==button.dataset.id)};try{saveKnowledge(next);tourKnowledge=next;if(noteId===button.dataset.id){noteId='';noteTitle='';noteText='';}notice='Note deleted from this device.';}catch{notice='Could not update device storage.';}render();break;}
+    case 'knowledge-save': {
+      try{
+        if(!noteId&&tourKnowledge.documents.filter(row=>row.id!=='band-profile'&&row.id!=='last-decision').length>=6)throw new Error('Six notes are already saved. Edit or delete one.');
+        const next=putDocument(withBandProfile(tourKnowledge,bandProfile),{id:noteId||crypto.randomUUID(),title:noteTitle,text:noteText,updatedAt:new Date().toISOString()});tourKnowledge=next;noteId='';noteTitle='';noteText='';notice='Note saved for the next live research session.';
+      }catch(e){notice=e instanceof Error?e.message:'Could not save note.';}render();break;
+    }
     case 'document-proposal': if(chosenProposal){proposalReturn='documents';screen='draft';render();}break;
     case 'team-assignment': openAgency();agencyAssignOpen='presale';render();break;
     case 'profile-save': {
@@ -1166,6 +1190,11 @@ root!.addEventListener('click', async event => {
         incident=transitionIncident(initialIncident(),{type:'start-search'});
         incident=transitionIncident(incident,{type:'proposals-ready',runId:result.audit.runId,optionIds:view.options.map(row=>row.id)});
         screen='options';notice='Accepted into comparison. All checks and decision analysis were recalculated. Four confirmed shows are unchanged; no booking was made.';
+        if(aiSession.mode==='live'){
+          const lead=aiSession.proposals.find(row=>row.draft.id===button.dataset.id)!;
+          try{tourKnowledge=putDocument(withBandProfile(tourKnowledge,bandProfile),{id:'last-decision',title:'Most recent accepted research decision',updatedAt:accepted.acceptance.acceptedAt,text:'The user explicitly accepted '+lead.draft.venueName+' for further comparison, not a booking. Reason: '+lead.draft.reason+' Booking availability, fees and terms remain UNKNOWN. Source session: '+aiSession.sessionId});}
+          catch{notice+=' The comparison is accepted, but device memory could not be saved.';}
+        }
       }catch(error){aiNotice='Could not accept this proposal. The comparison is unchanged. '+(error instanceof Error?error.message:'Validation failed.');}
       render();break;
     }

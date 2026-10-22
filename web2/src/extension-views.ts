@@ -4,6 +4,8 @@ import type { SosSampleState, PlanSummary, EconomicsAssumptions } from './extens
 import type { AiAcceptance, AiSessionResult, AiStep } from '../../src/ai/types.ts';
 import { AI_DEMO_SCENARIOS } from '../../src/ai/demo.ts';
 import type { AiDemoScenarioId } from '../../src/ai/demo.ts';
+import {TOUR_SKILLS} from '../../src/ai/knowledge.ts';
+import type {TourSkill} from '../../src/ai/knowledge.ts';
 
 export type ExtensionScreen =
   | 'route' | 'sos-problem' | 'sos-options' | 'sos-quote' | 'sos-approved'
@@ -14,6 +16,7 @@ export function isExtensionScreen(screen: string): screen is ExtensionScreen {
     'economics','economics-terms','fan','ai'].includes(screen);
 }
 export interface ExtensionContext {
+  readonly aiSkill?:TourSkill;
   readonly tabs: string;
   readonly sos: SosSampleState;
   readonly planBrief: string;
@@ -212,7 +215,7 @@ function ai(ctx: ExtensionContext): string {
     : ctx.sourceMode === 'live'
       ? 'Live Qloo evidence will be used with the Worker. No message or booking is sent.'
       : 'ⓘ Unavailable - run fresh Qloo first to enable genuine agent research.';
-  return frame('<div class="intro"><p class="eyebrow">AGENT HOOK · RESCUE RESEARCH</p>' +
+  return frame('<div class="intro"><p class="eyebrow">AI RESCUE · CHECKED RESEARCH</p>' +
     '<h1>Research the gap.</h1><p class="muted">' + esc(modeMessage) + '</p></div>' +
     '<div class="extension-facts"><div><span>Research mode</span><strong>' + (ctx.aiMode === 'demo' ? 'Saved synthetic transcript' : 'Live Claude via Worker') + '</strong></div></div>' +
     '<div class="extension-links compact">' +
@@ -220,6 +223,7 @@ function ai(ctx: ExtensionContext): string {
     '<button type="button" data-action="ai-mode-live"' + (ctx.aiBusy ? ' disabled' : '') + '>Live research <span>' + (ctx.aiMode==='live'?'Selected':'Requires live Qloo →') + '</span></button></div>' +
     (ctx.aiMode==='demo'?'<fieldset class="ai-scenarios"><legend>Saved research scenario</legend>'+AI_DEMO_SCENARIOS.map(row=>
       '<button type="button" data-action="ai-demo-scenario" data-id="'+row.id+'" aria-pressed="'+((ctx.aiDemoScenario??'corridor-repair')===row.id)+'"'+(ctx.aiBusy?' disabled':'')+'>'+esc(row.title)+'</button>').join('')+'</fieldset>':'')+
+    (ctx.aiMode==='live'?'<label for="ai-skill">Research procedure</label><select id="ai-skill"'+(ctx.aiBusy?' disabled':'')+'>'+Object.entries(TOUR_SKILLS).map(([id,row])=>'<option value="'+id+'"'+(id===(ctx.aiSkill??'corridor-repair')?' selected':'')+'>'+esc(row.title)+'</option>').join('')+'</select><p class="tiny-label">Starting research sends your saved band profile and text notes to Claude through the Worker. Excerpts used are included in your AI audit. <button type="button" class="text-button" data-action="documents">Review private notes →</button></p>':'')+
     (ctx.aiBusy ? '<p class="muted">Research in progress; checked results will appear when complete.</p>' : '') +
     (ctx.aiMode==='demo'&&ctx.sourceMode==='live'?action('Use the sample comparison for saved transcripts','ai-use-demo'):'')+
     (ctx.aiMode==='live'&&ctx.sourceMode==='live'&&ctx.aiLiveReady===false?'<p class="muted">Refresh Qloo before another live research session. Accepted cards stay in your current comparison until that fresh run succeeds.</p>'+action('Refresh Qloo artist evidence →','open-live'):'')+
@@ -238,6 +242,7 @@ function ai(ctx: ExtensionContext): string {
       ctx.aiSteps.slice(-20).map(step => '<li>' + esc(step.message) + '</li>').join('') + '</ul><ul>' +
       ctx.aiSession.sources.map(source => '<li><a target="_blank" rel="noreferrer noopener" href="' + esc(source.url) +
       '">' + esc(source.title) + '</a> · ' + esc(source.provenance) + '</li>').join('') + '</ul></details>' +
+      (ctx.aiSession.knowledgeReads?.length?'<details><summary>Private knowledge used · review before sharing</summary>'+ctx.aiSession.knowledgeReads.map(row=>'<article><strong>'+esc(row.title)+'</strong><p>'+esc(row.excerpt)+'</p><span class="tiny-label">User supplied · '+esc(row.updatedAt)+'</span></article>').join('')+'</details>':'')+
       '</div>' : '') +
     '<div class="focused-bottom">' +
     action(ctx.aiMode==='demo' ? 'Replay saved agent transcript →' : 'Start live AI research →',

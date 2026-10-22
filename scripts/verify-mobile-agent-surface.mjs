@@ -41,6 +41,9 @@ try{
   assert.equal(await page.locator('.guided-tour-layer:visible').count(),0);
   await act(page,'open-evidence').click();const after=JSON.parse((await downloaded(page,'audit')).bytes);assert.deepEqual(after.decisionAudit,before.decisionAudit);assert.deepEqual(after.accepted,before.accepted);
   await page.evaluate(()=>{location.hash='rescue';});await act(page,'start-guide').click();await page.keyboard.press('Escape');assert.equal(await page.locator('.guided-tour-layer:visible').count(),0);
+  await page.evaluate(()=>{location.hash='documents';});await page.locator('#knowledge-title').fill('Our technical rider');await page.locator('#knowledge-text').fill('We need a piano. Prefer daylight driving.');await act(page,'knowledge-save').click();
+  await page.reload();await page.locator('.tour-knowledge article').filter({hasText:'Our technical rider'}).waitFor();await page.locator('.tour-knowledge article').filter({hasText:'Our technical rider'}).locator('[data-action=knowledge-edit]').click();await page.locator('#knowledge-text').fill('Updated: acoustic piano only.');await act(page,'knowledge-save').click();assert.match(await page.locator('.tour-knowledge').innerText(),/Updated: acoustic piano only/);
+  await page.locator('.tour-knowledge article').filter({hasText:'Our technical rider'}).locator('[data-action=knowledge-delete]').click();assert.equal(await page.locator('.tour-knowledge article').count(),0);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(errors,[]);
   checks.push({width,evidence:'passed',png:'passed',printPdf:'generated',sixStepGuide:'passed',escapeAndRestore:'passed'});await context.close();
  }

@@ -10,6 +10,8 @@ The core is deterministic (pure TypeScript functions). The demo, live Qloo flow,
 
 The jury entry immediately identifies the mobile-first PWA. Install it on a phone, or use the complete desktop workflow. The offline public rescue shell excludes API responses and private research from its cache. See [the v2 judging path and validation](docs/V2_JUDGE_WORKFLOW.md) and [measured Qloo/Sonnet results](docs/validation/live-qloo-2026-10-23.md).
 
+Private band knowledge is editable in the profile and Documents screens and persists on the current device. Live AI uses bounded lexical retrieval over that snapshot, records the excerpts used, and keeps them separate from verified public venue evidence. The two research procedures map to real tools. Notes never override hard constraints, and downloaded AI audits may contain the user's private excerpts. See [the AI contract](docs/AI_RESCUE.md).
+
 ## Documents
 
 - [docs/BRIEF.md](docs/BRIEF.md): product brief, scope, architecture, acceptance criteria, plan

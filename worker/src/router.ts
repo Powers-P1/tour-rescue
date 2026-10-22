@@ -62,9 +62,9 @@ export async function handleWorkerRequest(request: Request, env: WorkerEnv, now 
       if (ip === null || !/^[0-9a-fA-F.:]{3,64}$/.test(ip)) {
         return finish(problem(503, 'CLIENT_ID_UNAVAILABLE', 'A trusted Cloudflare client address is required for live mode.'));
       }
-      const input = await readJson(request);
+      const input = await readJson(request,ai?48_000:16_384);
       // Projection and exact field validation happen again in the DO before any reservation.
-      inputObject(input, ai ? ['baseRunId', 'policy', 'additionalBudgetMinorUnits'] : internal === '/search' ? ['query'] :
+      inputObject(input, ai ? ['baseRunId', 'policy', 'additionalBudgetMinorUnits','knowledge','skill'] : internal === '/search' ? ['query'] :
         ['scenarioId', 'targetArtistId', 'comparisonArtistIds', 'controlArtistId', 'policy', 'additionalBudgetMinorUnits']);
       body = JSON.stringify(input);
       headers.set('Content-Type', 'application/json');

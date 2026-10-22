@@ -1,4 +1,4 @@
-export const API_VERSION = '0.6.0-pr6';
+export const API_VERSION = '0.7.0-knowledge';
 export const DEFAULT_ORIGIN = 'https://tour-rescue.pages.dev';
 const MAX_BODY_BYTES = 16_384;
 
@@ -27,12 +27,12 @@ export function problem(status: number, code: string, message: string, retryAfte
 }
 
 /** Bound bytes before JSON.parse, including bodies without Content-Length. */
-export async function readJson(request: Request): Promise<unknown> {
+export async function readJson(request: Request, maximumBytes = MAX_BODY_BYTES): Promise<unknown> {
   if (!/^application\/json(?:\s*;|$)/i.test(request.headers.get('Content-Type') ?? '')) {
     throw new HttpError(415, 'JSON_REQUIRED', 'Use Content-Type: application/json.');
   }
   const declared = request.headers.get('Content-Length');
-  if (declared !== null && Number(declared) > MAX_BODY_BYTES) {
+  if (declared !== null && Number(declared) > maximumBytes) {
     throw new HttpError(413, 'BODY_TOO_LARGE', 'The request body exceeds the size limit.');
   }
   if (request.body === null) throw new HttpError(400, 'INVALID_JSON', 'A JSON object is required.');
@@ -44,7 +44,7 @@ export async function readJson(request: Request): Promise<unknown> {
       const { done, value } = await reader.read();
       if (done) break;
       size += value.byteLength;
-      if (size > MAX_BODY_BYTES) {
+      if (size > maximumBytes) {
         await reader.cancel();
         throw new HttpError(413, 'BODY_TOO_LARGE', 'The request body exceeds the size limit.');
       }

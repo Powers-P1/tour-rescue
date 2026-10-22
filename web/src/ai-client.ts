@@ -4,6 +4,8 @@ import type { DecisionPolicy } from '../../src/core/decision-types.ts';
 import { parseAiProposalDraft, parseAiSources, validateAiProposal } from '../../src/ai/tools.ts';
 import type { AiDecisionContext, AiSessionResult, AiStep, AiStreamEvent, AiUsage } from '../../src/ai/types.ts';
 import { ApiError } from './data.ts';
+import {parseKnowledgeReads} from '../../src/ai/knowledge.ts';
+import type {TourKnowledge,TourSkill} from '../../src/ai/knowledge.ts';
 
 const MAX_STREAM_BYTES = 8 * 1024 * 1024;
 const MAX_LINE_BYTES = 8 * 1024 * 1024;
@@ -129,11 +131,15 @@ export function parseAiSession(value: unknown, mode: 'demo' | 'live', expected?:
     return { schemaVersion: 'tour-rescue.ai-session.v1', sessionId, mode, scenarioId: baseResult.scenarioId,
       model: mode === 'live' ? 'claude-sonnet-5-5' : 'synthetic-transcript', startedAt, completedAt,
       baseResult: expected === undefined ? baseResult : { ...baseResult, artists: expected.artists }, steps, sources, proposals, usage: usage(value.usage),
-      stopReason: value.stopReason as AiSessionResult['stopReason'], warnings: strings(value.warnings, 24, 1_000) };
+      stopReason: value.stopReason as AiSessionResult['stopReason'], warnings: strings(value.warnings, 24, 1_000),
+      ...(value.knowledgeReads===undefined?{}:{knowledgeReads:parseKnowledgeReads(value.knowledgeReads)}),
+      ...(value.skill==='corridor-repair'||value.skill==='evidence-gaps'?{skill:value.skill}:{}) };
   } catch { throw invalid(); }
 }
 
 export interface AiLiveRequest {
+  readonly knowledge?:TourKnowledge;
+  readonly skill?:TourSkill;
   readonly baseRunId: string;
   readonly policy?: DecisionPolicy;
   readonly additionalBudgetMinorUnits?: number;
