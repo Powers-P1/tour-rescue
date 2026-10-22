@@ -80,6 +80,11 @@ async function open(path,viewport) {
 }
 async function health(page,errors,external) {
  await page.evaluate(()=>document.fonts.ready);
+ // Actions rebuild the DOM; an eager local image can still be loading even
+ // when the previous copy was ready. Wait for completion, then reject errors.
+ await page.waitForFunction(()=>[...document.images]
+  .filter(img=>img.loading!=='lazy'&&!img.closest('details:not([open])'))
+  .every(img=>img.complete),null,{timeout:10000});
  assert.match(await page.title(),/Tour Rescue/);
  const layout=await page.evaluate(()=>{
   const ids=[...document.querySelectorAll('[id]')].map(n=>n.id);
