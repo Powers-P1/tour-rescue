@@ -125,7 +125,103 @@ try{
     'Audience map boundary or labels invalid '+width,result);
   await page.close();
  }
- console.log('Germany outline Playwright PASS: '+assertions+' assertions at 1280/390 px; offline inline SVG and 26 real city positions.');
+
+ // Follow-up: numbered badges must identify real markers at mobile widths,
+ // and their numbers must match the unchanged HTML geographic key exactly.
+ for(const width of [390,768,1099]){
+  const page=await open('/',width);
+  const measure=await page.locator('[data-map-scope="landing"]').evaluate(node=>{
+   const visible=e=>e.getClientRects().length>0;
+   const markers=[...node.querySelectorAll('.geo-number-callout')].filter(visible);
+   const labels=[...node.querySelectorAll('.geo-direct-label text')].filter(visible);
+   const keys=[...node.querySelectorAll('.geo-key-item')];
+   const overlapping=[];
+   const numberBoxes=markers.map(g=>g.querySelector('.geo-number-bubble')?.getBoundingClientRect());
+   for(let i=0;i<numberBoxes.length;i++)for(let j=i+1;j<numberBoxes.length;j++){
+     const a=numberBoxes[i],b=numberBoxes[j];
+     if(!a||!b)continue;
+     const w=Math.min(a.right,b.right)-Math.max(a.left,b.left);
+     const h=Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top);
+     if(w>2&&h>2)overlapping.push([i,j,w,h]);
+   }
+   return {markers:markers.map(g=>({city:g.getAttribute('data-numbered-city'),
+     number:g.getAttribute('data-key-number'),text:g.querySelector('text')?.textContent,
+     fontSize:g.querySelector('text')?.getBoundingClientRect().height})),
+    keys:keys.map(k=>({city:k.getAttribute('data-key-city'),number:k.getAttribute('data-key-number'),
+      name:k.querySelector('span')?.textContent?.trim(),size:k.getBoundingClientRect().height})),
+    labels:labels.length,overlapping,
+    overflow:document.documentElement.scrollWidth-window.innerWidth};
+  });
+  ok(measure.markers.length===11&&measure.keys.length===11&&measure.labels===0,
+    'Missing mobile numbered map markers '+width,measure);
+  for(let i=0;i<11;i++){
+   const marker=measure.markers[i],key=measure.keys[i];
+   ok(marker.city===key.city&&marker.number===key.number&&marker.text===key.number,
+    'Mobile marker/key mismatch '+width+' index '+i,{marker,key});
+   ok(marker.fontSize>=12,'Unreadably small mobile map numeral '+width,marker);
+  }
+  ok(measure.overlapping.length===0,'Overlapping mobile map callouts '+width,measure.overlapping);
+  ok(measure.overflow<=2,'Mobile map causes horizontal overflow '+width,measure.overflow);
+  await page.close();
+ }
+ // At >=1100px every route-relevant city has a readable on-map name. Check
+ // labels themselves for pixel size, boundaries and pairwise overlap, in
+ // both the public landing and the desktop Command's differently sized map.
+ for(const config of [
+  {path:'/',scope:'landing',width:1100},
+  {path:'/',scope:'landing',width:1280},
+  {path:'/',scope:'landing',width:1536},
+  {path:'/app/',scope:'command',width:1100},
+  {path:'/app/',scope:'command',width:1280},
+  {path:'/app/',scope:'command',width:1536},
+ ]){
+  const page=await open(config.path,config.width);
+  const data=await page.locator('[data-map-scope="'+config.scope+'"]').evaluate(node=>{
+    const visible=e=>e.getClientRects().length>0;
+    const svg=node.querySelector('svg');
+    const svgBox=svg?.getBoundingClientRect();
+    const labels=[...node.querySelectorAll('.geo-direct-label')].filter(visible);
+    const numbered=[...node.querySelectorAll('.geo-number-callout')].filter(visible);
+    const entries=labels.map(g=>{
+      const text=g.querySelector('text');
+      const bbox=text?.getBoundingClientRect();
+      return {city:g.getAttribute('data-labelled-city'),text:text?.textContent,
+        height:bbox?.height??0,rect:bbox?{x:bbox.left,y:bbox.top,right:bbox.right,bottom:bbox.bottom}:null};
+    });
+    const overlap=[];
+    for(let i=0;i<entries.length;i++)for(let j=i+1;j<entries.length;j++){
+      const a=entries[i].rect,b=entries[j].rect;
+      if(!a||!b)continue;
+      const w=Math.min(a.right,b.right)-Math.max(a.x,b.x);
+      const h=Math.min(a.bottom,b.bottom)-Math.max(a.y,b.y);
+      if(w>2&&h>2)overlap.push({a:entries[i].city,b:entries[j].city,w,h});
+    }
+    const stroke=el=>el?getComputedStyle(el).stroke:'';
+    const expected=getComputedStyle(node.querySelector('.geo-line-proposed')).borderTopColor;
+    const actual=[...node.querySelectorAll('.geo-route-proposal')].map(el=>stroke(el));
+    return {entries,numbered:numbered.length,overlap,svgBox:svgBox?{
+      x:svgBox.left,y:svgBox.top,right:svgBox.right,bottom:svgBox.bottom}:null,
+      expected,actual,overflow:document.documentElement.scrollWidth-innerWidth};
+  });
+  const essential=['de-hamburg','de-berlin','de-leipzig','de-cologne',
+    'de-munich','de-nuremberg','de-frankfurt'];
+  ok(data.entries.length===7&&data.numbered===0,
+    'On-map desktop labels missing '+JSON.stringify(config),data);
+  for(const city of essential){
+    const item=data.entries.find(x=>x.city===city);
+    ok(item&&item.height>=14&&item.rect,
+       'On-map city name smaller than 14px: '+city+' '+JSON.stringify(config),item);
+    ok(item.rect.x>=data.svgBox.x-2&&item.rect.right<=data.svgBox.right+2&&
+       item.rect.y>=data.svgBox.y-2&&item.rect.bottom<=data.svgBox.bottom+2,
+       'On-map city name clipped: '+city+' '+JSON.stringify(config),item.rect);
+  }
+  ok(data.overlap.length===0,'Overlapping on-map city names '+JSON.stringify(config),data.overlap);
+  ok(data.actual.length===2&&data.actual.every(value=>value===data.expected),
+     'One of the two proposed route colours differs from the legend '+JSON.stringify(config),data);
+  ok(data.overflow<=2,'Map makes page scroll horizontally '+JSON.stringify(config),data.overflow);
+  await page.close();
+ }
+ console.log('Germany outline Playwright PASS: '+assertions+' assertions, numbered map badges at 390/768/1099 and nonoverlapping >=14px names at 1100/1280/1536; both proposed routes amber.');
 }finally{
  await browser?.close();
  server.kill('SIGTERM');

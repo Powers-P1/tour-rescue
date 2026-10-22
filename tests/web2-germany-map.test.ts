@@ -77,3 +77,48 @@ test('landing Germany route is geographic but does not invent booked venue or ro
  assert.match(html,/Dashed: Proposed/);
  assert.doesNotMatch(html,/d="M204 20 L370/);
 });
+
+test('mobile numbered on-map callouts have a one-to-one ordered city key',()=>{
+ const html=renderGermanyGeographicMap({
+  scope:'landing',from:'Berlin',cancelled:'Leipzig',to:'Munich',
+  proposalIds:['de-nuremberg','de-frankfurt'],preferredProposalId:'de-nuremberg',
+ });
+ const markers=[...html.matchAll(/data-numbered-city="([^"]+)" data-key-number="(\d+)"/g)]
+    .map(m=>({city:m[1],number:Number(m[2])}));
+ const key=[...html.matchAll(/data-key-city="([^"]+)" data-key-number="(\d+)"/g)]
+    .map(m=>({city:m[1],number:Number(m[2])}));
+ assert.equal(markers.length,11);
+ assert.deepEqual(markers,key,'marker number must match actual key city and ordering');
+ assert.deepEqual(markers.map(m=>m.number),[1,2,3,4,5,6,7,8,9,10,11]);
+ for(const city of ['de-hamburg','de-berlin','de-munich','de-cologne','de-nuremberg','de-frankfurt'])
+   assert.ok(markers.some(m=>m.city===city),'unidentified priority city '+city);
+ assert.equal((html.match(/class="geo-number-leader"/g)??[]).length,11);
+ assert.equal((html.match(/class="geo-number-bubble"/g)??[]).length,11);
+});
+test('1100px+ direct map labels distinguish every confirmed, canceled and proposed route stop',()=>{
+ const html=renderGermanyGeographicMap({
+  scope:'command',from:'Berlin',cancelled:'Leipzig',to:'Munich',
+  proposalIds:['de-nuremberg','de-frankfurt'],
+ });
+ const direct=[...html.matchAll(/data-labelled-city="([^"]+)"/g)].map(m=>m[1]);
+ assert.deepEqual([...direct].sort(),[
+  'de-berlin','de-cologne','de-frankfurt','de-hamburg',
+  'de-leipzig','de-munich','de-nuremberg',
+ ].sort());
+ assert.match(html,/data-labelled-city="de-frankfurt"[^>]*><text[^>]*>Frankfurt<\/text>/);
+ assert.match(html,/data-labelled-city="de-nuremberg"[^>]*><text[^>]*>Nuremberg<\/text>/);
+ const css=readFileSync(new URL('../web2/src/germany-map.css',import.meta.url),'utf8');
+ assert.match(css,/\.geo-direct-label text\s*\{[^}]*font:700 25px/);
+ assert.match(css,/@media\(max-width:1099px\)/);
+ assert.match(css,/\.geo-number-callout\{display:block\}/);
+});
+test('every dashed proposed route shares the legend amber, including second candidate',()=>{
+ const css=readFileSync(new URL('../web2/src/germany-map.css',import.meta.url),'utf8');
+ const expected='#f3b65b';
+ const route=css.match(/\.geo-route-proposal\s*\{\s*stroke:(#[\da-f]{6})/i)?.[1];
+ const other=css.match(/\.geo-route-alternative\s*\{\s*stroke:(#[\da-f]{6})/i)?.[1];
+ const legend=css.match(/\.geo-line-proposed\{border-color:(#[\da-f]{6})/i)?.[1];
+ assert.equal(route,expected);
+ assert.equal(other,expected);
+ assert.equal(legend,expected);
+});
