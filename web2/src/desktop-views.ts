@@ -151,7 +151,7 @@ function simulation(ctx:DesktopViewContext):string{
  if(!s)return '<section class="feature-page">'+titleRow('What-if simulation','Choose a checked route alternative.','Draft')+
    action('Open repair directions →','rescue',true)+'</section>';
  const pass=s.verdict==='PASS';
- const statusText=pass?'Fits declared checks (conditional).':s.verdict==='FAIL'?
+ const statusText=s.dayOff&&pass?'Day off preserves the locked tour.':pass?'Fits declared checks (conditional).':s.verdict==='FAIL'?
    'Does not meet current limits.':'Needs more evidence.';
  const distanceEditor='<details class="sim-edit map-reference-details"><summary>Adjust extra-distance preference</summary><label for="sim-cap">What if extra distance were allowed up to (km)?</label>'+
    '<input type="text" id="sim-cap" inputmode="decimal" autocomplete="off" spellcheck="false" value="'+esc(ctx.simulationCapDraft ?? String(s.maxAdditionalDistanceKm))+'">'+
@@ -181,7 +181,7 @@ function simulation(ctx:DesktopViewContext):string{
    '<div class="sim-line">'+
     itineraryRow(s.fromDate,s.fromCity,'Existing locked date')+
     '<p class="sim-transfer">↝ '+esc(s.inbound)+' · frozen OSRM</p>'+
-    itineraryRow(s.changedDate,s.cityName,'Proposed · not booked')+
+    itineraryRow(s.changedDate,s.cityName,s.dayOff?'No extra concert or booking':'Proposed · not booked')+
     '<div class="sim-city-switch">'+action(ctx.changeCityOpen?'Hide alternatives ↑':'Change city →','sim-change-city')+
       (ctx.changeCityOpen?'<div class="sim-alternatives">'+ctx.projection.options.filter(o=>o.kind!=='day-off').map(o=>
         '<button type="button" data-action="sim-pick" data-id="'+esc(o.id)+'">'+esc(o.cityName)+'</button>').join('')+'</div>':'')+'</div>'+
@@ -200,8 +200,8 @@ function simulation(ctx:DesktopViewContext):string{
    (ctx.actionNotice?'<p class="feature-action-notice" role="status">'+esc(ctx.actionNotice)+'</p>':'')+'</div>'+
    '<div class="sim-final-action">'+action(ctx.savedDraft?'Save updated draft →':'Save draft scenario →','sim-save',true)+
    (ctx.savedDraft?'<p class="soft-status">✓ Saved on this device only - no tour, venue or booking updated.</p>':'')+
-   action(s.verdict==='FAIL'?'View why it fails →':'Preview promoter proposal →',
-     s.verdict==='FAIL'?'sim-evidence':'sim-proposal')+
+   action(s.dayOff?'Download day-off audit ↓':s.verdict==='FAIL'?'View why it fails →':'Preview promoter proposal →',
+     s.dayOff?'sim-audit':s.verdict==='FAIL'?'sim-evidence':'sim-proposal')+
    action('Inspect sensitivity & control →','sim-full-evidence')+
    fallback('Confirmed dates locked · proposed city remains unbooked · all missing facts stay Unknown / To confirm.')+
    '</div></section></div>'

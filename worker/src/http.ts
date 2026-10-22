@@ -1,4 +1,4 @@
-export const API_VERSION = '0.7.0-knowledge';
+export const API_VERSION = '0.7.1-review';
 export const DEFAULT_ORIGIN = 'https://tour-rescue.pages.dev';
 const MAX_BODY_BYTES = 16_384;
 

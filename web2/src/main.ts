@@ -132,6 +132,22 @@ function captureGuideWorkspace() {
    audienceModel,selectedAudienceCityId,showEvidence,notice};
 }
 let guideWorkspace:ReturnType<typeof captureGuideWorkspace>|null=null;
+const historyWorkspaces=new Map<number,ReturnType<typeof captureGuideWorkspace>>();
+let historyWorkspaceSequence=0;
+function restoreWorkspace(workspace:ReturnType<typeof captureGuideWorkspace>):void{
+ ({result,projection,incident,screen,pendingId,researchHistory,aiSession,aiSteps,aiMode,aiDemoScenario,aiNotice,liveResearchBaseRunId,
+   simulationModel,simulationTab,simSaved,simCapDraft,simCapError,simChooseCity,evidenceSource,evidenceOptionId,
+   chosenProposal,proposalSource,proposalReturn,proposalFromSimulation,proposalMessage,proposalContact,reviewingMessage,
+   audienceModel,selectedAudienceCityId,showEvidence,notice}=workspace);
+}
+function rememberWorkspaceHistory():void{
+ if(guideWorkspace||screen.startsWith('sos-'))return;
+ const previous=history.state?.tourRescueWorkspace;
+ const id=typeof previous==='number'&&historyWorkspaces.get(previous)?.screen===screen?previous:++historyWorkspaceSequence;
+ historyWorkspaces.set(id,captureGuideWorkspace());
+ while(historyWorkspaces.size>120)historyWorkspaces.delete(historyWorkspaces.keys().next().value!);
+ history.replaceState({...history.state,screen,tourRescueWorkspace:id},'');
+}
 function beginGuide():void {
  guideWorkspace=captureGuideWorkspace();
  result=createDemoResult();projection=projectRescue(result);incident=initialIncident();
@@ -141,12 +157,7 @@ function beginGuide():void {
  audienceModel=projectAudience(result);selectedAudienceCityId=audienceModel.places[0]?.cityId??'';notice='';
 }
 function finishGuide():void {
- if(guideWorkspace){
-   ({result,projection,incident,screen,pendingId,researchHistory,aiSession,aiSteps,aiMode,aiDemoScenario,aiNotice,liveResearchBaseRunId,
-     simulationModel,simulationTab,simSaved,simCapDraft,simCapError,simChooseCity,evidenceSource,evidenceOptionId,
-     chosenProposal,proposalSource,proposalReturn,proposalFromSimulation,proposalMessage,proposalContact,reviewingMessage,
-     audienceModel,selectedAudienceCityId,showEvidence,notice}=guideWorkspace);
- }
+ if(guideWorkspace)restoreWorkspace(guideWorkspace);
  guideWorkspace=null;render();
 }
 const HTML = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, char =>
@@ -585,6 +596,7 @@ function render(): void {
     if (!followingLocation && location.hash !== hash) history.pushState({screen,chosenOptionId:incident.chosenOptionId}, '', location.pathname+location.search+hash);
   }
   rememberSosHistory();
+  rememberWorkspaceHistory();
   setMapKeyDefaults(root!);
   if(screen==='evidence')mountEvidence(root!,evidenceSource??result,evidenceOptionId||pendingId);
   root!.querySelector('[data-action=rescue]')?.setAttribute('data-tour','cancelled-date');
@@ -745,6 +757,7 @@ function saveCurrentSimulation(): void {
 function previewSimulationProposal(): void {
   proposalReturn=null;
   if(!simulationModel)return;
+  if(simulationModel.dayOff){downloadAudit(simulationModel.sourceResult,'what-if');return;}
   const source=simulationModel.sourceResult;
   const selected=source.audit.analysis.decision.options.find(option=>option.optionId===simulationModel!.optionId);
   if(!selected || selected.status==='FAIL') {
@@ -1269,6 +1282,13 @@ function followAppHash():void {
   followingLocation=true;
   try {
     const hash=window.location.hash.slice(1);
+    const saved=historyWorkspaces.get(history.state?.tourRescueWorkspace);
+    const savedHash=saved?.screen==='today'?'':saved?.screen==='options'?'rescue':saved?.screen;
+    if(saved&&hash===savedHash){restoreWorkspace(saved);render();return;}
+    if(typeof history.state?.tourRescueWorkspace==='number'&&!saved&&['simulation','evidence','audit','detail','draft'].includes(hash)){
+      incident=initialIncident();screen='options';notice='The earlier audited view is no longer held in this tab. Reopen a direction from the current comparison.';
+      history.replaceState({screen},'',location.pathname+location.search+'#rescue');render();return;
+    }
     if(hash==='rescue'||hash==='options'){incident=initialIncident();startRescue();return;}
     if(hash==='agency'){openAgency();return;}
     if(hash==='audience'){openAudience();return;}

@@ -35,7 +35,7 @@ export function initPwa():void {
    status.textContent=ios?'Safari uses its Share menu to install apps.':'If the install option is unavailable, open this page in Chrome, Edge or Safari.';
  }
  function open(){
-   if(installed||dialog.open)return;
+   if(installed||dialog.open||document.querySelector('dialog[open],[role="dialog"][aria-modal="true"]'))return;
    returnFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
    help.hidden=true;status.textContent='';delete primary.dataset.help;primary.textContent='Install Tour Rescue';
    dialog.showModal();primary.focus();
@@ -56,7 +56,7 @@ export function initPwa():void {
    if(target){event.preventDefault();if(!installed)open();else target.textContent='App installed';}
  });
  function maybeOpen(){
-   if(!mobile||autoShown||installed||dismissed()||document.querySelector('.guided-tour-layer:not([hidden])'))return;
+   if(!mobile||autoShown||installed||dismissed()||document.querySelector('.guided-tour-layer:not([hidden]),dialog[open],[role="dialog"][aria-modal="true"]'))return;
    autoShown=true;open();
  }
  window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferred=event as InstallPrompt;maybeOpen();});

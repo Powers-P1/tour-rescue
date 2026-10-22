@@ -3,6 +3,14 @@ import assert from 'node:assert/strict';
 import { createDemoResult } from '../web/src/data.ts';
 import { relativeFitLabel, projectAudience, projectSimulation, loadSimulation,
   saveSimulation, SIM_DRAFT_KEY, agencyTasks } from '../web2/src/desktop-model.ts';
+import {parseExtraDistanceKm} from '../web2/src/simulation-input.ts';
+
+test('valid whole-metre decimals survive floating point and day-off recommendations can be inspected',()=>{
+ const demo=createDemoResult({generatedAt:'2026-10-21T12:00:00Z',runId:'final-sim'});
+ assert.equal(parseExtraDistanceKm('8.007'),8.007);assert.equal(parseExtraDistanceKm('8.0070'),8.007);assert.throws(()=>parseExtraDistanceKm('0.00000000001'));
+ assert.equal(projectSimulation(demo,'detour-frankfurt',8.007).maxAdditionalDistanceKm,8.007);
+ const whatIf=projectSimulation(demo,'day-off',0);assert.equal(whatIf.dayOff,true);assert.equal(whatIf.afterRecommendation.optionId,'day-off');assert.equal(whatIf.verdict,'PASS');assert.equal(whatIf.checks.find(c=>c.id==='venue')?.status,'PASS');assert.equal(whatIf.sourceResult.audit.replay.scenario.tour.shows.filter(s=>s.status==='confirmed').length,4);
+});
 
 test('audience displays audited core cities, not bitmap sample Erfurt',()=>{
   const demo=createDemoResult({generatedAt:'2026-10-21T12:00:00Z',runId:'audience-test'});
