@@ -8,6 +8,8 @@ import type { WorkerEnv } from './config.ts';
 import { HttpError, inputObject, problem, readJson } from './http.ts';
 import type { UsageLedger } from './ledger.ts';
 import { runAiSession } from './ai-agent.ts';
+import {parseTourKnowledge,TOUR_SKILLS} from '../../src/ai/knowledge.ts';
+import type {TourKnowledge,TourSkill} from '../../src/ai/knowledge.ts';
 
 const BASE_TTL_MS = 6 * 60 * 60 * 1000;
 const baseKey = (runId: string) => `ai-base:${runId}`;
@@ -50,8 +52,12 @@ interface AiRouteDependencies {
 }
 
 /** Client bodies can change declared preferences, never source facts, cities or provider tools. */
-async function prepareAiContext(request: Request, deps: AiRouteDependencies, clientHash: string): Promise<() => ApiDecisionResult> {
-  const data = inputObject(await readJson(request), ['baseRunId', 'policy', 'additionalBudgetMinorUnits']);
+async function prepareAiContext(request: Request, deps: AiRouteDependencies, clientHash: string): Promise<{build:()=>ApiDecisionResult;knowledge?:TourKnowledge;skill:TourSkill}> {
+  const data = inputObject(await readJson(request,48_000), ['baseRunId', 'policy', 'additionalBudgetMinorUnits','knowledge','skill']);
+  let knowledge:TourKnowledge|undefined;
+  try{if(data.knowledge!==undefined)knowledge=parseTourKnowledge(data.knowledge);}catch{throw new HttpError(400,'INVALID_KNOWLEDGE','Use up to eight text documents and 6000 characters.');}
+  const skill=data.skill??'corridor-repair';
+  if(typeof skill!=='string'||!Object.hasOwn(TOUR_SKILLS,skill))throw new HttpError(400,'INVALID_SKILL','Choose a supported research procedure.');
   if (typeof data.baseRunId !== 'string' || !/^[a-zA-Z0-9:_-]{1,160}$/.test(data.baseRunId)) {
     throw new HttpError(400, 'INVALID_AI_BASE', 'Supply the run ID of your latest live Qloo decision.');
   }
@@ -81,7 +87,7 @@ async function prepareAiContext(request: Request, deps: AiRouteDependencies, cli
       additionalBudget: { status: 'known', value: { currency: 'EUR', minorUnits: amount } },
     } } };
   }
-  return () => {
+  const build = () : ApiDecisionResult => {
     const audit = createDecisionAudit({
       scenario, policy, ranges: replay.ranges, queries: record.queries, mode: 'live', runId: record.runId,
       generatedAt: new Date(Math.max(deps.now(), Date.parse(record.generatedAt))).toISOString(),
@@ -92,6 +98,7 @@ async function prepareAiContext(request: Request, deps: AiRouteDependencies, cli
     return { schemaVersion: 'tour-rescue.api-result.v1', mode: 'live', scenarioId: scenario.id,
       artists: record.artists, audit };
   };
+  return {build,skill:skill as TourSkill,...(knowledge?{knowledge}:{})};
 }
 
 export async function handleAiLive(request: Request, deps: AiRouteDependencies): Promise<Response> {
@@ -101,7 +108,7 @@ export async function handleAiLive(request: Request, deps: AiRouteDependencies):
     return problem(400, 'CLIENT_ID_UNAVAILABLE', 'A server-derived client identity is required.');
   }
   const maxInputTokens = aiMaxInputTokens(deps.env);
-  const buildContext = await prepareAiContext(request, deps, clientHash);
+  const prepared = await prepareAiContext(request, deps, clientHash);
   if (request.signal.aborted) return problem(499, 'AI_CANCELLED', 'The AI session was cancelled before it started.');
   // This must settle durably before the stream or any paid provider request starts.
   await deps.ledger.reserveAiSession(clientHash);
@@ -109,7 +116,7 @@ export async function handleAiLive(request: Request, deps: AiRouteDependencies):
   // but do not miss that abort by subscribing only after it has already happened.
   if (request.signal.aborted) return problem(499, 'AI_CANCELLED', 'The AI session was cancelled before the provider started.');
   // Denied sessions must not repeatedly consume the deterministic engine's CPU budget.
-  const baseResult = buildContext();
+  const baseResult = prepared.build();
   const cancellation = new AbortController();
   const onAbort = () => cancellation.abort();
   request.signal.addEventListener('abort', onAbort, { once: true });
@@ -124,6 +131,7 @@ export async function handleAiLive(request: Request, deps: AiRouteDependencies):
       try {
         const result = await (deps.runAi ?? runAiSession)({
           baseResult, sessionId: deps.runId(), apiKey: deps.env.ANTHROPIC_API_KEY!, now: deps.now,
+          skill:prepared.skill,...(prepared.knowledge?{knowledge:prepared.knowledge}:{}),
           signal: cancellation.signal, onEvent: emit, maxInputTokens,
           ...(deps.fetch === undefined ? {} : { fetch: deps.fetch }),
         });

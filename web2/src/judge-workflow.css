@@ -40,6 +40,12 @@
 .tag-state { font-size:14px; color:var(--muted); }
 .tag-evidence-list { padding-left:20px; }
 .live-study-report { white-space:pre-wrap; overflow-wrap:anywhere; font-size:14px; max-height:480px; overflow:auto; }
+.tour-knowledge { margin-top:32px; border-top:1px solid var(--border); padding-top:24px; }
+.tour-knowledge article { border-bottom:1px solid var(--border); padding:20px 0; }
+.tour-knowledge label { display:block; margin:18px 0 8px; font-size:14px; }
+.tour-knowledge input,.tour-knowledge textarea,#ai-skill { display:block; width:100%; max-width:100%; min-height:48px; padding:12px; border:1px solid var(--border); border-radius:8px; background:var(--surface); color:var(--text); font:inherit; }
+.tour-knowledge .knowledge-excerpt { white-space:pre-wrap; overflow-wrap:anywhere; }
+.tour-knowledge .text-button { min-height:48px; margin-right:12px; }
 .guided-tour-card { background:var(--surface); color:var(--text); border-color:var(--border); }
 .guided-tour-card .guided-tour-description,.guided-tour-card .guided-tour-hint,.guided-tour-card .guided-tour-skip { color:var(--muted); font-size:14px; }
 .guided-tour-card .guided-tour-label,.guided-tour-card .guided-tour-focus { color:var(--accent); font-size:14px; }

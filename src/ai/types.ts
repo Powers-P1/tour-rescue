@@ -1,6 +1,7 @@
 import type { DecisionAudit } from '../core/audit-types.ts';
 import type { EvaluatedRepairOption } from '../core/repair-types.ts';
 import type { CheckStatus } from '../core/travel-constraints.ts';
+import type { KnowledgeRead, TourSkill } from './knowledge.ts';
 
 /** Shared application contract. Provider credentials and raw Qloo responses never belong here. */
 export interface AiDecisionContext {
@@ -70,6 +71,8 @@ export interface AiUsage {
 export type AiStopReason = 'completed' | 'step-limit' | 'token-limit' | 'tool-limit' | 'cancelled' | 'provider-error' | 'incomplete';
 
 export interface AiSessionResult {
+  readonly knowledgeReads?: readonly KnowledgeRead[];
+  readonly skill?: TourSkill;
   readonly schemaVersion: 'tour-rescue.ai-session.v1';
   readonly sessionId: string;
   readonly mode: 'demo' | 'live';
