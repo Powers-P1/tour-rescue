@@ -2,6 +2,7 @@ import './styles.css';
 import './desktop.css';
 import './germany-map.css';
 import './completion.css';
+import './judge-workflow.css';
 import { icon, brand } from './icons.ts';
 import { isWorkspaceScreen, workspaceView } from './workspace-views.ts';
 import type { WorkspaceScreen } from './workspace-views.ts';
@@ -19,7 +20,10 @@ import { SAMPLE_ECONOMICS, evaluateEconomics, SAMPLE_PLAN_BRIEF, initialSosSampl
 import type { EconomicsAssumptions, PlanSummary, SosSampleState, SosStage, SosSupplierId } from './extension-state.ts';
 import { isExtensionScreen, renderExtension } from './extension-views.ts';
 import type { ExtensionContext, ExtensionScreen } from './extension-views.ts';
-import { createAiDemoSession } from '../../src/ai/demo.ts';
+import { AI_DEMO_SCENARIOS, createAiDemoSession } from '../../src/ai/demo.ts';
+import type { AiDemoScenarioId } from '../../src/ai/demo.ts';
+import { acceptResearchIntoComparison, emptyResearch } from './research-comparison.ts';
+import { safeAiSourceUrl } from '../../src/ai/tools.ts';
 import { createAiClient } from '../../web/src/ai-client.ts';
 import { hadMountedScreen, selectFocusTarget } from './focus-policy.ts';
 import { projectAudience, projectSimulation, loadSimulation, saveSimulation } from './desktop-model.ts';
@@ -63,6 +67,8 @@ let aiMode: 'demo' | 'live' = 'demo';
 let aiBusy = false;
 let aiNotice = '';
 let aiSession: AiSessionResult | null = null;
+let aiDemoScenario: AiDemoScenarioId = 'corridor-repair';
+let researchHistory = emptyResearch();
 let aiSteps: AiStep[] = [];
 let aiAbort: AbortController | null = null;
 let aiGeneration = 0;
@@ -239,7 +245,20 @@ function evidencePanel(option: RescueOption): string {
     '<h3>Checks for ' + HTML(option.cityName) + '</h3><div class="check-list">' +
     option.checks.map(check => '<div class="check-row">' + statusBadge(check.status) +
       '<div><strong>' + HTML(check.id) + '</strong><p>' + HTML(check.message) + '</p></div></div>').join('') +
-    '</div>' + softButton('Download full JSON audit ↓', 'audit') + '</section>';
+    '</div>' + acceptedResearchSources() + softButton('Download full JSON audit ↓', 'audit') + '</section>';
+}
+function acceptedResearchSources(): string {
+  if(!researchHistory.accepted.length)return '';
+  return '<section class="research-sources"><h3>Accepted AI research</h3><p>Explicitly accepted comparison leads; independently rechecked. No booking or outreach.</p><ul>'+
+    researchHistory.accepted.map(acceptance=>{
+      const session=researchHistory.sessions.find(row=>row.sessionId===acceptance.sessionId);
+      const proposal=session?.proposals.find(row=>row.draft.id===acceptance.proposalId);
+      return '<li><strong>'+HTML(proposal?.draft.venueName)+'</strong> · '+HTML(session?.mode==='demo'?'Synthetic transcript':'Live research')+' · accepted '+HTML(acceptance.acceptedAt)+'<ul>'+
+        (session?.sources.filter(source=>acceptance.sourceIds.includes(source.id))??[]).map(source=>{
+          const url=safeAiSourceUrl(source.url);
+          return '<li>'+(url?'<a href="'+HTML(url)+'" target="_blank" rel="noopener noreferrer">'+HTML(source.title)+'</a>':HTML(source.title))+' · '+HTML(source.provenance)+' · '+HTML(source.retrievedAt)+'</li>';
+        }).join('')+'</ul></li>';
+    }).join('')+'</ul></section>';
 }
 function defaultMessage(sheet: PromoterSheetModel): string {
   return 'Subject: Proposed show - ' + sheet.artist + ' - ' + sheet.city + '\n\n' +
@@ -329,7 +348,8 @@ function desktopHome(): string {
 }
 function extensionContext(): ExtensionContext {
   return { tabs: mobileTabs(), sos, planBrief, planSummary, bandProfile, showAssumptions: economicsExpanded,
-    economics, economicsError, economicsDraft, fanPreviewed, aiBusy, aiNotice, aiMode, aiSteps, aiSession, sourceMode: projection.mode };
+    economics, economicsError, economicsDraft, fanPreviewed, aiBusy, aiNotice, aiMode, aiSteps, aiSession,
+    aiDemoScenario, aiAccepted: researchHistory.accepted, sourceMode: projection.mode };
 }
 function desktopContext(): DesktopViewContext {
   return {
@@ -561,7 +581,7 @@ function back(): void {
 }
 function downloadAudit(source?:ApiDecisionResult,kind:'baseline'|'what-if'='baseline'):void {
   const audited=source??(screen==='draft'?proposalSource??result:result);
-  const exported=auditExport(audited,kind);
+  const exported=auditExport(audited,kind,researchHistory);
   const file=new Blob([exported.content],{type:'application/json'});
   const url = URL.createObjectURL(file);
   const link = document.createElement('a');
@@ -726,6 +746,7 @@ async function runLive(): Promise<void> {
     const nextState = transitionIncident(initialIncident(), { type: 'start-search' });
     incident = transitionIncident(nextState, { type: 'proposals-ready', runId: view.runId, optionIds: view.options.map(item => item.id) });
     result = fresh;
+    researchHistory = emptyResearch(); aiSession = null; aiSteps = [];
     projection = view;
     pendingId = view.options.find(x => x.recommended)?.id ?? view.options[0]?.id ?? '';
     chosenProposal = null;
@@ -847,7 +868,13 @@ root!.addEventListener('click', async event => {
     case 'sim-route-tab':simulationTab='route';notice='';render();break;
     case 'sim-budget-tab':simulationTab='budget';notice='';render();break;
     case 'sim-change-city':simChooseCity=!simChooseCity;render();break;
-    case 'sim-pick':openSimulation(button.dataset.id);break;
+    case 'sim-pick':
+      if(simulationModel && button.dataset.id){simulationModel=projectSimulation(result,button.dataset.id,simulationModel.maxAdditionalDistanceKm);simChooseCity=false;simSaved=false;render();}
+      break;
+    case 'sim-follow-recommendation':
+      if(simulationModel?.afterRecommendation.optionId){simulationModel=projectSimulation(result,simulationModel.afterRecommendation.optionId,simulationModel.maxAdditionalDistanceKm);simSaved=false;render();}
+      break;
+    case 'sim-audit':if(simulationModel)downloadAudit(simulationModel.sourceResult,'what-if');break;
     case 'sim-recheck': {
       const input=root!.querySelector<HTMLInputElement>('#sim-cap');
       if(!input||!simulationModel)break;
@@ -856,9 +883,7 @@ root!.addEventListener('click', async event => {
         const cap=parseExtraDistanceKm(input.value);
         simulationModel=projectSimulation(result,simulationModel.optionId,cap);
         simCapDraft=null;simCapError='';simSaved=false;
-        notice=simulationModel.verdict==='PASS'?'✓ Recalculated. Checks pass conditionally.':
-          simulationModel.verdict==='FAIL'?'× Recalculated. A declared check fails.':
-          '? Recalculated. Evidence still needed.';
+        notice=(simulationModel.recommendationChanged?'Recommendation changed: ':'Recommendation unchanged: ')+simulationModel.afterRecommendation.name+'. The reviewed alternative is labelled separately.';
       }catch(err){
         simCapError=err instanceof Error?err.message:'Enter 0–500 km.';
         notice='';
@@ -998,10 +1023,31 @@ root!.addEventListener('click', async event => {
     case 'ai-mode-live': if (!aiBusy) { aiMode = 'live'; aiNotice = ''; aiSession = null; aiSteps = []; render(); } break;
     case 'ai-replay':
       if (aiBusy) break;
-      aiSession = createAiDemoSession('corridor-repair');
+      aiSession = createAiDemoSession(aiDemoScenario);
       aiSteps = [...aiSession.steps];
       aiNotice = '✓ Saved demo replayed - synthetic transcript; no live AI or provider request.';
       render(); break;
+    case 'ai-demo-scenario':
+      if(!aiBusy && AI_DEMO_SCENARIOS.some(row=>row.id===button.dataset.id)){
+        aiDemoScenario=button.dataset.id as AiDemoScenarioId;aiSession=null;aiSteps=[];aiNotice='';render();
+      }break;
+    case 'ai-accept': {
+      if(aiBusy || !aiSession || !button.dataset.id)break;
+      try {
+        const accepted=acceptResearchIntoComparison(result,aiSession,button.dataset.id,researchHistory,{
+          generatedAt:new Date(Math.max(Date.now(),Date.parse(result.audit.generatedAt),Date.parse(aiSession.completedAt))).toISOString(),
+          runId:'browser-ai-'+crypto.randomUUID(),
+        });
+        const view=projectRescue(accepted.result);
+        result=accepted.result;projection=view;researchHistory=accepted.history;
+        pendingId=accepted.acceptance.optionId;chosenProposal=null;proposalSource=null;simulationModel=null;
+        audienceModel=projectAudience(result);
+        incident=transitionIncident(initialIncident(),{type:'start-search'});
+        incident=transitionIncident(incident,{type:'proposals-ready',runId:result.audit.runId,optionIds:view.options.map(row=>row.id)});
+        screen='options';notice='Accepted into comparison. All checks and decision analysis were recalculated. Four confirmed shows are unchanged; no booking was made.';
+      }catch(error){aiNotice='Could not accept this proposal. The comparison is unchanged. '+(error instanceof Error?error.message:'Validation failed.');}
+      render();break;
+    }
     case 'ai-run-live': await researchWithAgent(); break;
     case 'ai-stop': stopAgentResearch(); render(); break;
         case 'run-live': await runLive(); break;

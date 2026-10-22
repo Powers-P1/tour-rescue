@@ -1,7 +1,9 @@
 import { icon, brand } from './icons.ts';
 import { SAMPLE_ECONOMICS, SAMPLE_SUPPLIERS, evaluateEconomics, selectedSupplier } from './extension-state.ts';
 import type { SosSampleState, PlanSummary, EconomicsAssumptions } from './extension-state.ts';
-import type { AiSessionResult, AiStep } from '../../src/ai/types.ts';
+import type { AiAcceptance, AiSessionResult, AiStep } from '../../src/ai/types.ts';
+import { AI_DEMO_SCENARIOS } from '../../src/ai/demo.ts';
+import type { AiDemoScenarioId } from '../../src/ai/demo.ts';
 
 export type ExtensionScreen =
   | 'route' | 'sos-problem' | 'sos-options' | 'sos-quote' | 'sos-approved'
@@ -27,6 +29,8 @@ export interface ExtensionContext {
   readonly aiMode: 'demo' | 'live';
   readonly aiSteps: readonly AiStep[];
   readonly aiSession: AiSessionResult | null;
+  readonly aiDemoScenario?: AiDemoScenarioId;
+  readonly aiAccepted?: readonly AiAcceptance[];
   readonly sourceMode: 'demo' | 'live';
 }
 const esc = (value: unknown): string => String(value ?? '').replace(/[&<>"']/g, char =>
@@ -213,6 +217,8 @@ function ai(ctx: ExtensionContext): string {
     '<div class="extension-links compact">' +
     '<button type="button" data-action="ai-mode-demo"' + (ctx.aiBusy ? ' disabled' : '') + '>Saved demo <span>' + (ctx.aiMode==='demo'?'Selected':'Use synthetic data →') + '</span></button>' +
     '<button type="button" data-action="ai-mode-live"' + (ctx.aiBusy ? ' disabled' : '') + '>Live research <span>' + (ctx.aiMode==='live'?'Selected':'Requires live Qloo →') + '</span></button></div>' +
+    (ctx.aiMode==='demo'?'<fieldset class="ai-scenarios"><legend>Saved research scenario</legend>'+AI_DEMO_SCENARIOS.map(row=>
+      '<button type="button" data-action="ai-demo-scenario" data-id="'+row.id+'" aria-pressed="'+((ctx.aiDemoScenario??'corridor-repair')===row.id)+'"'+(ctx.aiBusy?' disabled':'')+'>'+esc(row.title)+'</button>').join('')+'</fieldset>':'')+
     (ctx.aiBusy ? '<p class="muted">Research in progress; checked results will appear when complete.</p>' : '') +
     '<p role="status" class="live-notice">' + esc(ctx.aiNotice) + '</p>' +
     (ctx.aiSession ? '<div class="agent-results"><h2>Checked research leads</h2>' +
@@ -221,7 +227,10 @@ function ai(ctx: ExtensionContext): string {
       ctx.aiSession.proposals.map(proposal => '<div class="agent-proposal"><strong>' +
         esc(proposal.draft.venueName) + '</strong><span class="status status-' + (proposal.status==='FAIL'?'danger':proposal.status==='PASS'?'good':'unknown') +
         '">' + (proposal.status==='FAIL'?'×':proposal.status==='PASS'?'✓':'?') + ' ' + esc(proposal.status) + '</span>' +
-        '<p>' + esc(proposal.draft.reason) + '</p><p class="tiny-label">Proposed lead · not an accepted show or booking</p></div>').join('') +
+        '<p>' + esc(proposal.draft.reason) + '</p><p class="tiny-label">Proposed lead · not an accepted show or booking. Availability, fees and terms need independent evidence.</p>'+
+        '<button type="button" class="primary-button" data-action="ai-accept" data-id="'+esc(proposal.draft.id)+'"'+
+        (ctx.aiBusy||ctx.aiSession!.stopReason!=='completed'||ctx.aiSession!.proposals.length<2||ctx.aiSession!.mode!==ctx.sourceMode||ctx.aiAccepted?.some(row=>row.proposalId===proposal.draft.id&&row.sessionId===ctx.aiSession!.sessionId)?' disabled':'')+'>'+
+        (ctx.aiAccepted?.some(row=>row.proposalId===proposal.draft.id&&row.sessionId===ctx.aiSession!.sessionId)?'Added to comparison':'Accept into comparison')+'</button></div>').join('') +
       '<details><summary>Research steps & sources</summary><ul>' +
       ctx.aiSteps.slice(-20).map(step => '<li>' + esc(step.message) + '</li>').join('') + '</ul><ul>' +
       ctx.aiSession.sources.map(source => '<li><a target="_blank" rel="noreferrer noopener" href="' + esc(source.url) +
