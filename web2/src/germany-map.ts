@@ -40,7 +40,7 @@ export interface GermanyMapOptions {
   readonly to?:string;
   /** These are route options supplied by the audited core, never inferred from taste. */
   readonly proposalIds?:readonly string[];
-  readonly preferredProposalId?:string|null;
+  readonly preferredProposalId?:string|null|undefined;
   readonly selectedCityId?:string|null;
   readonly routes?:boolean;
 }
