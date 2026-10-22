@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { evaluateEconomics, SAMPLE_ECONOMICS, SAMPLE_PLAN_BRIEF, SAMPLE_SUPPLIERS,
-  initialSosSample, selectedSupplier, summarizePlanBrief, transitionSosSample } from '../web2/src/extension-state.ts';
+  initialSosSample, restoreSosHistory, selectedSupplier, summarizePlanBrief, transitionSosSample } from '../web2/src/extension-state.ts';
 
 test('SOS sample has two explicitly fictitious suppliers and never creates a real booking', () => {
   assert.equal(SAMPLE_SUPPLIERS.length, 2);
@@ -24,6 +24,18 @@ test('SOS cannot approve sample spend over cap or without reviewing', () => {
   state = transitionSosSample(state, { type: 'find-sample-options' });
   state = transitionSosSample(state, { type: 'review-sample-quote' });
   assert.throws(() => transitionSosSample(state, { type: 'preview-approval' }));
+});
+test('SOS navigation restores the selected supplier and only an affordable explicit sample approval',()=>{
+  let state=transitionSosSample(initialSosSample(),{type:'find-sample-options'});
+  state=transitionSosSample(state,{type:'choose-sample-supplier',id:'saigon-stage-supply'});
+  assert.deepEqual(restoreSosHistory(state,'options'),state);
+  state=transitionSosSample(state,{type:'review-sample-quote'});
+  state=transitionSosSample(state,{type:'preview-approval'});
+  assert.deepEqual(restoreSosHistory(state,'preview-approved'),state);
+  for(const invalid of [null,{...state,sampleApproval:false},{...state,budgetCapVnd:1},{...state,selectedId:'unknown'}]){
+    assert.deepEqual(restoreSosHistory(invalid,'preview-approved'),initialSosSample());
+  }
+  assert.equal(restoreSosHistory(state,'problem').stage,'problem');
 });
 test('sample NL planner reads explicit constraints without touching core tour', () => {
   const summary = summarizePlanBrief(SAMPLE_PLAN_BRIEF);

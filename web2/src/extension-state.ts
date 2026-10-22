@@ -30,6 +30,23 @@ export const initialSosSample = (): SosSampleState => ({
   location: 'Ho Chi Minh City', requiredLocal: 'Today, 16:00 · ICT (UTC+7)',
   budgetCapVnd: 2_000_000, selectedId: 'minh-backline', sampleApproval: false,
 });
+/** Restore a navigation snapshot; an URL alone cannot imply sample approval. */
+export function restoreSosHistory(value: unknown, stage: SosStage): SosSampleState {
+  if (!value || typeof value !== 'object') return initialSosSample();
+  const row = value as Record<string, unknown>;
+  if (row.stage !== stage || typeof row.problem !== 'string' || !row.problem.trim() || row.problem.length > 700
+    || typeof row.location !== 'string' || !row.location.trim() || row.location.length > 200
+    || typeof row.requiredLocal !== 'string' || !row.requiredLocal.trim() || row.requiredLocal.length > 200
+    || typeof row.budgetCapVnd !== 'number' || !Number.isSafeInteger(row.budgetCapVnd)
+    || row.budgetCapVnd <= 0 || row.budgetCapVnd > 100_000_000
+    || !SAMPLE_SUPPLIERS.some(supplier => supplier.id === row.selectedId)
+    || typeof row.sampleApproval !== 'boolean') return initialSosSample();
+  if (stage === 'preview-approved' && (!row.sampleApproval
+    || SAMPLE_SUPPLIERS.find(supplier => supplier.id === row.selectedId)!.estimateVnd > row.budgetCapVnd)) return initialSosSample();
+  return {stage, problem:row.problem, location:row.location, requiredLocal:row.requiredLocal,
+    budgetCapVnd:row.budgetCapVnd, selectedId:row.selectedId as SosSupplierId,
+    sampleApproval:stage === 'preview-approved'};
+}
 export function selectedSupplier(state: SosSampleState): SosSupplier {
   const found = SAMPLE_SUPPLIERS.find(provider => provider.id === state.selectedId);
   if (!found) throw new RangeError('Unknown sample supplier.');

@@ -6,6 +6,7 @@ import { icon, brand } from './icons.ts';
 import { isWorkspaceScreen, workspaceView } from './workspace-views.ts';
 import type { WorkspaceScreen } from './workspace-views.ts';
 import { renderGermanyGeographicMap } from './germany-map.ts';
+import { setMapKeyDefaults } from './map-disclosure.ts';
 import { createDemoResult, createApiClient } from '../../web/src/data.ts';
 import type { ApiDecisionResult, ArtistChoice, LiveSelection } from '../../web/src/data.ts';
 import { buildPromoterModel } from '../../web/src/promoter-model.ts';
@@ -14,7 +15,7 @@ import { initialIncident, isFocusedRescue, transitionIncident } from './state.ts
 import type { IncidentState } from './state.ts';
 import { projectRescue, UNKNOWN } from './model.ts';
 import type { RescueOption, RescueProjection } from './model.ts';
-import { SAMPLE_ECONOMICS, evaluateEconomics, SAMPLE_PLAN_BRIEF, initialSosSample, selectedSupplier, summarizePlanBrief, transitionSosSample } from './extension-state.ts';
+import { SAMPLE_ECONOMICS, evaluateEconomics, SAMPLE_PLAN_BRIEF, initialSosSample, restoreSosHistory, selectedSupplier, summarizePlanBrief, transitionSosSample } from './extension-state.ts';
 import type { EconomicsAssumptions, PlanSummary, SosSampleState, SosStage, SosSupplierId } from './extension-state.ts';
 import { isExtensionScreen, renderExtension } from './extension-views.ts';
 import type { ExtensionContext, ExtensionScreen } from './extension-views.ts';
@@ -473,7 +474,13 @@ function render(): void {
     const hash = screen === 'today' ? '' : '#' + (screen === 'options' ? 'rescue' : screen);
     if (!followingLocation && location.hash !== hash) history.pushState({screen,chosenOptionId:incident.chosenOptionId}, '', location.pathname+location.search+hash);
   }
+  rememberSosHistory();
+  setMapKeyDefaults(root!);
   lastRenderedScreen = screen;
+}
+window.matchMedia('(max-width: 1099px)').addEventListener('change',()=>setMapKeyDefaults(root!));
+function rememberSosHistory(): void {
+  if (screen.startsWith('sos-')) history.replaceState({...history.state,screen,sos:{...sos}},'');
 }
 desktopMedia.addEventListener('change', () => render());
 function goHome(): void {
@@ -775,6 +782,7 @@ root!.addEventListener('input', event => {
   if (node instanceof HTMLInputElement && node.id === 'sos-deadline') sos = {...sos,requiredLocal:node.value};
   if (node instanceof HTMLInputElement && node.id.startsWith('econ-')) economicsDraft[node.id.slice(5)]=node.value;
   if (node instanceof HTMLInputElement && node.id === 'sos-budget') sos = {...sos,budgetCapVnd:Number(node.value)};
+  if (node instanceof HTMLElement && node.id.startsWith('sos-')) rememberSosHistory();
 });
 root!.addEventListener('click', async event => {
   const element = event.target;
@@ -1067,7 +1075,7 @@ function followAppHash():void {
     if(hash==='agency'){openAgency();return;}
     if(hash==='audience'){openAudience();return;}
     if(hash==='simulation'){openSimulation();return;}
-    if(hash==='sos'){openSos();return;}
+    if(hash==='sos'){sos=restoreSosHistory(history.state?.sos,'problem');openSos();return;}
     if(hash==='detail'||hash==='draft'){
       const chosenId=history.state?.chosenOptionId;
       if(typeof chosenId==='string' && optionById(chosenId)) {
@@ -1082,7 +1090,13 @@ function followAppHash():void {
       if(hash==='detail' && currentOption()){screen='detail';render();return;}
       startRescue();return;
     }
-    if(hash.startsWith('sos-')){screen=sosScreen(sos.stage);render();return;}
+    if(hash.startsWith('sos-')){
+      const stages:Record<string,SosStage>={'sos-problem':'problem','sos-options':'options','sos-quote':'quote','sos-approved':'preview-approved'};
+      const stage=stages[hash];
+      sos=stage?restoreSosHistory(history.state?.sos,stage):initialSosSample();
+      if(stage!==sos.stage)history.replaceState({...history.state,sos},'',location.pathname+location.search+'#'+sosScreen(sos.stage));
+      screen=sosScreen(sos.stage);render();return;
+    }
     if(['fan','crew','route','plan','economics','economics-terms','ai','documents','team','profile','presale'].includes(hash)){
       screen=hash as Screen;if(screen==='team')workspaceAgency=true;render();return;
     }

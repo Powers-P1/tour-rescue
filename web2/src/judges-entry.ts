@@ -4,12 +4,15 @@ import './marketing-completion.css';
 import { publicSiteModel } from './marketing-model.ts';
 import { judgesMarkup } from './marketing.ts';
 import { auditExport } from './audit-download.ts';
+import { setMapKeyDefaults } from './map-disclosure.ts';
 
 const root=document.getElementById('judges-root');
 if(root){
   try{
     const model=publicSiteModel();
     root.innerHTML=judgesMarkup(model);
+    setMapKeyDefaults(root);
+    window.matchMedia('(max-width: 1099px)').addEventListener('change',()=>setMapKeyDefaults(root));
     root.querySelector<HTMLButtonElement>('#download-synthetic-audit')?.addEventListener('click',()=>{
       const exported=auditExport(model.original);
       const blob=new Blob([exported.content],{type:'application/json'});
