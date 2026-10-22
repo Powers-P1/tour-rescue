@@ -153,16 +153,30 @@ function simulation(ctx:DesktopViewContext):string{
  const pass=s.verdict==='PASS';
  const statusText=pass?'Fits declared checks (conditional).':s.verdict==='FAIL'?
    'Does not meet current limits.':'Needs more evidence.';
+ const distanceEditor='<details class="sim-edit map-reference-details"><summary>Adjust extra-distance preference</summary><label for="sim-cap">What if extra distance were allowed up to (km)?</label>'+
+   '<input type="text" id="sim-cap" inputmode="decimal" autocomplete="off" spellcheck="false" value="'+esc(ctx.simulationCapDraft ?? String(s.maxAdditionalDistanceKm))+'">'+
+   (ctx.simulationCapError?'<p class="sim-input-error" role="alert">× Invalid distance cap: '+esc(ctx.simulationCapError)+'</p>':'')+
+   action('Recheck one assumption →','sim-recheck')+'</details>';
  return '<section class="feature-page simulation-page">'+
-   titleRow('What if: '+s.cityName+'.','Replace '+ctx.projection.cancelledCity+' on '+s.changedDate,'DRAFT SCENARIO',
+   titleRow('What changes the recommendation?','Replace '+ctx.projection.cancelledCity+' on '+s.changedDate,'DRAFT SCENARIO',
      action('Close scenario →','sim-close'))+
+   distanceEditor+
+   '<section class="recommendation-change" aria-label="Recommendation before and after" aria-live="polite">'+
+   '<div><span>Before · '+esc(formatExtraKm(s.originalDistanceCapKm))+' extra-distance cap</span><strong data-recommendation="before">'+esc(s.beforeRecommendation.name)+'</strong></div>'+
+   '<span class="recommendation-arrow" aria-hidden="true">→</span>'+
+   '<div><span>After · '+esc(formatExtraKm(s.maxAdditionalDistanceKm))+' extra-distance cap</span><strong data-recommendation="after">'+esc(s.afterRecommendation.name)+'</strong></div>'+
+   '<p>'+esc(s.recommendationChanged?'Recommendation changed.':'Recommendation unchanged.')+' '+esc(s.afterRecommendation.reason)+'</p>'+
+   '<p>Only the additional-distance cap changes. Daily driving stays at '+esc(s.maxDailyDriving)+'. Four confirmed shows stay locked.</p>'+
+   action('Download this what-if audit ↓','sim-audit')+'</section>'+
    '<div class="feature-tabs" role="tablist" aria-label="Simulation scope">'+
    '<button id="simulation-tab-route" type="button" role="tab" data-action="sim-route-tab" aria-selected="'+(ctx.simulationTab==='route')+'" aria-controls="simulation-panel-route" tabindex="'+(ctx.simulationTab==='route'?'0':'-1')+'">Route</button>'+
    '<button id="simulation-tab-budget" type="button" role="tab" data-action="sim-budget-tab" aria-selected="'+(ctx.simulationTab==='budget')+'" aria-controls="simulation-panel-budget" tabindex="'+(ctx.simulationTab==='budget'?'0':'-1')+'">Budget · ? Needs review</button></div>'+
    '<p class="audience-disclosure">ⓘ Local draft only. The four confirmed shows and the original comparison remain unchanged.</p>'+
    '<div id="simulation-panel-'+ctx.simulationTab+'" role="tabpanel" aria-labelledby="simulation-tab-'+ctx.simulationTab+'" tabindex="0">'+
    (ctx.simulationTab==='route'?
-   '<div class="sim-columns"><section class="sim-itinerary"><h2>The proposed route</h2>'+
+   '<div class="sim-columns"><section class="sim-itinerary"><h2>Reviewing: '+esc(s.cityName)+'</h2>'+
+   '<p class="sim-reviewed-option">'+(s.afterRecommendation.optionId===s.optionId?'This is the current recommendation.':'Manually viewed alternative. Current recommendation: '+esc(s.afterRecommendation.name)+'.')+'</p>'+
+   (s.afterRecommendation.optionId && s.afterRecommendation.optionId!==s.optionId? action('Review the recommended option →','sim-follow-recommendation'):'')+
    '<p class="muted">Current plan: '+esc(s.baseline)+'</p>'+
    '<div class="sim-line">'+
     itineraryRow(s.fromDate,s.fromCity,'Existing locked date')+
@@ -184,11 +198,6 @@ function simulation(ctx:DesktopViewContext):string{
     (s.checks[3] && s.checks[3].status!=='PASS'
       ? '<p class="sim-failed-explanation" role="status">'+esc(s.checks[3].explanation)+'</p>':'')+
    (ctx.actionNotice?'<p class="feature-action-notice" role="status">'+esc(ctx.actionNotice)+'</p>':'')+'</div>'+
-   '<details class="sim-edit map-reference-details"><summary>Adjust extra-distance preference</summary><label for="sim-cap">What if extra distance were allowed up to (km)?</label>'+
-   '<input type="text" id="sim-cap" inputmode="decimal" autocomplete="off" spellcheck="false" value="'+
-      esc(ctx.simulationCapDraft ?? String(s.maxAdditionalDistanceKm))+'">'+
-   (ctx.simulationCapError ? '<p class="sim-input-error" role="alert">× Invalid distance cap: '+esc(ctx.simulationCapError)+'</p>':'')+
-   action('Recheck one assumption →','sim-recheck')+'</details>'+
    '<div class="sim-final-action">'+action(ctx.savedDraft?'Save updated draft →':'Save draft scenario →','sim-save',true)+
    (ctx.savedDraft?'<p class="soft-status">✓ Saved on this device only - no tour, venue or booking updated.</p>':'')+
    action(s.verdict==='FAIL'?'View why it fails →':'Preview promoter proposal →',

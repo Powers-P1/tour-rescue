@@ -62,7 +62,7 @@ const cases=[
  ['landing-map-key','/',[expand('.journey-diagram .map-reference-details')]],
  ['audience-map-source','/app/#audience',[expand('.taste-map-wrap .map-reference-details')]],
  ['judges-scope','/judges/',[async p=>{await p.locator('.judge-optional summary').first().click();}]],
- ['judges-challenge','/judges/',[async p=>{await p.locator('.judge-optional summary').last().click();}]],
+ ['judges-challenge','/judges/',[async p=>{await p.getByRole('link',{name:'Try 350 → 354.1 km →',exact:true}).click();}]],
 ];
 async function open(path,viewport) {
  const context=await browser.newContext({viewport,deviceScaleFactor:1});

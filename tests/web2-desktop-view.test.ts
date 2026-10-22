@@ -31,7 +31,9 @@ test('board 05 renders audited source and never merges fan declarations with Qlo
 
 test('board 06 renders audited route + separate unknown booking checks',()=>{
  const html=renderDesktopFeature('simulation',base);
- assert.match(html,/What if: Nuremberg/);
+ assert.match(html,/What changes the recommendation/);
+ assert.match(html,/data-recommendation="before">Nuremberg/);
+ assert.match(html,/data-recommendation="after">Nuremberg/);
  assert.match(html,/PROPOSED/i);
  assert.match(html,/Unknown \/ To confirm/);
  assert.match(html,/Save draft scenario/);

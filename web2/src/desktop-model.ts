@@ -87,6 +87,10 @@ export interface SimCheck {
 }
 export interface SimulationModel {
   readonly sourceResult: ApiDecisionResult;
+  readonly beforeRecommendation: { readonly optionId: string|null; readonly name: string; readonly reason: string };
+  readonly afterRecommendation: { readonly optionId: string|null; readonly name: string; readonly reason: string };
+  readonly originalDistanceCapKm: number;
+  readonly recommendationChanged: boolean;
   readonly optionId: string;
   readonly cityName: string;
   readonly fromCity: string;
@@ -124,6 +128,14 @@ export function projectSimulation(
   if (!selected) throw new Error('Selected option is not in the frozen decision.');
   const scenario = base.audit.replay.scenario;
   const revised = recomputeResult(base, { maxAdditionalDistanceMetres: Math.round(maxAdditionalDistanceKm * 1000) });
+  const summarize = (source: ApiDecisionResult) => {
+    const recommendation = source.audit.analysis.decision.recommendation;
+    const id = recommendation.status === 'recommended' ? recommendation.optionId : null;
+    return { optionId: id, name: id ? projectRescue(source).options.find(row => row.id === id)?.cityName ?? UNKNOWN
+      : recommendation.status === 'needs-evidence' ? 'UNKNOWN · more evidence needed' : 'No feasible option',
+      reason: recommendation.reason };
+  };
+  const beforeRecommendation = summarize(base), afterRecommendation = summarize(revised);
   const option = revised.audit.analysis.repairs.options.find(row => row.id === optionId);
   const decision = revised.audit.analysis.decision.options.find(row => row.optionId === optionId);
   if (!option || !decision) throw new Error('Recomputed audit has no selected option.');
@@ -155,7 +167,11 @@ export function projectSimulation(
       explanation: extraDistanceCheck?.message ?? 'No distance evidence available.' },
   ];
   return {
-    sourceResult: revised, optionId, cityName: selected.cityName,
+    sourceResult: revised, beforeRecommendation, afterRecommendation,
+    originalDistanceCapKm: base.audit.replay.policy.maxAdditionalDistanceMetres / 1000,
+    recommendationChanged: beforeRecommendation.optionId !== afterRecommendation.optionId ||
+      base.audit.analysis.decision.recommendation.status !== revised.audit.analysis.decision.recommendation.status,
+    optionId, cityName: selected.cityName,
     fromCity: baseline.fromCity, toCity: baseline.toCity, fromDate:localDate(prior),
     changedDate:localDate(cancelled), toDate:localDate(next),
     inbound:selected.inbound, outbound:selected.outbound,

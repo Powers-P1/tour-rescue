@@ -210,8 +210,8 @@ export function judgesMarkup(model:PublicSiteModel):string{
  '</section>'+
  '<details class="judge-optional site-shell"><summary>Scope and known limits</summary>'+knownLimitsSection()+
  scopeTable()+'</details>'+
- '<details class="judge-optional site-shell"><summary>Challenge one assumption</summary><section class="judge-last"><p class="eyebrow">CAN YOU CHANGE THE OUTCOME?</p>'+
+ '<section class="judge-last site-shell"><p class="eyebrow">CAN YOU CHANGE THE OUTCOME?</p>'+
  '<h2>Change one assumption.</h2>'+breakpoint(model)+
- link(model.appHref,'Try the rescue demo →','m-button')+'</section></details>'+
+ link('/app/#simulation','Try 350 → 354.1 km →','m-button')+'</section>'+
  '</main>'+footer(true);
 }

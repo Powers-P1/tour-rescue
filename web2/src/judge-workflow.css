@@ -1,0 +1,13 @@
+.recommendation-change { margin:24px 0; padding:24px; border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:8px; display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); gap:16px; }
+.recommendation-change strong { display:block; font-size:clamp(22px,3vw,30px); margin:8px 0; line-height:1.2; }
+.recommendation-change span,.sim-reviewed-option { color:var(--muted); font-size:14px; }
+.recommendation-change p,.recommendation-change>.text-button { grid-column:1/-1; margin:0; }
+.recommendation-arrow { align-self:center; font-size:24px!important; }
+.ai-scenarios { display:flex; flex-wrap:wrap; gap:12px; margin:24px 0; }
+.ai-scenarios legend { margin-bottom:12px; }
+.ai-scenarios button { padding:12px 16px; border:1px solid var(--border); color:var(--text); border-radius:8px; background:transparent; text-align:left; }
+.ai-scenarios button[aria-pressed=true] { border-color:var(--accent); color:var(--accent); }
+.agent-proposal .primary-button { margin-top:16px; }
+.review-tools { display:flex; flex-wrap:wrap; gap:12px 24px; margin:24px 0; border-top:1px solid var(--border); padding-top:16px; }
+.research-sources { overflow-wrap:anywhere; }
+@media(max-width:600px){.recommendation-change{grid-template-columns:1fr;padding:18px}.recommendation-arrow{display:none}.recommendation-change p,.recommendation-change>.text-button{grid-column:1}.recommendation-change>div+div{border-top:1px solid var(--border);padding-top:12px}}
