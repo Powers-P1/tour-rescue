@@ -1,6 +1,8 @@
 import type { AudienceModel, AudienceSource, AudiencePlace, SimulationModel, AgencyOwner } from './desktop-model.ts';
 import { agencyTasks, AGENCY_FOURTH_TOUR } from './desktop-model.ts';
 import type { RescueProjection } from './model.ts';
+import { GERMANY_OUTLINE_PATH, projectGermany } from './germany-geography.ts';
+import { GERMANY_MAP_CITIES, GEOGRAPHIC_KEY_IDS, cityById } from './germany-map.ts';
 
 export type DesktopScreen = 'audience' | 'simulation' | 'agency';
 /** A city's explanatory text is derived from the audited fit, never its position. */
@@ -49,42 +51,55 @@ function titleRow(title:string,desc:string,badge:string,actionHtml=''):string{
     '<button type="button" class="text-button feature-back" data-action="feature-back">← Back</button>'+
     actionHtml+'</div></header>';
 }
-const project=(lon:number,lat:number):readonly[number,number]=>[
-  Math.round(60+(lon-5.5)/10*530),Math.round(42+(55.2-lat)/8.2*405),
-];
+const project=(lon:number,lat:number):readonly[number,number]=>projectGermany(lon,lat);
 function tasteMap(ctx:DesktopViewContext):string{
  const p=ctx.audience.places;
- const selected=ctx.selectedAudienceCityId;
- const zoom=ctx.mapZoom;
- const labels=[{name:'Berlin',pos:project(13.405,52.52)}, {name:'Munich',pos:project(11.575,48.1375)}];
+ const selected=ctx.selectedAudienceCityId,zoom=ctx.mapZoom;
+ const visibleIds=new Set(p.map(city=>city.cityId));
  const points=p.map((city,index)=>{
    const [x,y]=project(city.lon,city.lat);
    const known=city.fit.status==='known';
    const r=known?Math.round(17+(city.fit.value/100)*24):8;
    const opacity=known?(0.15+(city.fit.value/100)*0.24).toFixed(2):'0';
-   const offset=index%2===0?24:-24;
-   return '<g><circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="#F3B65B" opacity="'+opacity+'"/>'+
+   return '<g><title>'+esc(city.name)+' · '+esc(city.relativeLabel)+'</title>'+
+     '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="#F3B65B" opacity="'+opacity+'"/>'+
      (city.cityId===selected?'<circle cx="'+x+'" cy="'+y+'" r="'+(r+7)+'" fill="none" stroke="#F3B65B" stroke-width="2"/>':'')+
      '<circle cx="'+x+'" cy="'+y+'" r="6" fill="'+(known?'#F3B65B':'#AEBCC6')+'"/>'+
-     '<text class="taste-map-label" x="'+(x+13)+'" y="'+(y+offset)+'">'+esc(city.name)+'</text>'+
-      '<text class="taste-map-mobile-number" x="'+x+'" y="'+(y-14)+'" text-anchor="middle">'+(index+1)+'</text></g>';
+     '<text class="taste-map-mobile-number" x="'+x+'" y="'+(y-14)+'" text-anchor="middle">'+(index+1)+'</text></g>';
  }).join('');
- const muted=labels.map(row=>'<circle cx="'+row.pos[0]+'" cy="'+row.pos[1]+'" r="4" fill="#AEBCC6"/>'+
-   '<text class="taste-map-label" x="'+(row.pos[0]+12)+'" y="'+(row.pos[1]-13)+'">'+row.name+'</text>').join('');
- return '<div class="taste-map-wrap"><svg class="taste-map" viewBox="0 0 680 520" role="img" aria-describedby="taste-map-key" aria-label="Schematic German geography: circular regions show relative fit ranks only, not individual fans" preserveAspectRatio="xMidYMid meet">'+
-   '<defs><clipPath id="taste-clip"><rect x="20" y="8" width="640" height="480" rx="14"/></clipPath></defs>'+
-   '<g clip-path="url(#taste-clip)"><rect x="0" y="0" width="680" height="520" fill="#19262D"/>'+
-   '<g transform="translate('+(340-340*zoom)+' '+(240-240*zoom)+') scale('+zoom+')">'+
-   '<path d="M260 29 L380 39 500 101 515 188 495 270 449 328 445 411 364 455 284 443 235 388 167 330 188 244 146 160 193 82Z" fill="#22333c" stroke="#4b6470" stroke-width="2"/>'+
-   '<path d="M188 245 Q339 147 497 286 M214 132 Q301 270 436 429 M174 350 Q382 324 505 139" stroke="#344550" stroke-width="1.4" fill="none"/>'+
-   muted+points+'</g></g></svg>'+
-   '<div id="taste-map-key" class="taste-mobile-key" aria-label="Map marker names">'+
+ const anchors=['de-berlin','de-munich'].map(id=>{
+   const city=cityById(id)!;
+   const [x,y]=project(city.lon,city.lat);
+   return '<circle cx="'+x+'" cy="'+y+'" r="4.5" fill="#AEBCC6">'+
+     '<title>'+esc(city.name)+'</title></circle>';
+ }).join('');
+ const otherCities=GERMANY_MAP_CITIES.filter(city=>
+   !visibleIds.has(city.id)&&city.id!=='de-berlin'&&city.id!=='de-munich')
+ .map(city=>{
+    const [x,y]=project(city.lon,city.lat);
+    return '<circle cx="'+x+'" cy="'+y+'" r="2.2" fill="#8097A5" opacity=".55">'+
+       '<title>'+esc(city.name)+' · geographic reference</title></circle>';
+ }).join('');
+ return '<div class="taste-map-wrap"><svg class="taste-map" viewBox="0 0 640 455" role="img"'+
+   ' aria-describedby="taste-map-key"'+
+   ' aria-label="Germany outline and real city-centre positions, with illustrative relative cultural-fit circles" preserveAspectRatio="xMidYMid meet">'+
+   '<defs><clipPath id="taste-clip"><rect x="10" y="4" width="620" height="446" rx="14"/></clipPath></defs>'+
+   '<g clip-path="url(#taste-clip)"><rect x="0" y="0" width="640" height="455" fill="#19262D"/>'+
+   '<g transform="translate('+(320-320*zoom)+' '+(225-225*zoom)+') scale('+zoom+')">'+
+   '<path class="geo-country-outline" d="'+GERMANY_OUTLINE_PATH+'"/>'+
+   otherCities+anchors+points+'</g></g></svg>'+
+   '<div id="taste-map-key" class="taste-mobile-key" aria-label="Cultural-fit city labels">'+
    p.map((city,i)=>'<span><b>'+(i+1)+'</b> '+esc(city.name)+'</span>').join('')+
    '<span>• Berlin</span><span>• Munich</span></div>'+
-   '<div class="taste-map-bottom"><div><span>Relative cultural fit</span><div class="taste-scale" aria-hidden="true"><i></i><i></i><i></i><i></i></div><small>Low - High · within this candidate set</small></div>'+
+   '<div class="taste-geographic-key" aria-label="Other actual city-centre references">'+
+   GEOGRAPHIC_KEY_IDS.filter(id=>!visibleIds.has(id)&&id!=='de-berlin'&&id!=='de-munich').map(id=>
+     '<span>'+esc(cityById(id)!.name)+'</span>').join('')+'</div>'+
+   '<div class="taste-map-bottom"><div><span>Relative cultural fit</span>'+
+   '<div class="taste-scale" aria-hidden="true"><i></i><i></i><i></i><i></i></div>'+
+   '<small>Low - High · within this candidate set</small></div>'+
    '<div class="map-zoom-actions"><button type="button" data-action="audience-zoom-out" aria-label="Zoom out">−</button>'+
    '<button type="button" data-action="audience-zoom-in" aria-label="Zoom in">+</button></div></div>'+
-   fallback('Schematic city-centre geography from the frozen reference catalogue, not road or demographic measurements.')+'</div>';
+   fallback('Germany outline: Natural Earth 1:10m public-domain boundary. City centres are real coordinates; cultural fit is a relative index, not road or demographic data.')+'</div>';
 }
 function audience(ctx:DesktopViewContext):string{
  const mode=ctx.audienceSource==='qloo';

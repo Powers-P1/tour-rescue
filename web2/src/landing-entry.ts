@@ -1,4 +1,5 @@
 import './marketing.css';
+import './germany-map.css';
 import { publicSiteModel } from './marketing-model.ts';
 import { landingMarkup } from './marketing.ts';
 /** Preserve older root app hash links without claiming an old tour UI exists. */

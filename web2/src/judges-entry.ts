@@ -1,4 +1,5 @@
 import './marketing.css';
+import './germany-map.css';
 import { publicSiteModel } from './marketing-model.ts';
 import { judgesMarkup } from './marketing.ts';
 import { auditExport } from './audit-download.ts';

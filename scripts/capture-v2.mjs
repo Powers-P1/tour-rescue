@@ -33,6 +33,8 @@ try{
  const shots=[
   {name:'08-landing-desktop.png',path:'/',width:1536,height:1024},
   {name:'08-landing-mobile.png',path:'/',width:390,height:844},
+  {name:'08-landing-germany-1280.png',path:'/',width:1280,height:800},
+  {name:'08-landing-germany-390.png',path:'/',width:390,height:844},
   {name:'09-judges-desktop.png',path:'/judges/',width:1536,height:1024},
   {name:'09-judges-mobile.png',path:'/judges/',width:390,height:844},
   {name:'404-desktop.png',path:'/404.html',width:1280,height:800},
@@ -40,6 +42,8 @@ try{
   {name:'01-today-mobile.png',path:'/app/',width:390,height:844},
   {name:'01-rescue-options-mobile.png',path:'/app/#rescue',width:390,height:844},
   {name:'04-command-desktop.png',path:'/app/',width:1536,height:1024},
+  {name:'04-command-germany-1280.png',path:'/app/',width:1280,height:800},
+  {name:'05-audience-germany-1280.png',path:'/app/#audience',width:1280,height:800},
   {name:'05-audience-desktop.png',path:'/app/#audience',width:1536,height:1024},
   {name:'06-simulation-desktop.png',path:'/app/#simulation',width:1536,height:1024},
   {name:'07-agency-desktop.png',path:'/app/#agency',width:1536,height:1024},

@@ -1,0 +1,42 @@
+/* Shared offline Germany map. No tiles, fetches, foreign SVG resources or inline CSS. */
+.germany-map-geo{width:100%;min-width:0}
+.germany-geo-svg{display:block;width:100%;height:auto;max-height:535px}
+.geo-background{fill:#19262d}
+.geo-country-outline{fill:#243641;stroke:#8296a2;stroke-width:1.8;stroke-linejoin:round;fill-rule:evenodd}
+.geo-route-current,.geo-route-proposal{
+ fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke
+}
+.geo-route-current{stroke:#dce8ee;stroke-width:3.1;opacity:.92}
+.geo-route-proposal{stroke:#efb760;stroke-width:2.7;stroke-dasharray:7 6}
+.geo-route-alternative{stroke:#87aebd;stroke-dasharray:5 7;stroke-width:2.1;opacity:.92}
+.geo-city circle{stroke:#121a20;stroke-width:1.3;vector-effect:non-scaling-stroke}
+.geo-city-context circle{fill:#8199a7;opacity:.58}
+.geo-city-confirmed circle{fill:#e9f3fa}
+.geo-city-proposed circle{fill:#f3b65b}
+.geo-city-selected circle{fill:#f3b65b}
+.geo-city-cancelled circle{fill:#df8d87;stroke:#121a20;stroke-width:1.5}
+.geo-cancel-cross{fill:none;stroke:#121a20;stroke-width:1.9;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.geo-route-legend{display:flex;align-items:center;flex-wrap:wrap;gap:12px 19px;
+ margin:10px 0 8px;font-size:14px;line-height:1.5;color:var(--muted,#aebcc6)}
+.geo-route-legend>span{display:inline-flex;align-items:center;gap:8px}
+.geo-line-current,.geo-line-proposed{width:29px;border-top:3px solid #dce8ee;display:inline-block;flex:none}
+.geo-line-proposed{border-color:#f3b65b;border-top-style:dashed}
+.geo-city-key{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 12px;
+ margin:12px 0 8px;font-size:14px;line-height:1.5;color:var(--text,#f4f6f8)}
+.geo-key-item{display:flex;align-items:flex-start;gap:7px;min-width:0;min-height:30px}
+.geo-key-item>span{font-size:14px;overflow-wrap:break-word}
+.geo-key-pin{width:9px;height:9px;flex:none;border-radius:50%;margin-top:6px;
+ background:#8199a7;border:1px solid #dbe7ee}
+.geo-key-pin-confirmed{background:#e9f3fa}
+.geo-key-pin-proposed{background:#f3b65b;border-color:#f3b65b}
+.geo-key-pin-cancelled{background:#df8d87;border-color:#df8d87}
+.geo-provenance{font-size:13px;line-height:1.5;color:var(--muted,#aebcc6);margin:9px 0 0}
+@media(max-width:700px){
+ .geo-city-key{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 11px;font-size:14px}
+ .geo-route-legend{gap:9px 15px}
+ .geo-provenance{font-size:13px}
+}
+@media(max-width:380px){
+ .geo-city-key{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 7px}
+ .geo-key-item>span{font-size:14px}
+}

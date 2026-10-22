@@ -184,3 +184,20 @@
   .taste-map-wrap .taste-mobile-key{display:flex;font-size:15px;line-height:1.55}
   .taste-map-wrap .taste-mobile-key span,.taste-map-wrap .taste-mobile-key b{font-size:15px}
 }
+
+/* Geographically correct Germany outline: city names are real HTML text, >=14px
+   at mobile and desktop widths, never viewBox-scaled labels. */
+.taste-map{aspect-ratio:640/455}
+.taste-map-wrap .taste-map-label{display:none!important}
+.taste-map-wrap .taste-map-mobile-number{
+ display:block!important;font:700 39px Inter,"IBM Plex Sans",sans-serif;
+ fill:var(--text);stroke:#121A20;stroke-width:6px;paint-order:stroke
+}
+.taste-map-wrap .taste-mobile-key{
+ display:flex!important;flex-wrap:wrap;gap:8px 15px;margin:13px 0;
+ font-size:14px;line-height:1.6;color:var(--text)
+}
+.taste-map-wrap .taste-mobile-key span,.taste-map-wrap .taste-mobile-key b{font-size:14px}
+.taste-geographic-key{display:flex;flex-wrap:wrap;gap:5px 12px;
+ margin:7px 0 12px;color:var(--muted);font-size:14px;line-height:1.5}
+.taste-geographic-key>span{font-size:14px}
