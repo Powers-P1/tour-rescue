@@ -1,5 +1,4 @@
 import type { PublicSiteModel } from './marketing-model.ts';
-import './germany-map.css';
 import { renderGermanyGeographicMap } from './germany-map.ts';
 import { PUBLIC_REPOSITORY, PUBLIC_LICENSE, PUBLIC_API_DOCS, PUBLIC_AGENT_DOCS, publicOptionStatus, linkedEvidence } from './marketing-model.ts';
 
