@@ -8,6 +8,7 @@ on:
       - 'scripts/verify-germany-map.mjs'
       - 'scripts/verify-completion.mjs'
       - 'scripts/verify-judge-workflow.mjs'
+      - 'scripts/verify-mobile-agent-surface.mjs'
       - 'package.json'
       - '.github/workflows/visual-v2.yml'
   workflow_dispatch:
@@ -42,6 +43,10 @@ jobs:
         run: node scripts/verify-judge-workflow.mjs
         env:
           QA_OUTPUT: artifacts/screenshots/v2/judge-workflow
+      - name: Verify v2 evidence, exports, guide and PWA
+        run: node scripts/verify-mobile-agent-surface.mjs
+        env:
+          QA_OUTPUT: artifacts/screenshots/v2/mobile-agent
       - name: Upload real browser screenshots
         if: always()
         uses: actions/upload-artifact@v4

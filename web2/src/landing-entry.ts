@@ -4,6 +4,7 @@ import './marketing-completion.css';
 import { publicSiteModel } from './marketing-model.ts';
 import { landingMarkup } from './marketing.ts';
 import { setMapKeyDefaults } from './map-disclosure.ts';
+import { initPwa } from './pwa.ts';
 /** Preserve older root app hash links without claiming an old tour UI exists. */
 const legacyHashes=new Set(['route','options','breakpoint','evidence','audit','promoter','ai','fan']);
 const current=window.location.hash.slice(1);
@@ -13,6 +14,7 @@ if(legacyHashes.has(current)){
   const root=document.getElementById('site-root');
   if(root){
     try{root.className='product-site';root.innerHTML=landingMarkup(publicSiteModel());
+    initPwa();
     setMapKeyDefaults(root);
     window.matchMedia('(max-width: 1099px)').addEventListener('change',()=>setMapKeyDefaults(root));
     // A blocked editorial photo must not hide the original local illustration.

@@ -36,7 +36,7 @@ export function publicOptionStatus(status:'PASS'|'FAIL'|'UNKNOWN') {
 export function linkedEvidence(model:PublicSiteModel):readonly {label:string;detail:string;href:string}[] {
  return [
   {label:'Taste evidence',detail:'Synthetic fixture by default; explicit live Qloo action in the app',href:PUBLIC_API_DOCS},
-  {label:'Feasibility',detail:'Recorded OSRM model, constraints and unresolved booking facts',href:model.appHref},
+  {label:'Feasibility',detail:'Recorded OSRM model, constraints and unresolved booking facts',href:'/app/#evidence'},
   {label:'Public source & licence',detail:'MIT-licensed code, reproducible tests and setup',href:PUBLIC_LICENSE},
  ];
 }

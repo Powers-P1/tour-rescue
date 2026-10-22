@@ -171,22 +171,27 @@ export function judgesMarkup(model:PublicSiteModel):string{
  return header(true)+
  '<main id="main-content">'+
  '<section class="judges-hero site-shell"><div class="judge-copy">'+
- '<p class="eyebrow">READY-TO-OPEN DEMO · NO SIGN-IN</p>'+
+ '<p class="eyebrow">MOBILE FIRST · INSTALLABLE APP · NO SIGN-IN</p>'+
  '<h1>Leipzig canceled.<span>Keep the tour moving.</span></h1>'+
- '<p>A tour-rescue agent that combines cultural fit, road constraints and a promoter-ready plan.</p>'+
+ '<p>Your tour desk, built for a phone. Cultural fit, road constraints and a promoter-ready plan. The complete workflow also works on desktop.</p>'+
  '<div class="hero-actions">'+link(model.appHref,'Rescue Leipzig →','m-button')+
- ext(PUBLIC_REPOSITORY,'Public source & licence ↗','judges-external-link')+'</div>'+
+ '<button type="button" class="m-button m-button-quiet" data-install-app>Install Tour Rescue</button></div>'+
+ '<p class="mini-disclosure">Add it to your home screen. Sample rescue works offline; live Qloo and AI need a connection. '+ext(PUBLIC_REPOSITORY,'Public source & licence ↗','judges-external-link')+'</p>'+
  '<p class="mini-disclosure">ⓘ '+escape(model.rescue.cancelledDate)+
   ' · Synthetic taste fixture · Frozen OSRM · Not a booking</p></div>'+proposalPreview(model)+'</section>'+
  '<section id="steps" class="site-shell judge-steps">'+
- '<div class="section-title"><p class="eyebrow">THE CASE</p><h2>One rescue. Three steps.</h2></div>'+
+ '<div class="section-title"><p class="eyebrow">THE CASE</p><h2>One clear path.</h2></div>'+
  '<div class="judge-step-columns"><article><span>01 / ↗</span><h3>Open the canceled date</h3>'+
  '<p>Start from the Berlin–Munich gap.</p></article>'+
  '<article><span>02 / ◇</span><h3>Compare feasible directions</h3>'+
  '<p>Review relative cultural fit, roads and unknown constraints.</p></article>'+
- '<article><span>03 / ▤</span><h3>Review the proposal</h3>'+
- '<p>A one-page promoter draft, not a booked date or sent email.</p></article></div>'+
- link(model.appHref,'Open the guided case →','text-amber')+'</section>'+
+ '<article><span>03 / ↔</span><h3>Reverse the recommendation</h3><p>Change the additional-distance cap. Nuremberg → Frankfurt.</p></article>'+
+ '<article><span>04 / ◇</span><h3>Inspect the evidence</h3><p>Artist omissions, a separate control and transparent UNKNOWN facts.</p></article>'+
+ '<article><span>05 / ▤</span><h3>Take the promoter draft</h3><p>Matching audit, A4 print and PNG. Nothing is booked or sent.</p></article></div>'+
+ link('/app/?tour=start#rescue','Start the six-step guided demo →','text-amber')+'</section>'+
+ '<section class="judge-last site-shell"><p class="eyebrow">CAN YOU CHANGE THE OUTCOME?</p>'+
+ '<h2>Change one assumption.</h2>'+breakpoint(model)+
+ link('/app/#simulation','Try 350 → 354.1 km →','m-button')+'</section>'+
  '<section id="why-qloo" class="judge-why"><div class="site-shell">'+
  '<div class="section-title"><p class="eyebrow">PROVENANCE BY DESIGN</p><h2>Why Qloo changes the decision.</h2></div>'+
  '<div class="why-columns"><article><p>01 / CULTURAL FIT</p><h3>Where taste fits.</h3>'+
@@ -204,14 +209,13 @@ export function judgesMarkup(model:PublicSiteModel):string{
    (e.href.startsWith('https://')?' target="_blank" rel="noopener noreferrer"':'')+'>'+
    '<strong>'+escape(e.label)+'</strong><span>'+escape(e.detail)+'</span><b>↗</b></a>').join('')+'</div>'+
  '<div class="judge-tools"><button type="button" id="download-synthetic-audit" class="m-button m-button-quiet">Download saved demo audit ↓</button>'+
- link('/app/#rescue','Open app · then explicitly run live Qloo','text-link')+
+ link('/app/#evidence','Inspect sensitivity & control','text-link')+
+ link('/app/#ai','Try both agent scenarios','text-link')+
+ link('/app/#live-preset','Run a real Qloo preset','text-link')+
  ext(PUBLIC_AGENT_DOCS,'Agent contract ↗','judges-external-link')+'</div>'+
  '<p class="mini-disclosure">Saved demo is generated from openly available, explicitly synthetic artist inputs; a fresh Qloo evaluation requires a separate user action and a live Worker.</p>'+
  '</section>'+
  '<details class="judge-optional site-shell"><summary>Scope and known limits</summary>'+knownLimitsSection()+
  scopeTable()+'</details>'+
- '<section class="judge-last site-shell"><p class="eyebrow">CAN YOU CHANGE THE OUTCOME?</p>'+
- '<h2>Change one assumption.</h2>'+breakpoint(model)+
- link('/app/#simulation','Try 350 → 354.1 km →','m-button')+'</section>'+
  '</main>'+footer(true);
 }

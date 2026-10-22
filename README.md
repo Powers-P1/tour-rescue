@@ -8,6 +8,8 @@ A booker or tour manager has a confirmed 5-date tour in one region and loses one
 
 The core is deterministic (pure TypeScript functions). The demo, live Qloo flow, breakpoint exploration and promoter sheet require no LLM. **AI Rescue (Pro)** adds bounded Claude Sonnet 5.5 research with source links; every proposal passes through the same checker and enters comparison only after explicit user acceptance.
 
+The jury entry immediately identifies the mobile-first PWA. Install it on a phone, or use the complete desktop workflow. The offline public rescue shell excludes API responses and private research from its cache. See [the v2 judging path and validation](docs/V2_JUDGE_WORKFLOW.md) and [measured Qloo/Sonnet results](docs/validation/live-qloo-2026-10-23.md).
+
 ## Documents
 
 - [docs/BRIEF.md](docs/BRIEF.md): product brief, scope, architecture, acceptance criteria, plan
@@ -35,7 +37,7 @@ npm run web:preview
 
 `check` runs strict TypeScript checking for the core, Worker and browser, plus Node's built-in test runner. Tests use synthetic fixtures and injected HTTP/storage doubles; they need no Qloo key, Cloudflare account or LLM. There are no core or frontend runtime dependencies. `web:build` bundles the v2 landing page, judges page and application from `web2/` into `web/dist` with esbuild. GitHub Actions runs checks, local bundle builds, browser screenshot evidence and `worker:build` (Wrangler **without deploying**). `worker:dev` starts the optional local Worker and SQLite Durable Object.
 
-Open **`http://localhost:4173`** for the landing page, or **`http://localhost:4173/app`** for the five-screen demo: Route, Options, Breakpoint, Evidence and Audit. Both evaluate the bundled synthetic fixture locally without a provider request. The landing table and exact **350 → 354.097 km** breakpoint come from the same core result as the app; this changes the extra-distance preference, not the daily-driving limit. Existing root hash links such as `/#options` forward to `/app#options`. Select an option and open its **Promoter sheet** for A4 print/Save PDF or a canvas PNG download. Demo includes two comparison artists; the third sheet slot is explicitly UNKNOWN.
+Open **`http://localhost:4173`** for the landing page, or **`http://localhost:4173/app`** for the mobile-first rescue workspace: cancelled date, three options, a visible before/after breakpoint, evidence and promoter exports. Both evaluate the bundled synthetic fixture locally without a provider request. The landing table and exact **350 → 354.097 km** breakpoint come from the same core result as the app; this changes the extra-distance preference, not the daily-driving limit. Existing root hash links such as `/#options` forward to `/app#options`. Select an option and open its **Promoter sheet** for A4 print/Save PDF or a canvas PNG download. Demo includes two comparison artists; the third sheet slot is explicitly UNKNOWN.
 
 Choose **Start the guided tour** on the landing page, in its judges section or in the app for six steps: cancelled date, option checks, the 354.1 km what-if, evidence, exports and optional AI research. It starts only on an explicit action, supports keyboard controls and **Esc / Skip**, and saves progress/completion in localStorage. Starting inside the app uses a temporary synthetic demo and restores the previous comparison on Skip or Finish; starting from the landing page leaves the explored demo open. See [DEPLOY](docs/DEPLOY.md#guided-tour-pr7) for storage and routing details.
 
@@ -43,7 +45,7 @@ Choose **Start the guided tour** on the landing page, in its judges section or i
 
 The **Try live** dialog uses the public Worker, searches real artist identities, and submits a target, zero to three comparisons and a distinct control. Qloo evidence can change; the Germany route and venue facts remain fictional. Failures and missing evidence remain visible without falling back to synthetic scores. `PUBLIC_WORKER_ORIGIN` configures the public API origin at build time; it is never a key. See [DEPLOY](docs/DEPLOY.md) for Pages settings, CORS, quotas and maintainer deployment.
 
-If running `worker:dev`, `http://localhost:8787/api/demo` and `/api/demo/audit` expose the same labelled demo and JSON without a secret. `/health` describes both live switches and effective Qloo caps; `/do-check` exercises `UnitLedger`. Qloo live is configured on and requires its secret; AI live remains disabled until explicitly enabled. See the single [PRD roadmap](docs/PRD.md).
+If running `worker:dev`, `http://localhost:8787/api/demo` and `/api/demo/audit` expose the same labelled demo and JSON without a secret. `/health` describes both live switches and effective Qloo caps; `/do-check` exercises `UnitLedger`. Both live switches are enabled in the measured production Worker; local AI remains opt-in and requires its configured secret. See the single [PRD roadmap](docs/PRD.md).
 
 ## Repository layout
 
@@ -55,7 +57,8 @@ src/ai/          Pure proposal tools, AI evidence contracts and synthetic transc
 src/worker/      Pointer to the runtime implementation under worker/
 src/web/         Pointer to the implemented frontend under web/
 worker/         Edge API, SQLite UnitLedger, persistent quotas and private cache
-web/            Plain TS landing, app, guided tour, SVG visuals, A4/PNG sheet and build
+web2/           Production v2: mobile/desktop workspace, judges entry, guided tour and PWA
+web/            Legacy UI and shared pure/rendering components
 web/dist/       Generated static Pages output (ignored by git)
 fixtures/       Synthetic Qloo examples and a maintained OSRM Germany snapshot
 tests/          Offline arithmetic, invariance and contract checks

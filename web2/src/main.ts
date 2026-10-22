@@ -3,6 +3,7 @@ import './desktop.css';
 import './germany-map.css';
 import './completion.css';
 import './judge-workflow.css';
+import '../../web/src/guided-tour.css';
 import { icon, brand } from './icons.ts';
 import { isWorkspaceScreen, workspaceView } from './workspace-views.ts';
 import type { WorkspaceScreen } from './workspace-views.ts';
@@ -24,6 +25,13 @@ import { AI_DEMO_SCENARIOS, createAiDemoSession } from '../../src/ai/demo.ts';
 import type { AiDemoScenarioId } from '../../src/ai/demo.ts';
 import { acceptResearchIntoComparison, emptyResearch } from './research-comparison.ts';
 import { safeAiSourceUrl } from '../../src/ai/tools.ts';
+import { createGuidedTour } from '../../web/src/guided-tour.ts';
+import type { GuidedTourController } from '../../web/src/guided-tour.ts';
+import { downloadPromoterPng } from '../../web/src/promoter.ts';
+import { mountEvidence, recommendationName } from './evidence-view.ts';
+import { initPwa } from './pwa.ts';
+import { LIVE_PRESETS } from './live-presets.ts';
+import { projectLiveStudy } from './live-study.ts';
 import { createAiClient } from '../../web/src/ai-client.ts';
 import { hadMountedScreen, selectFocusTarget } from './focus-policy.ts';
 import { projectAudience, projectSimulation, loadSimulation, saveSimulation } from './desktop-model.ts';
@@ -37,7 +45,7 @@ import type { AiSessionResult, AiStep } from '../../src/ai/types.ts';
 
 declare const __WORKER_ORIGIN__: string;
 
-type Screen = 'today' | 'options' | 'detail' | 'draft' | 'crew' | ExtensionScreen | DesktopScreen | WorkspaceScreen;
+type Screen = 'today' | 'options' | 'detail' | 'draft' | 'crew' | 'evidence' | 'live-preset' | ExtensionScreen | DesktopScreen | WorkspaceScreen;
 type ArtistRole = 'target' | 'comparison' | 'control';
 const api = createApiClient(__WORKER_ORIGIN__);
 const aiApi = createAiClient(__WORKER_ORIGIN__);
@@ -72,6 +80,7 @@ let researchHistory = emptyResearch();
 let aiSteps: AiStep[] = [];
 let aiAbort: AbortController | null = null;
 let aiGeneration = 0;
+let liveResearchBaseRunId:string|null=null;
 let audienceModel: AudienceModel = projectAudience(result);
 let audienceSource: AudienceSource = 'qloo';
 let selectedAudienceCityId = audienceModel.places[0]?.cityId ?? '';
@@ -106,6 +115,35 @@ let proposalContact = '';
 let proposalMessage = '';
 let reviewingMessage = false;
 let chosenProposal: PromoterSheetModel | null = null;
+let evidenceSource:ApiDecisionResult|null=null;
+let evidenceOptionId='';
+let guide:GuidedTourController|undefined;
+let livePresetId=LIVE_PRESETS[0]!.id;
+let liveWorkerVersion='UNKNOWN';
+function captureGuideWorkspace() {
+ return {result,projection,incident,screen,pendingId,researchHistory,aiSession,aiSteps,aiMode,aiDemoScenario,aiNotice,liveResearchBaseRunId,
+   simulationModel,simulationTab,simSaved,simCapDraft,simCapError,simChooseCity,evidenceSource,evidenceOptionId,
+   chosenProposal,proposalSource,proposalReturn,proposalFromSimulation,proposalMessage,proposalContact,reviewingMessage,
+   audienceModel,selectedAudienceCityId,showEvidence,notice};
+}
+let guideWorkspace:ReturnType<typeof captureGuideWorkspace>|null=null;
+function beginGuide():void {
+ guideWorkspace=captureGuideWorkspace();
+ result=createDemoResult();projection=projectRescue(result);incident=initialIncident();
+ pendingId=projection.options.find(row=>row.recommended)?.id??projection.options[0]!.id;
+ researchHistory=emptyResearch();aiSession=null;aiSteps=[];aiMode='demo';aiDemoScenario='corridor-repair';aiNotice='';liveResearchBaseRunId=null;
+ simulationModel=null;simSaved=false;simCapDraft=null;simCapError='';evidenceSource=null;chosenProposal=null;
+ audienceModel=projectAudience(result);selectedAudienceCityId=audienceModel.places[0]?.cityId??'';notice='';
+}
+function finishGuide():void {
+ if(guideWorkspace){
+   ({result,projection,incident,screen,pendingId,researchHistory,aiSession,aiSteps,aiMode,aiDemoScenario,aiNotice,liveResearchBaseRunId,
+     simulationModel,simulationTab,simSaved,simCapDraft,simCapError,simChooseCity,evidenceSource,evidenceOptionId,
+     chosenProposal,proposalSource,proposalReturn,proposalFromSimulation,proposalMessage,proposalContact,reviewingMessage,
+     audienceModel,selectedAudienceCityId,showEvidence,notice}=guideWorkspace);
+ }
+ guideWorkspace=null;render();
+}
 const HTML = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, char =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char] ?? char);
 
@@ -212,7 +250,22 @@ function shortlist(): string {
     '<div id="rescue-choice-summary" class="focused-bottom">' + primary(optionById(pendingId)?.kind === 'day-off' ?
       'Keep the day off →' : 'Review ' + (optionById(pendingId)?.cityName ?? 'option') + ' →', 'review') +
     '<p class="tiny-label">Source-labelled estimates · venue/date not confirmed</p>' +
-    softButton('Run fresh Qloo evidence →', 'open-live', 'muted-button') + '</div></section>';
+    softButton('Run fresh Qloo evidence →', 'open-live', 'muted-button') + '</div>'+reviewTools()+'</section>';
+}
+function reviewTools():string {
+ return '<nav class="review-tools" aria-label="Decision tools">'+softButton('Change one assumption','open-sim')+
+   softButton('Evidence','open-evidence')+softButton('AI research','open-ai')+
+   softButton('Six-step guided demo','start-guide')+softButton('Real Qloo presets','open-live-presets')+'<button type="button" class="text-button" data-install-app>Install app</button></nav>';
+}
+function livePresetView():string {
+ const preset=LIVE_PRESETS.find(row=>row.id===livePresetId)!;
+ return '<section class="feature-page live-preset-view">'+header(true,'Decision')+
+  '<div class="intro"><p class="eyebrow">LIVE QLOO · EXPLICIT REQUEST</p><h1>Try a real artist.</h1><p>Same frozen German cities and route constraints. Fresh artist evidence can be complete, unchanged or UNKNOWN.</p></div>'+
+  '<fieldset class="ai-scenarios"><legend>Representative artist preset</legend>'+LIVE_PRESETS.map(row=>'<button type="button" data-action="choose-live-preset" data-id="'+row.id+'" aria-pressed="'+(row.id===livePresetId)+'"'+(liveBusy?' disabled':'')+'>'+HTML(row.selection.target.name)+'</button>').join('')+'</fieldset>'+
+  '<p>Comparisons: '+preset.selection.comparisons.map(row=>HTML(row.name)).join(', ')+'. Control: '+HTML(preset.selection.control.name)+'.</p>'+
+  '<p class="muted">No request runs on opening or selecting a preset. This action uses the existing Qloo quota. No AI session, booking or outreach starts automatically.</p>'+
+  '<p class="live-notice" role="status">'+HTML(navigator.onLine===false?'Offline. Fresh Qloo needs a connection; the saved comparison is unchanged.':liveNotice)+'</p>'+primary(liveBusy?'Checking fresh evidence…':'Run live Qloo comparison →','run-live-preset',liveBusy||navigator.onLine===false)+
+  (result.mode==='live'?softButton('Inspect the current live report →','open-evidence'):'')+'</section>';
 }
 function details(): string {
   const option = currentOption();
@@ -245,7 +298,35 @@ function evidencePanel(option: RescueOption): string {
     '<h3>Checks for ' + HTML(option.cityName) + '</h3><div class="check-list">' +
     option.checks.map(check => '<div class="check-row">' + statusBadge(check.status) +
       '<div><strong>' + HTML(check.id) + '</strong><p>' + HTML(check.message) + '</p></div></div>').join('') +
-    '</div>' + acceptedResearchSources() + softButton('Download full JSON audit ↓', 'audit') + '</section>';
+    '</div>' + acceptedResearchSources() + softButton('Inspect sensitivity & control →','open-evidence') + softButton('Download full JSON audit ↓', 'audit') + '</section>';
+}
+function evidenceView():string {
+ const source=evidenceSource??result;
+ const rec=source.audit.analysis.decision.recommendation;
+ const selectedId=evidenceOptionId||pendingId;
+ const decision=source.audit.analysis.decision.options.find(row=>row.optionId===selectedId);
+ const control=source.audit.controlRun;
+ const controlName=control.status==='known'?recommendationName({...source,audit:{...source.audit,analysis:{...source.audit.analysis,decision:control.value.decision}}}):'UNKNOWN';
+ const controlExplanation=control.status==='known'?control.value.decision.recommendation.reason:control.reason;
+ return '<section class="feature-page decision-evidence">'+header(true,'Decision')+
+   '<div class="intro"><p class="eyebrow">EVIDENCE · '+HTML(source.mode==='live'?'LIVE QLOO / SAMPLE TOUR':'SYNTHETIC TASTE / FROZEN OSRM')+'</p><h1>Why this direction?</h1>'+
+   '<p>Current recommendation: <strong>'+HTML(recommendationName(source))+'</strong>. '+HTML(rec.reason)+'</p></div>'+
+   '<p class="source-note">Additional-distance cap '+source.audit.replay.policy.maxAdditionalDistanceMetres/1000+' km. Daily driving is a separate constraint. Four confirmed shows remain locked.</p>'+
+   '<div data-tour="evidence" data-evidence-scatter></div>'+
+   '<section class="control-evidence"><h2>Control artist</h2><p data-control-result><strong>'+HTML(controlName)+'</strong></p><p>'+HTML(controlExplanation)+'</p><p class="muted">'+
+   (control.status==='known'&&control.value.recommendedOptionChanged.status==='known'?
+     (control.value.recommendedOptionChanged.value?'Changing the artist changes the recommendation.':'Changing the artist does not change the recommendation.'):
+     'UNKNOWN whether the control changes the recommendation. No successful change is inferred.')+'</p></section>'+
+   '<details class="evidence-disclosure" open><summary>Leave one comparison artist out</summary><div data-evidence-sensitivity></div></details>'+
+   '<details class="evidence-disclosure"><summary>Tag Bridge · sourced tags only</summary><div data-evidence-tags></div></details>'+
+   acceptedResearchSources()+'<details class="evidence-disclosure"><summary>Sources & limitations</summary><ul>'+projectRescue(source).evidence.map(item=>'<li>'+HTML(item)+'</li>').join('')+'</ul></details>'+
+   (source.mode==='live'?'<details class="evidence-disclosure"><summary>Live-Qloo completeness report</summary><pre class="live-study-report">'+HTML(JSON.stringify(projectLiveStudy(source,liveWorkerVersion),null,2))+'</pre></details>':'')+
+   '<div class="focused-bottom" data-tour="exports">'+primary('Download current audit ↓','audit')+
+   (decision?.kind!=='day-off'&&decision?.status!=='FAIL'?softButton('Prepare promoter proposal →','evidence-proposal'):softButton('Review the three options →','rescue'))+
+   softButton('Return to comparison','rescue')+'</div></section>';
+}
+function openEvidence(source:ApiDecisionResult=result,optionId=pendingId):void {
+ evidenceSource=source;evidenceOptionId=optionId;screen='evidence';notice='';render();
 }
 function acceptedResearchSources(): string {
   if(!researchHistory.accepted.length)return '';
@@ -275,14 +356,15 @@ function sheetHtml(sheet: PromoterSheetModel): string {
     '<h1>' + HTML(sheet.artist) + ' - ' + HTML(sheet.city) + '</h1>' +
     '<p class="sheet-date">Proposed: ' + HTML(sheet.date) + ' · ' + HTML(sheet.timeZone) + '</p>' +
     '<p>' + HTML(sheet.provenanceNote) + '</p>' +
-    '<div class="sheet-grid"><div><small>Route & constraints</small><strong>' + HTML(sheet.extraDriving) + ' added driving</strong><span>Max daily: ' + HTML(sheet.dailyDrivingLimit) + '</span></div>' +
+    '<div class="sheet-grid"><div><small>Route & constraints</small><strong>' + HTML(sheet.extraDistance) + ' additional distance</strong><span>'+HTML(sheet.extraDriving)+' added driving · distance cap '+HTML(sheet.distanceLimit)+'</span><span>Max daily: ' + HTML(sheet.dailyDrivingLimit) + '</span></div>' +
     '<div><small>Qloo cultural affinity</small><strong>' + HTML(sheet.fit) + '</strong><span>' + HTML(sheet.fitNote) + '</span></div>' +
     '<div><small>Decision checks</small><strong>' + HTML(sheet.decisionStatus) + '</strong><span>' + HTML(sheet.recommendation) + '</span></div>' +
-    '<div><small>Venue & contact</small><strong>Unknown / To confirm</strong><span>No outreach has been sent</span></div></div>' +
+    '<div><small>Venue & contact</small><strong>Unknown / To confirm</strong><span>'+HTML(sheet.venueNote)+'</span><span>No outreach has been sent</span></div></div>' +
+    '<h2>Comparison artists & sensitivity</h2><p>'+sheet.comparisons.map(row=>HTML(row.slot+'. '+row.name)).join(' · ')+'</p><p>'+HTML(sheet.sensitivityNote)+'</p>'+
     '<h2>What still needs confirming</h2><ul>' +
     ['Date and venue availability', 'Room capacity and technical rider', 'Fee and promoter terms', 'Contact and acceptance'].map(x => '<li>' + HTML(x) + '</li>').join('') +
     '</ul><h2>Evidence & limitations</h2><p>' + HTML(sheet.sourceLines.join(' ')) + '</p>' +
-    '<p>' + HTML(sheet.recommendationNote) + '</p>' +
+    '<p>' + HTML(sheet.recommendationNote) + '</p><p>'+HTML(sheet.risks.join(' '))+'</p>' +
     '<footer>Audit run: ' + HTML(sheet.runId) + ' · generated ' + HTML(sheet.generatedAt) +
     ' · This proposal is not an agreement, a booking or an email confirmation.</footer></article>';
 }
@@ -300,6 +382,7 @@ function draft(): string {
       '<textarea id="proposal-message" rows="11">' + HTML(proposalMessage) + '</textarea></div>' : '') +
     '<div class="focused-bottom">' + primary(reviewingMessage ? 'Copy message →' : 'Review message →', reviewingMessage ? 'copy-message' : 'review-message') +
     softButton('Print / save one-page proposal →', 'print-sheet') +
+    softButton('Download promoter PNG ↓','download-sheet-png')+
     softButton('Download evidence audit ↓', 'audit') +
     '<p class="tiny-label">No sending integration · status remains Not sent.</p></div></section>';
 }
@@ -349,7 +432,7 @@ function desktopHome(): string {
 function extensionContext(): ExtensionContext {
   return { tabs: mobileTabs(), sos, planBrief, planSummary, bandProfile, showAssumptions: economicsExpanded,
     economics, economicsError, economicsDraft, fanPreviewed, aiBusy, aiNotice, aiMode, aiSteps, aiSession,
-    aiDemoScenario, aiAccepted: researchHistory.accepted, sourceMode: projection.mode };
+    aiDemoScenario, aiAccepted: researchHistory.accepted, aiLiveReady:!!liveResearchBaseRunId, sourceMode: projection.mode };
 }
 function desktopContext(): DesktopViewContext {
   return {
@@ -364,6 +447,8 @@ function desktopContext(): DesktopViewContext {
 function renderWorkspace(): string { return workspaceView(screen as WorkspaceScreen, {profile:bandProfile,hasProposal:!!chosenProposal,agency:workspaceAgency,presaleOwner:agencyOwners.presale??'Unassigned'}); }
 function openWorkspace(next: WorkspaceScreen, agency=false):void { workspaceReturn=screen; workspaceAgency=agency; screen=next;notice='';render(); }
 function desktopInner(): string {
+  if(screen==='live-preset')return livePresetView();
+  if(screen==='evidence')return evidenceView();
   if (isWorkspaceScreen(screen)) return '<div class="desktop-centered">'+renderWorkspace()+'</div>';
   if (isDesktopScreen(screen)) return renderDesktopFeature(screen, desktopContext());
   if (screen === 'today') return desktopHome();
@@ -453,7 +538,7 @@ function render(): void {
       (screen === 'agency' ? '' : '<button type="button" class="sos-button" data-action="sos">SOS</button>') +
       '</div>' + renderDesktopFeature(screen, desktopContext())
     : isExtensionScreen(screen) ? renderExtension(screen, extensionContext()) :
-    screen === 'today' ? homeMobile() : screen === 'options' ? shortlist() :
+    screen === 'live-preset'?livePresetView():screen === 'evidence'?evidenceView():screen === 'today' ? homeMobile() : screen === 'options' ? shortlist() :
     screen === 'detail' ? details() : screen === 'draft' ? draft() : crew();
   // One DOM layout. The public fan page never receives private tour navigation or SOS controls.
   root!.innerHTML = '<a href="#main" class="skip-link">Skip to content</a>' +
@@ -496,6 +581,13 @@ function render(): void {
   }
   rememberSosHistory();
   setMapKeyDefaults(root!);
+  if(screen==='evidence')mountEvidence(root!,evidenceSource??result,evidenceOptionId||pendingId);
+  root!.querySelector('[data-action=rescue]')?.setAttribute('data-tour','cancelled-date');
+  root!.querySelector('.options-list')?.setAttribute('data-tour','options');
+  root!.querySelector('.sim-edit')?.setAttribute('data-tour','breakpoint-limit');
+  root!.querySelector('.agent-results,.extension-view:has([data-action=ai-replay])')?.setAttribute('data-tour','ai');
+  guide?.refresh();
+  window.dispatchEvent(new Event('tour-rescue:screen-rendered'));
   lastRenderedScreen = screen;
 }
 window.matchMedia('(max-width: 1099px)').addEventListener('change',()=>setMapKeyDefaults(root!));
@@ -557,6 +649,7 @@ function back(): void {
     render(); return;
   }
   if (screen === 'fan') { closeFan(); return; }
+  if (screen === 'evidence'||screen==='live-preset') { screen='options';render();return; }
   if (screen === 'plan-preview') { screen = 'plan'; render(); return; }
   if (screen === 'economics-terms') { screen = 'economics'; render(); return; }
   if (['plan', 'economics', 'ai'].includes(screen)) {
@@ -580,7 +673,7 @@ function back(): void {
   render();
 }
 function downloadAudit(source?:ApiDecisionResult,kind:'baseline'|'what-if'='baseline'):void {
-  const audited=source??(screen==='draft'?proposalSource??result:result);
+  const audited=source??(screen==='draft'?proposalSource??result:screen==='evidence'?evidenceSource??result:result);
   const exported=auditExport(audited,kind,researchHistory);
   const file=new Blob([exported.content],{type:'application/json'});
   const url = URL.createObjectURL(file);
@@ -682,6 +775,8 @@ function stopAgentResearch(): void {
 }
 async function researchWithAgent(): Promise<void> {
   if (aiBusy || result.mode !== 'live') return;
+  if(navigator.onLine===false){aiNotice='Offline. Live AI research needs a connection; your current comparison is unchanged.';render();return;}
+  if(!liveResearchBaseRunId){aiNotice='Refresh Qloo before starting another live research session. Your accepted comparison stays unchanged until a new run succeeds.';render();return;}
   const generation = ++aiGeneration;
   const controller = new AbortController();
   aiAbort = controller;
@@ -699,7 +794,7 @@ async function researchWithAgent(): Promise<void> {
     render();
     const budget = result.audit.replay.scenario.tour.constraints.additionalBudget;
     const session = await aiApi.rescue({
-      baseRunId: result.audit.runId,
+      baseRunId: liveResearchBaseRunId,
       policy: result.audit.replay.policy,
       ...(budget.status === 'known' ? { additionalBudgetMinorUnits: budget.value.minorUnits } : {}),
     }, result, event => {
@@ -729,6 +824,7 @@ async function researchWithAgent(): Promise<void> {
 }
 async function runLive(): Promise<void> {
   if (liveBusy || !liveTarget || !liveControl) return;
+  if(navigator.onLine===false){liveNotice='Offline. Live Qloo needs a connection; your current comparison is unchanged.';render();return;}
   const selection: LiveSelection = { target: liveTarget, control: liveControl, comparisons: liveComparisons };
   const ids = [selection.target.id, ...selection.comparisons.map(x => x.id), selection.control.id];
   if (new Set(ids).size !== ids.length) {
@@ -741,11 +837,13 @@ async function runLive(): Promise<void> {
   liveNotice = 'Running Qloo and recomputing the deterministic audit…';
   render();
   try {
+    liveWorkerVersion=(await api.health()).version;
     const fresh = await api.rescue(selection);
     const view = projectRescue(fresh);
     const nextState = transitionIncident(initialIncident(), { type: 'start-search' });
     incident = transitionIncident(nextState, { type: 'proposals-ready', runId: view.runId, optionIds: view.options.map(item => item.id) });
     result = fresh;
+    liveResearchBaseRunId=fresh.audit.runId;
     researchHistory = emptyResearch(); aiSession = null; aiSteps = [];
     projection = view;
     pendingId = view.options.find(x => x.recommended)?.id ?? view.options[0]?.id ?? '';
@@ -875,6 +973,28 @@ root!.addEventListener('click', async event => {
       if(simulationModel?.afterRecommendation.optionId){simulationModel=projectSimulation(result,simulationModel.afterRecommendation.optionId,simulationModel.maxAdditionalDistanceKm);simSaved=false;render();}
       break;
     case 'sim-audit':if(simulationModel)downloadAudit(simulationModel.sourceResult,'what-if');break;
+    case 'open-evidence':openEvidence();break;
+    case 'sim-full-evidence':if(simulationModel)openEvidence(simulationModel.sourceResult,simulationModel.optionId);break;
+    case 'evidence-proposal': {
+      const source=evidenceSource??result;
+      const id=evidenceOptionId||pendingId;
+      if(source.audit.analysis.decision.options.find(row=>row.optionId===id)?.status==='FAIL')break;
+      incident=transitionIncident(initialIncident(),{type:'start-search'});
+      incident=transitionIncident(incident,{type:'proposals-ready',runId:source.audit.runId,optionIds:source.audit.analysis.repairs.options.map(row=>row.id)});
+      incident=transitionIncident(incident,{type:'choose',optionId:id});incident=transitionIncident(incident,{type:'prepare-draft'});
+      chosenProposal=buildPromoterModel(source,id);proposalSource=source;proposalReturn='evidence';proposalFromSimulation=false;
+      proposalMessage=defaultMessage(chosenProposal);reviewingMessage=false;screen='draft';render();break;
+    }
+    case 'download-sheet-png':
+      if(chosenProposal&&proposalSource){try{await downloadPromoterPng(proposalSource,chosenProposal.optionId);notice='PNG downloaded. The matching audit contains the full evidence.';}catch(error){notice='PNG could not be created. '+(error instanceof Error?error.message:'Use Print A4.');}render();}break;
+    case 'start-guide':if(!aiBusy&&!liveBusy)guide?.start(button);break;
+    case 'open-live-presets':screen='live-preset';liveNotice='';render();break;
+    case 'choose-live-preset':if(!liveBusy&&LIVE_PRESETS.some(row=>row.id===button.dataset.id)){livePresetId=button.dataset.id!;liveNotice='';render();}break;
+    case 'run-live-preset':{
+      if(liveBusy)break;const preset=LIVE_PRESETS.find(row=>row.id===livePresetId)!;
+      liveTarget=preset.selection.target;liveComparisons=[...preset.selection.comparisons];liveControl=preset.selection.control;
+      await runLive();break;
+    }
     case 'sim-recheck': {
       const input=root!.querySelector<HTMLInputElement>('#sim-cap');
       if(!input||!simulationModel)break;
@@ -931,7 +1051,7 @@ root!.addEventListener('click', async event => {
       catch { notice = 'Copy this page URL to share the preview.'; }
       render(); break;
     case 'sos': openSos(); break;
-    case 'open-live': dialogReturnAction = 'open-live'; liveOpen = true; notice = ''; render(); break;
+    case 'open-live': if(guide?.isActive())guide.skip();dialogReturnAction = 'open-live'; liveOpen = true; notice = ''; render(); break;
     case 'close-live': liveOpen = false; render(); break;
     case 'pick-artist': {
       const choice = liveChoices[Number(button.dataset.index)];
@@ -1040,6 +1160,7 @@ root!.addEventListener('click', async event => {
         });
         const view=projectRescue(accepted.result);
         result=accepted.result;projection=view;researchHistory=accepted.history;
+        liveResearchBaseRunId=null;
         pendingId=accepted.acceptance.optionId;chosenProposal=null;proposalSource=null;simulationModel=null;
         audienceModel=projectAudience(result);
         incident=transitionIncident(initialIncident(),{type:'start-search'});
@@ -1050,6 +1171,8 @@ root!.addEventListener('click', async event => {
     }
     case 'ai-run-live': await researchWithAgent(); break;
     case 'ai-stop': stopAgentResearch(); render(); break;
+    case 'ai-use-demo':
+      if(!aiBusy){result=createDemoResult();projection=projectRescue(result);researchHistory=emptyResearch();aiSession=null;aiSteps=[];liveResearchBaseRunId=null;simulationModel=null;chosenProposal=null;proposalSource=null;pendingId=projection.options.find(row=>row.recommended)?.id??projection.options[0]!.id;aiNotice='Sample comparison selected explicitly. No live request was made.';render();}break;
         case 'run-live': await runLive(); break;
   }
 });
@@ -1120,7 +1243,9 @@ function followAppHash():void {
     if(hash==='rescue'||hash==='options'){incident=initialIncident();startRescue();return;}
     if(hash==='agency'){openAgency();return;}
     if(hash==='audience'){openAudience();return;}
-    if(hash==='simulation'){openSimulation();return;}
+    if(hash==='simulation'||hash==='breakpoint'){openSimulation();return;}
+    if(hash==='evidence'||hash==='audit'){openEvidence();return;}
+    if(hash==='live-preset'){screen='live-preset';render();return;}
     if(hash==='sos'){sos=restoreSosHistory(history.state?.sos,'problem');openSos();return;}
     if(hash==='detail'||hash==='draft'){
       const chosenId=history.state?.chosenOptionId;
@@ -1152,4 +1277,29 @@ function followAppHash():void {
 }
 window.addEventListener('hashchange', followAppHash);
 window.addEventListener('popstate', followAppHash);
+window.addEventListener('online',()=>render());window.addEventListener('offline',()=>render());
+guide=createGuidedTour({
+ descriptions:[
+  {title:'Start with the cancelled date',body:'Choose Rescue this date. Four confirmed shows stay locked.'},
+  {title:'Compare three options',body:'Replacement, detour or day off. Read PASS, FAIL and UNKNOWN separately from the recommendation.'},
+  {title:'Overturn one assumption',body:'Expand Adjust extra-distance preference. Enter354.1km and choose Recheck one assumption. Watch Nuremberg change to Frankfurt; daily driving stays fixed.'},
+  {title:'Inspect the evidence',body:'Read the two-axis plot, artist omissions, control result and sourced Tag Bridge. UNKNOWN stays unknown.'},
+  {title:'Export the current decision',body:'Download the audit or prepare the promoter proposal. Its print A4 and PNG exports share the same audited metrics.'},
+  {title:'Explore AI research, optionally',body:'Choose either saved transcript or explicitly run live Claude Sonnet5.5 research after loading fresh Qloo evidence. Accept a lead only after review.'},
+ ],
+ onStart:beginGuide,
+ onExit:finishGuide,
+ navigate:step=>{
+   if(step===0){screen='today';render();}
+   else if(step===1)startRescue();
+   else if(step===2){simulationModel??=projectSimulation(result,'replacement-nuremberg',350);screen='simulation';render();}
+   else if(step===3||step===4){const source=simulationModel?.sourceResult??result;const id=simulationModel?.afterRecommendation.optionId??pendingId;openEvidence(source,id);}
+   else{screen='ai';render();}
+ },
+ getTarget:step=>root!.querySelector('[data-tour="'+['cancelled-date','options','breakpoint-limit','evidence','exports','ai'][step]+'"]'),
+});
 followAppHash();
+initPwa();
+if(new URL(location.href).searchParams.get('tour')==='start'){
+ const url=new URL(location.href);url.searchParams.delete('tour');history.replaceState(history.state,'',url);guide.start();
+}
