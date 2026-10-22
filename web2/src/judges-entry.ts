@@ -5,12 +5,14 @@ import { publicSiteModel } from './marketing-model.ts';
 import { judgesMarkup } from './marketing.ts';
 import { auditExport } from './audit-download.ts';
 import { setMapKeyDefaults } from './map-disclosure.ts';
+import { initPwa } from './pwa.ts';
 
 const root=document.getElementById('judges-root');
 if(root){
   try{
     const model=publicSiteModel();
     root.innerHTML=judgesMarkup(model);
+    initPwa();
     setMapKeyDefaults(root);
     window.matchMedia('(max-width: 1099px)').addEventListener('change',()=>setMapKeyDefaults(root));
     root.querySelector<HTMLButtonElement>('#download-synthetic-audit')?.addEventListener('click',()=>{

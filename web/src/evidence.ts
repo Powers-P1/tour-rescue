@@ -47,7 +47,7 @@ function fitFor(result: ApiDecisionResult, report: FitReport, optionId: string):
   return value?.status === 'known' ? formatFit(value.value) : 'UNKNOWN';
 }
 
-function sensitivityTable(result: ApiDecisionResult): HTMLElement {
+export function sensitivityTable(result: ApiDecisionResult): HTMLElement {
   const audit = result.audit;
   const options = audit.analysis.repairs.options;
   const wrapper = el('div', 'evidence-table-scroll');
@@ -82,7 +82,7 @@ function sensitivityTable(result: ApiDecisionResult): HTMLElement {
   const outcomes = { retained: 'Unchanged', 'option-changed': 'Option changed', 'recommendation-withdrawn': 'Recommendation withdrawn',
     unresolved: 'UNKNOWN', 'not-comparable': 'Not comparable' };
   for (const run of audit.analysis.artistSensitivity.runs) {
-    row(artistName(result, run.removed.artistId), options.map(option => fitFor(result, run.fitReport, option.id)), run.decision.recommendation, outcomes[run.outcome]);
+    row(artistName(result, run.removed.artistId), options.map(option => fitFor(result, run.fitReport, option.id)), run.decision.recommendation, outcomes[run.outcome]+'. '+run.reason);
   }
   if (audit.controlRun.status === 'known') {
     const control = audit.controlRun.value;
@@ -102,7 +102,7 @@ function sensitivityTable(result: ApiDecisionResult): HTMLElement {
   return wrapper;
 }
 
-function sensitivitySummary(result: ApiDecisionResult): HTMLElement {
+export function sensitivitySummary(result: ApiDecisionResult): HTMLElement {
   const sensitivity = result.audit.analysis.artistSensitivity;
   const block = el('div', 'sensitivity-summary');
   const retained = sensitivity.summary.retainedRecommendationFraction;

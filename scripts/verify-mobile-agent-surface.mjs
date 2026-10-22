@@ -1,0 +1,78 @@
+/** Browser plugin not available. Offline Playwright proof of v2 evidence, exports, guide and PWA. */
+import assert from 'node:assert/strict';
+import {chromium} from 'playwright';
+import {spawn} from 'node:child_process';
+import {mkdir,readFile,writeFile} from 'node:fs/promises';
+import {join} from 'node:path';import {tmpdir} from 'node:os';
+const base=process.env.BASE_URL??'http://127.0.0.1:4194';
+const server=process.env.BASE_URL?null:spawn(process.execPath,['web2/serve.mjs','--deploy'],{env:{...process.env,PORT:'4194'},stdio:'ignore'});
+const out=process.env.QA_OUTPUT??join(tmpdir(),'tour-rescue-mobile-agent');let browser;const checks=[];
+const launch={headless:true,...(process.env.PLAYWRIGHT_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_EXECUTABLE_PATH}:{})};
+const act=(p,id)=>p.locator('[data-action="'+id+'"]:visible').first();
+async function downloaded(p,id){const pending=p.waitForEvent('download');await act(p,id).click();const d=await pending;return {bytes:await readFile(await d.path()),name:d.suggestedFilename()};}
+try{
+ for(let i=0;i<60;i++){try{if((await fetch(base)).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
+ await mkdir(out,{recursive:true});browser=await chromium.launch(launch);
+ for(const width of [390,1280]){
+  const context=await browser.newContext({viewport:{width,height:900},serviceWorkers:'block'});
+  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));
+  await context.route('**/*',r=>new URL(r.request().url()).origin===new URL(base).origin?r.continue():r.abort());
+  await page.goto(base+'/app/#simulation');await page.locator('.sim-edit summary').click();
+  await page.locator('#sim-cap').fill('354.1');await act(page,'sim-recheck').click();await act(page,'sim-follow-recommendation').click();await act(page,'sim-full-evidence').click();
+  assert.match(await page.locator('.decision-evidence').innerText(),/Frankfurt am Main/);
+  assert.equal(await page.locator('.fit-scatter svg .scatter-point').count(),2);
+  assert.ok(await page.locator('.sensitivity-result').count()>=4);
+  assert.match(await page.locator('.control-evidence').innerText(),/Control artist/);
+  await page.getByText('Tag Bridge · sourced tags only',{exact:true}).click();assert.equal(await page.locator('.tag-state').innerText(),'UNKNOWN');
+  await page.screenshot({path:join(out,'evidence-'+width+'.png'),fullPage:true});
+  await act(page,'evidence-proposal').click();
+  const text=await page.locator('#main .sheet-paper').innerText();assert.match(text,/additional distance/);assert.match(text,/Comparison artists & sensitivity/);assert.match(text,/Leave one artist out/);
+  const png=await downloaded(page,'download-sheet-png');assert.equal(png.bytes.subarray(1,4).toString(),'PNG');assert.equal(png.bytes.readUInt32BE(16),1680);assert.equal(png.bytes.readUInt32BE(20),2376);
+  await writeFile(join(out,'promoter-'+width+'.png'),png.bytes);
+  await page.pdf({path:join(out,'promoter-'+width+'.pdf'),preferCSSPageSize:true,printBackground:true});
+  await page.goto(base+'/app/#ai');await act(page,'ai-replay').click();await page.locator('[data-action=ai-accept]').first().click();
+  await act(page,'open-evidence').click();const before=JSON.parse((await downloaded(page,'audit')).bytes);
+  await page.evaluate(()=>{location.hash='rescue';});await act(page,'start-guide').click();
+  for(let step=1;step<=6;step++){
+    await page.locator('.guided-tour-layer[data-step="'+step+'"]').waitFor({state:'visible'});
+    assert.equal(await page.getByRole('progressbar').getAttribute('aria-valuenow'),String(step));
+    await page.getByRole('button',{name:step===6?'Finish tour':'Next',exact:true}).click();
+  }
+  assert.equal(await page.locator('.guided-tour-layer:visible').count(),0);
+  await act(page,'open-evidence').click();const after=JSON.parse((await downloaded(page,'audit')).bytes);assert.deepEqual(after.decisionAudit,before.decisionAudit);assert.deepEqual(after.accepted,before.accepted);
+  await page.evaluate(()=>{location.hash='rescue';});await act(page,'start-guide').click();await page.keyboard.press('Escape');assert.equal(await page.locator('.guided-tour-layer:visible').count(),0);
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(errors,[]);
+  checks.push({width,evidence:'passed',png:'passed',printPdf:'generated',sixStepGuide:'passed',escapeAndRestore:'passed'});await context.close();
+ }
+ // Android native-prompt hook, close affordance and dismissal across reload.
+ const android=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,userAgent:'Mozilla/5.0 (Linux; Android14) AppleWebKit/537.36 Chrome/130.0.0.0 Mobile Safari/537.36'});
+ const mobile=await android.newPage();await mobile.goto(base+'/judges/');await mobile.locator('.pwa-install-dialog[open]').waitFor();
+ assert.ok(await mobile.getByRole('button',{name:'Close installation prompt'}).evaluate(e=>e.getBoundingClientRect().height)>=48);
+ await mobile.screenshot({path:join(out,'install-android.png')});await mobile.getByRole('button',{name:'Close installation prompt'}).click();await mobile.reload();await mobile.waitForTimeout(1800);assert.equal(await mobile.locator('.pwa-install-dialog[open]').count(),0);
+ await mobile.evaluate(()=>{window.promptCount=0;const e=new Event('beforeinstallprompt',{cancelable:true});e.prompt=async()=>{window.promptCount++;};e.userChoice=Promise.resolve({outcome:'accepted'});window.dispatchEvent(e);});
+ await mobile.locator('[data-install-app]').first().click();await mobile.locator('.pwa-install-primary').click();assert.equal(await mobile.evaluate(()=>window.promptCount),1);assert.equal(await mobile.locator('.pwa-install-dialog[open]').count(),0);
+ await android.close();
+ const standalone=await browser.newContext();await standalone.addInitScript(()=>{const original=window.matchMedia.bind(window);window.matchMedia=q=>q==='(display-mode: standalone)'?{...original(q),matches:true}:original(q);});
+ const installed=await standalone.newPage();await installed.goto(base+'/app/#rescue');assert.equal(await installed.locator('[data-install-app]').first().innerText(),'App installed');await installed.evaluate(()=>{location.hash='evidence';});await installed.evaluate(()=>{location.hash='rescue';});assert.equal(await installed.locator('[data-install-app]').first().innerText(),'App installed');await standalone.close();
+ const safari=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1'});
+ const ios=await safari.newPage();await ios.goto(base+'/judges/');await ios.locator('.pwa-install-dialog[open]').waitFor();await ios.locator('.pwa-install-primary').click();assert.match(await ios.locator('.pwa-install-help').innerText(),/Share[\s\S]*Add to Home Screen/);await ios.screenshot({path:join(out,'install-ios-guidance.png')});await safari.close();
+ const offline=await browser.newContext();const op=await offline.newPage();await op.goto(base+'/app/#rescue');await op.evaluate(()=>navigator.serviceWorker.ready);await op.waitForFunction(()=>!!navigator.serviceWorker.controller);
+ await op.evaluate(()=>localStorage.setItem('tour-rescue.band-profile.v1','Personal test profile, preserved across reload'));
+ const keys=await op.evaluate(async()=>{const all=[];for(const k of await caches.keys())for(const r of await(await caches.open(k)).keys())all.push(new URL(r.url).pathname);return all;});
+ assert.ok(keys.includes('/app.js'));assert.ok(keys.every(k=>!k.startsWith('/api/')));
+ await offline.setOffline(true);await op.reload();await op.locator('.option-row').first().waitFor();await op.evaluate(()=>{location.hash='live-preset';});assert.match(await op.locator('.live-notice').innerText(),/Offline/);assert.equal(await act(op,'run-live-preset').isDisabled(),true);
+ assert.equal(await op.evaluate(()=>localStorage.getItem('tour-rescue.band-profile.v1')),'Personal test profile, preserved across reload');
+ await offline.setOffline(false);
+ if(!process.env.BASE_URL){
+  const swPath='web/dist/app/sw.js',original=await readFile(swPath,'utf8');
+  try{
+   await writeFile(swPath,original.replace(/tour-rescue-shell-([a-f0-9]+)/,'tour-rescue-shell-qa-update-$1'));
+   await op.evaluate(async()=>{const r=await navigator.serviceWorker.ready;await r.update();await new Promise((resolve,reject)=>{if(r.waiting)return resolve();const end=setTimeout(()=>reject(new Error('No waiting service worker')),15000);const tick=setInterval(()=>{if(r.waiting){clearInterval(tick);clearTimeout(end);resolve();}},100);});});
+   await op.close();const next=await offline.newPage();await next.goto(base+'/app/#rescue');await next.waitForFunction(async()=>!(await caches.keys()).some(k=>k.startsWith('tour-rescue-shell-')&&!k.includes('qa-update')));
+   assert.equal(await next.evaluate(()=>localStorage.getItem('tour-rescue.band-profile.v1')),'Personal test profile, preserved across reload');
+  }finally{await writeFile(swPath,original);}
+ }
+ await offline.close();
+ checks.push({androidPromptHook:'passed (simulated native event)',standaloneLabels:'passed',ios:'guidance verified; physical OS install not tested',offlineRescue:'passed',apiCacheExclusion:'passed',serviceWorkerUpdate:'local update preserves profile'});
+ await writeFile(join(out,'report.json'),JSON.stringify(checks,null,2));console.log(JSON.stringify(checks));
+}finally{await browser?.close();server?.kill();}

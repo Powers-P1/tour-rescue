@@ -1,0 +1,21 @@
+{
+  "id": "/app/",
+  "name": "Tour Rescue",
+  "short_name": "Tour Rescue",
+  "description": "Your mobile tour desk: rescue a cancelled date with checked options, evidence and a promoter draft.",
+  "lang": "en",
+  "start_url": "/app/?source=pwa#rescue",
+  "scope": "/app/",
+  "display": "standalone",
+  "background_color": "#121A20",
+  "theme_color": "#121A20",
+  "categories": ["music", "productivity", "business"],
+  "icons": [
+    {"src": "/assets/pwa-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "/assets/pwa-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ],
+  "shortcuts": [
+    {"name": "Rescue a date", "url": "/app/#rescue"},
+    {"name": "Review evidence", "url": "/app/#evidence"}
+  ]
+}

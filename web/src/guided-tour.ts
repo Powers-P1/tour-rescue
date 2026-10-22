@@ -20,6 +20,7 @@ export const TOUR_STEPS = [
 ] as const;
 
 export interface GuidedTourOptions {
+  readonly descriptions?: readonly {readonly title:string;readonly body:string}[];
   readonly navigate: (step: TourStepIndex) => void;
   readonly getTarget: (step: TourStepIndex) => HTMLElement | null;
   /** Prepare the labelled synthetic demo; called only after an explicit start/resume. */
@@ -190,7 +191,7 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
   }
 
   function paint(): void {
-    const step = TOUR_STEPS[progress.step];
+    const step = options.descriptions?.[progress.step] ?? TOUR_STEPS[progress.step];
     label.textContent = `Guided demo · ${progress.step + 1} of ${TOUR_STEPS.length}`;
     title.textContent = step.title;
     description.textContent = step.body;

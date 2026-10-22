@@ -202,6 +202,7 @@ function simulation(ctx:DesktopViewContext):string{
    (ctx.savedDraft?'<p class="soft-status">✓ Saved on this device only - no tour, venue or booking updated.</p>':'')+
    action(s.verdict==='FAIL'?'View why it fails →':'Preview promoter proposal →',
      s.verdict==='FAIL'?'sim-evidence':'sim-proposal')+
+   action('Inspect sensitivity & control →','sim-full-evidence')+
    fallback('Confirmed dates locked · proposed city remains unbooked · all missing facts stay Unknown / To confirm.')+
    '</div></section></div>'
    :'<div class="sim-budget"><h2>Budget needs a separate review.</h2>'+

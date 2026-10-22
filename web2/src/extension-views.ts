@@ -31,6 +31,7 @@ export interface ExtensionContext {
   readonly aiSession: AiSessionResult | null;
   readonly aiDemoScenario?: AiDemoScenarioId;
   readonly aiAccepted?: readonly AiAcceptance[];
+  readonly aiLiveReady?: boolean;
   readonly sourceMode: 'demo' | 'live';
 }
 const esc = (value: unknown): string => String(value ?? '').replace(/[&<>"']/g, char =>
@@ -220,6 +221,8 @@ function ai(ctx: ExtensionContext): string {
     (ctx.aiMode==='demo'?'<fieldset class="ai-scenarios"><legend>Saved research scenario</legend>'+AI_DEMO_SCENARIOS.map(row=>
       '<button type="button" data-action="ai-demo-scenario" data-id="'+row.id+'" aria-pressed="'+((ctx.aiDemoScenario??'corridor-repair')===row.id)+'"'+(ctx.aiBusy?' disabled':'')+'>'+esc(row.title)+'</button>').join('')+'</fieldset>':'')+
     (ctx.aiBusy ? '<p class="muted">Research in progress; checked results will appear when complete.</p>' : '') +
+    (ctx.aiMode==='demo'&&ctx.sourceMode==='live'?action('Use the sample comparison for saved transcripts','ai-use-demo'):'')+
+    (ctx.aiMode==='live'&&ctx.sourceMode==='live'&&ctx.aiLiveReady===false?'<p class="muted">Refresh Qloo before another live research session. Accepted cards stay in your current comparison until that fresh run succeeds.</p>'+action('Refresh Qloo artist evidence →','open-live'):'')+
     '<p role="status" class="live-notice">' + esc(ctx.aiNotice) + '</p>' +
     (ctx.aiSession ? '<div class="agent-results"><h2>Checked research leads</h2>' +
       '<p class="tiny-label">' + (ctx.aiSession.mode==='demo'?'Synthetic authored transcript':'Live research') +
@@ -238,7 +241,7 @@ function ai(ctx: ExtensionContext): string {
       '</div>' : '') +
     '<div class="focused-bottom">' +
     action(ctx.aiMode==='demo' ? 'Replay saved agent transcript →' : 'Start live AI research →',
-      ctx.aiMode==='demo'?'ai-replay':'ai-run-live',true,ctx.aiBusy || (ctx.aiMode==='live' && ctx.sourceMode!=='live')) +
+      ctx.aiMode==='demo'?'ai-replay':'ai-run-live',true,ctx.aiBusy || (ctx.aiMode==='live' && (ctx.sourceMode!=='live'||ctx.aiLiveReady===false))) +
     (ctx.aiBusy ? action('Stop research (session may still count) →','ai-stop') : '') +
     (ctx.aiMode==='live' && ctx.sourceMode!=='live' ? action('Load Qloo artist evidence →','open-live') : '') +
     sample('Agent leads are independently validated. This preview never silently replaces the current comparison, sends mail or books a venue.') +

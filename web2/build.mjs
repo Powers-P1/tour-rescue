@@ -1,6 +1,7 @@
 import { build } from 'esbuild';
 import { mkdir, readFile, rm, writeFile, cp } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
+import { buildPwa } from './pwa-build.mjs';
 
 // With --deploy keep the existing Cloudflare Pages contract:
 // build command: npm run web:build, output directory: web/dist.
@@ -42,6 +43,8 @@ await Promise.all([
     await readFile(new URL('./assets/drum-fallback.svg',import.meta.url))),
 ]);
 await cp(new URL('./assets/',import.meta.url), new URL('assets/',destUrl), {recursive:true});
+await cp(new URL('./public/',import.meta.url),destUrl,{recursive:true});
+await buildPwa(destUrl);
 await writeFile(new URL('_headers',destUrl),`/*
   Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com; connect-src 'self' ${origin.origin}; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'
   X-Content-Type-Options: nosniff
