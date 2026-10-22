@@ -7,8 +7,9 @@
  fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke
 }
 .geo-route-current{stroke:#dce8ee;stroke-width:3.1;opacity:.92}
-.geo-route-proposal{stroke:#efb760;stroke-width:2.7;stroke-dasharray:7 6}
-.geo-route-alternative{stroke:#87aebd;stroke-dasharray:5 7;stroke-width:2.1;opacity:.92}
+.geo-route-proposal{stroke:#f3b65b;stroke-width:2.7;stroke-dasharray:7 6}
+.geo-route-selected{stroke:#f3b65b;stroke-width:2.9}
+.geo-route-alternative{stroke:#f3b65b;stroke-dasharray:5 7;stroke-width:2.1;opacity:.88}
 .geo-city circle{stroke:#121a20;stroke-width:1.3;vector-effect:non-scaling-stroke}
 .geo-city-context circle{fill:#8199a7;opacity:.58}
 .geo-city-confirmed circle{fill:#e9f3fa}
@@ -39,4 +40,42 @@
 @media(max-width:380px){
  .geo-city-key{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 7px}
  .geo-key-item>span{font-size:14px}
+}
+
+/* Map annotations use geographical city-centre positions. The 11 key IDs are
+ * stable; mobile callout numbers match the HTML key exactly, not arbitrary
+ * recommendation order. SVG callout bubbles hide above 1099px and full
+ * on-map city labels take over at 1100px+. */
+.geo-direct-label text{
+  font:700 25px Inter,"IBM Plex Sans",system-ui,sans-serif;
+  fill:#f4f6f8;stroke:#19262d;stroke-width:5.4px;
+  stroke-linejoin:round;paint-order:stroke;
+}
+.geo-label-proposed text{fill:#f3b65b}
+.geo-label-cancelled text{fill:#ef9d98}
+.geo-number-callout{display:none}
+.geo-number-leader{stroke:#b9cbd6;stroke-width:2;stroke-linecap:round;opacity:.74;fill:none}
+.geo-number-bubble{fill:#263843;stroke:#d6e4ed;stroke-width:1.8}
+.geo-number-callout text{
+ font:750 31px Inter,"IBM Plex Sans",system-ui,sans-serif;
+ fill:#f4f6f8;stroke:none;
+}
+.geo-number-confirmed .geo-number-bubble{fill:#f4f6f8;stroke:#f4f6f8}
+.geo-number-confirmed text{fill:#14222a}
+.geo-number-proposed .geo-number-bubble{fill:#f3b65b;stroke:#f3b65b}
+.geo-number-proposed text{fill:#14222a}
+.geo-number-cancelled .geo-number-bubble{fill:#df8d87;stroke:#df8d87}
+.geo-number-cancelled text{fill:#14222a}
+.geo-key-number{
+ width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;
+ flex:none;border:1px solid #b9cbd6;border-radius:50%;
+ color:#f4f6f8;background:#263843;font-size:14px;font-weight:750;
+ font-style:normal;line-height:1;
+}
+.geo-key-number-confirmed{color:#14222a;background:#f4f6f8;border-color:#f4f6f8}
+.geo-key-number-proposed{color:#14222a;background:#f3b65b;border-color:#f3b65b}
+.geo-key-number-cancelled{color:#14222a;background:#df8d87;border-color:#df8d87}
+@media(max-width:1099px){
+ .geo-direct-label{display:none}
+ .geo-number-callout{display:block}
 }

@@ -43,6 +43,8 @@ try{
   {name:'01-rescue-options-mobile.png',path:'/app/#rescue',width:390,height:844},
   {name:'04-command-desktop.png',path:'/app/',width:1536,height:1024},
   {name:'04-command-germany-1280.png',path:'/app/',width:1280,height:800},
+  {name:'04-command-labelled-1100.png',path:'/app/',width:1100,height:800},
+  {name:'08-landing-labelled-1100.png',path:'/',width:1100,height:844},
   {name:'05-audience-germany-1280.png',path:'/app/#audience',width:1280,height:800},
   {name:'05-audience-desktop.png',path:'/app/#audience',width:1536,height:1024},
   {name:'06-simulation-desktop.png',path:'/app/#simulation',width:1536,height:1024},
