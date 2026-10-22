@@ -253,7 +253,7 @@ try{
    if(await page.locator('p.toast').count()!==0)
      throw new Error('Recheck feedback still overlays the Extra-distance row');
    const inline=page.locator('.sim-distance-status .feature-action-notice');
-   if(!await inline.isVisible()||!(await inline.textContent())?.includes('Recalculated'))
+   if(!await inline.isVisible()||!/Recommendation (changed|unchanged):/.test((await inline.textContent())??''))
      throw new Error('Simulation decision status not displayed inline');
    await page.screenshot({path:join(out,'06-simulation-recheck-1280.png'),fullPage:true,animations:'disabled'});
    rows.push({file:'06-simulation-recheck-1280.png',path:'/app/#simulation',viewport:'1280x800',
