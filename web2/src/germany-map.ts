@@ -171,7 +171,7 @@ export function renderGermanyGeographicMap(opts:GermanyMapOptions):string {
     '<span><i class="geo-line-current"></i> Solid: current plan</span>'+
     (routes?'<span><i class="geo-line-proposed"></i> Dashed: Proposed</span>':'<span>City-centre references</span>')+
   '</div>'+
-  '<div class="geo-map-footer"><details class="map-reference-details"><summary>City key &amp; map source</summary><div id="geo-key-'+id+'" class="geo-city-key" aria-label="City names corresponding to the map locations">'+marks+'</div>'+
+  '<div class="geo-map-footer"><details class="map-reference-details" open><summary>City key &amp; map source</summary><div id="geo-key-'+id+'" class="geo-city-key" aria-label="City names corresponding to the map locations">'+marks+'</div>'+
   '<p class="geo-provenance">Germany outline: Natural Earth 1:10m · WGS84 city-centre coordinates. '+
    'Proposals are not bookings and lines do not follow roads.</p>'+
    (id==='command'?'<p class="tiny-label">Nuremberg is a candidate, not a booked venue. Road checks use a separate OSRM snapshot.</p>':'')+'</details>'+

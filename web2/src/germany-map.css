@@ -32,6 +32,11 @@
 .geo-key-pin-proposed{background:#f3b65b;border-color:#f3b65b}
 .geo-key-pin-cancelled{background:#df8d87;border-color:#df8d87}
 .geo-provenance{font-size:13px;line-height:1.5;color:var(--muted,#aebcc6);margin:9px 0 0}
+.map-reference-details>summary{min-height:48px;display:flex;align-items:center;cursor:pointer;gap:10px;font-size:14px;list-style:none}
+.map-reference-details>summary::before{content:'+';font-size:20px}
+.map-reference-details[open]>summary::before{content:'−'}
+.map-reference-details>summary::-webkit-details-marker{display:none}
+.map-reference-details>summary:focus-visible{outline:3px solid #f3b65b;outline-offset:3px}
 @media(max-width:700px){
  .geo-city-key{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 11px;font-size:14px}
  .geo-route-legend{gap:9px 15px}

@@ -13,9 +13,9 @@
 .product-site .landing-judges-promo .eyebrow {font-size:13px;margin-bottom:12px;}
 .judge-example-body {display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:20px;}
 .judge-map-preview .germany-geo-svg {height:300px;}
-.judge-map-preview .geo-route-legend {font-size:12px;gap:6px;}
+.judge-map-preview .geo-route-legend {font-size:14px;gap:6px;}
 .judge-map-preview .geo-map-footer {display:none;}
-.judge-map-preview .geo-direct-label text {font-size:29px;}
+.judge-map-preview .geo-direct-label text {font-size:32px;}
 .judge-map-preview .geo-number-callout {display:none;}
 .judge-map-preview .geo-direct-label {display:block;}
 .example-options {margin-top:0;}
@@ -46,6 +46,16 @@
 .judges-proof {padding-top:36px;padding-bottom:40px;}
 .evidence-rows a {min-height:80px;}
 .judge-tools {margin-top:20px;}
+/* Jury metadata stays readable, including the compact example and source notes. */
+#judges-root .example-top>small,#judges-root .example-option .m-badge,
+#judges-root .judges-utility,#judges-root .geo-provenance {font-size:14px;}
+#judges-root summary {min-height:48px;}
+/* A miniature cannot keep city labels legible at narrow desktop sizes. The
+ * adjacent named options carry the decision until there is room for the map. */
+@media(max-width:1279px){
+ #judges-root .judge-map-preview{display:none}
+ #judges-root .judge-example-body{grid-template-columns:minmax(0,1fr)}
+}
 @media(min-width:791px) {
   .product-site .site-header {position:absolute;top:0;left:0;right:0;background:transparent;border:0;}
   .product-site .site-header nav {gap:18px;}

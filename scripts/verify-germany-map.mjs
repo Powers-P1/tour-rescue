@@ -41,7 +41,7 @@ async function open(path,width){
 async function evaluateMap(page,context,width){
  const locator=page.locator('[data-map-scope="'+context+'"]');
  ok(await locator.count()===1,'Map not present: '+context+'/'+width);
- await locator.locator('.map-reference-details summary').click();
+ if (!await locator.locator('.map-reference-details').evaluate(details=>details.open)) await locator.locator('.map-reference-details summary').click();
  const result=await locator.evaluate(element=>{
   const visible=e=>e.getClientRects().length>0;
   const svg=element.querySelector('svg');
