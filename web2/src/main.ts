@@ -1356,10 +1356,19 @@ guide=createGuidedTour({
    else if(step===3||step===4){const source=simulationModel?.sourceResult??result;const id=simulationModel?.afterRecommendation.optionId??pendingId;openEvidence(source,id);}
    else{screen='ai';render();}
  },
- getTarget:step=>root!.querySelector('[data-tour="'+['cancelled-date','options','breakpoint-limit','evidence','exports','ai'][step]+'"]')??root!.querySelector<HTMLElement>('#main,.focused-screen'),
+ getTarget:step=>{
+   // Highlight the next real control, rather than a tall panel whose coach
+   // could obscure its own buttons on a phone.
+   const selectors=['[data-action=rescue]','[data-action=review]',
+     '.sim-edit[open] [data-action=sim-recheck],.sim-edit:not([open]) summary',
+     '.evidence-disclosure:has([data-evidence-tags]) > summary','[data-action=audit]',
+     '[data-action=ai-replay]'];
+   if(step===5){const accept=root!.querySelector<HTMLButtonElement>('[data-action=ai-accept]:not([disabled])');if(accept)return accept;}
+   return root!.querySelector<HTMLElement>(selectors[step]!)??root!.querySelector('[data-tour="'+['cancelled-date','options','breakpoint-limit','evidence','exports','ai'][step]+'"]')??root!.querySelector<HTMLElement>('#main,.focused-screen');
+ },
  objective:step=>guideObjective(step,{screen,chosen:incident.phase==='chosen',cap:simulationModel?.maxAdditionalDistanceKm??null,winner:simulationModel?.afterRecommendation.optionId??null,evidenceReads:guideEvidenceReads,exports:guideExports,acceptedDemo:researchHistory.accepted.length}),
 });
-root!.addEventListener('toggle',event=>{const detail=event.target;if(guide?.isActive()&&screen==='evidence'&&detail instanceof HTMLDetailsElement&&detail.open&&(detail.textContent?.includes('Tag Bridge')||detail.textContent?.includes('Sources & limitations'))){guideEvidenceReads++;guide.refresh();}},true);
+root!.addEventListener('toggle',event=>{const detail=event.target;if(guide?.isActive()&&detail instanceof HTMLDetailsElement){if(screen==='evidence'&&detail.open&&(detail.textContent?.includes('Tag Bridge')||detail.textContent?.includes('Sources & limitations')))guideEvidenceReads++;guide.refresh();}},true);
 followAppHash();
 initPwa();
 if(new URL(location.href).searchParams.get('tour')==='start'){

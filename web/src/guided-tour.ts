@@ -64,6 +64,7 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
   let oldTabIndex: string | null = null;
   let temporaryTabIndex = false;
   let saved = true;
+  let compact = false;
 
   const layer = el('div', 'guided-tour-layer');
   layer.hidden = true;
@@ -79,7 +80,15 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
   const label = el('p', 'guided-tour-label');
   const skip = button('Skip', () => exit(false), 'guided-tour-skip');
   skip.title = 'Skip guided tour (Esc)';
-  top.append(label, skip);
+  const minimize = button('−', () => {
+    compact = !compact;
+    card.classList.toggle('is-compact', compact);
+    minimize.textContent = compact ? '+' : '−';
+    minimize.setAttribute('aria-label', compact ? 'Expand guided tour' : 'Minimize guided tour');
+    refresh();
+  }, 'guided-tour-minimize');
+  minimize.setAttribute('aria-label', 'Minimize guided tour');
+  top.append(label, minimize, skip);
   const track = el('div', 'guided-tour-track');
   track.setAttribute('role', 'progressbar');
   track.setAttribute('aria-valuemin', '1');
@@ -223,6 +232,10 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
     progress = transitionTourProgress(progress, { type: resume ? 'resume' : 'start' });
     persist();
     active = true;
+    compact = false;
+    card.classList.remove('is-compact');
+    minimize.textContent = '−';
+    minimize.setAttribute('aria-label', 'Minimize guided tour');
     layer.hidden = false;
     document.body.classList.add('guided-tour-is-active');
     options.onStart();
@@ -239,6 +252,7 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
     if (!active || disposed) return;
     if (progress.step === step) { refresh(); return; }
     progress = transitionTourProgress(progress, { type: 'go-to', step });
+    next.disabled = !!options.objective;
     persist();
     paint();
     shouldFocus = true;
