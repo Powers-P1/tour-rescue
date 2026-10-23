@@ -3,7 +3,7 @@
 An independent review in the requested “Pomysł na hakaton Qloo” conversation identified two material navigation cases plus three smaller issues. They were reproduced against the deployed v2 and corrected locally on current main.
 
 - Back/Forward now restores the audited workspace for that history entry, including the what-if source, recommendation, evidence, chosen proposal and accepted-research provenance. Moving from a 354.1 km Frankfurt audit to the comparison and back keeps the same run ID and policy. The bounded in-tab history does not copy private material into browser history state. If an audited context is no longer held (for example after reload), the app explicitly returns to the comparison rather than silently showing an older audit.
-- A 0 km cap can recommend day off. That option now opens successfully, marks venue/fee checks as not applicable, keeps four confirmed shows locked and exports its actual audit. It does not offer a promoter booking draft.
+- A saved local simulation draft is restored and rechecked after reload, including a saved day-off option. Unsaved expired audit contexts still return explicitly to the comparison. A 0 km cap can recommend day off. That option opens successfully, marks venue/fee checks as not applicable, keeps four confirmed shows locked and exports its actual audit. It does not offer a promoter booking draft.
 - Whole-metre decimals such as 8.007 km survive binary floating-point conversion. Finer-than-metre values remain rejected.
 - The install prompt does not cover an already-open Live dialog or guided tour.
 - Private knowledge returned to the model must fit the exact twelve-record export bound. A thirteenth excerpt is withheld instead of being passed to the model and omitted from the audit.

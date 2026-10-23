@@ -22,7 +22,7 @@ test('v2 exposes Nuremberg → Frankfurt separately from the manually reviewed o
 
 test('v2 accepts into the current policy, preserves the other card and exports sourcing after a what-if',()=>{
   const base=createDemoResult({generatedAt:stamp,runId:'v2-accept'});
-  const current=recomputeResult(base,{maxAdditionalDistanceMetres:354100});
+  const current=recomputeResult(base,{maxAdditionalDistanceMetres:354100},{generatedAt:stamp,runId:'v2-current'});
   const session=createAiDemoSession('corridor-repair',{generatedAt:stamp});
   const proposal=session.proposals[0]!;
   const other=current.audit.replay.scenario.repairCandidates.find(row=>row.kind!==proposal.draft.kind&&row.kind!=='day-off');

@@ -729,7 +729,7 @@ function simulationScope(): string {
   return result.mode === 'demo' ? 'demo:' + result.scenarioId : result.audit.runId;
 }
 function openSimulation(optionId?: string): void {
-  const available = projection.options.filter(option => option.kind !== 'day-off');
+  const available = projection.options;
   const previous = (() => {try{return loadSimulation(window.localStorage, simulationScope());}catch{return null;}})();
   const requested = optionId ?? previous?.optionId ?? available.find(option => option.recommended)?.id ?? available[0]?.id;
   const chosen = available.some(option => option.id === requested) ? requested : available[0]?.id;
@@ -1286,6 +1286,10 @@ function followAppHash():void {
     const savedHash=saved?.screen==='today'?'':saved?.screen==='options'?'rescue':saved?.screen;
     if(saved&&hash===savedHash){restoreWorkspace(saved);render();return;}
     if(typeof history.state?.tourRescueWorkspace==='number'&&!saved&&['simulation','evidence','audit','detail','draft'].includes(hash)){
+      if(hash==='simulation'){
+        const draft=(()=>{try{return loadSimulation(window.localStorage,simulationScope());}catch{return null;}})();
+        if(draft){openSimulation(draft.optionId);notice='Saved local draft restored and rechecked. Confirmed shows remain unchanged.';render();return;}
+      }
       incident=initialIncident();screen='options';notice='The earlier audited view is no longer held in this tab. Reopen a direction from the current comparison.';
       history.replaceState({screen},'',location.pathname+location.search+'#rescue');render();return;
     }
