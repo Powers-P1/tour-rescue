@@ -1,6 +1,6 @@
 # Tour Rescue
 
-[Jury demo](https://tour-rescue.pages.dev/judges/) · [Submission handoff](docs/HACKATHON_HANDOFF.md) · [97-second mobile walkthrough](docs/demo/README.md)
+[Jury demo](https://tour-rescue.pages.dev/judges/) · [Submission handoff](docs/HACKATHON_HANDOFF.md)
 
 Qloo-powered agent that repairs a concert tour when one date falls through.
 

@@ -1,4 +1,6 @@
-# Mobile demonstration
+# Mobile demonstration — unapproved draft
+
+The user rejected these films on 23 October and deferred video work until tomorrow. Retain this as a working draft; do not publish or submit it as the project demo.
 
 - [97-second MP4](tour-rescue-mobile.mp4), 1920×1080 H.264/AAC, 8.2 MB.
 - [English transcript](tour-rescue-mobile-transcript.md) and [WebVTT captions](tour-rescue-mobile.vtt).
