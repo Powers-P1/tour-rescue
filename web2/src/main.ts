@@ -36,7 +36,8 @@ import { LIVE_PRESETS } from './live-presets.ts';
 import { projectLiveStudy } from './live-study.ts';
 import { createAiClient } from '../../web/src/ai-client.ts';
 import { hadMountedScreen, selectFocusTarget } from './focus-policy.ts';
-import { projectAudience, projectSimulation, loadSimulation, saveSimulation } from './desktop-model.ts';
+import { projectAudience, projectSimulation, loadSimulation, saveSimulation, simulationDraftScope } from './desktop-model.ts';
+import { createWorkspaceHistory, isWorkspaceHistoryKey, canonicalWorkspaceHash, workspaceScreenHash } from './workspace-history.ts';
 import { auditExport } from './audit-download.ts';
 import { parseExtraDistanceKm } from './simulation-input.ts';
 import { nextRovingIndex } from './keyboard-navigation.ts';
@@ -132,8 +133,7 @@ function captureGuideWorkspace() {
    audienceModel,selectedAudienceCityId,showEvidence,notice};
 }
 let guideWorkspace:ReturnType<typeof captureGuideWorkspace>|null=null;
-const historyWorkspaces=new Map<number,ReturnType<typeof captureGuideWorkspace>>();
-let historyWorkspaceSequence=0;
+const historyWorkspaces=createWorkspaceHistory<ReturnType<typeof captureGuideWorkspace>>();
 function restoreWorkspace(workspace:ReturnType<typeof captureGuideWorkspace>):void{
  ({result,projection,incident,screen,pendingId,researchHistory,aiSession,aiSteps,aiMode,aiDemoScenario,aiNotice,liveResearchBaseRunId,
    simulationModel,simulationTab,simSaved,simCapDraft,simCapError,simChooseCity,evidenceSource,evidenceOptionId,
@@ -142,10 +142,7 @@ function restoreWorkspace(workspace:ReturnType<typeof captureGuideWorkspace>):vo
 }
 function rememberWorkspaceHistory():void{
  if(guideWorkspace||screen.startsWith('sos-'))return;
- const previous=history.state?.tourRescueWorkspace;
- const id=typeof previous==='number'&&historyWorkspaces.get(previous)?.screen===screen?previous:++historyWorkspaceSequence;
- historyWorkspaces.set(id,captureGuideWorkspace());
- while(historyWorkspaces.size>120)historyWorkspaces.delete(historyWorkspaces.keys().next().value!);
+ const id=historyWorkspaces.remember(history.state?.tourRescueWorkspace,captureGuideWorkspace());
  history.replaceState({...history.state,screen,tourRescueWorkspace:id},'');
 }
 function beginGuide():void {
@@ -592,7 +589,8 @@ function render(): void {
   }
   if (screenChanged) {
     window.scrollTo({top:0,behavior:'instant'});
-    const hash = screen === 'today' ? '' : '#' + (screen === 'options' ? 'rescue' : screen);
+    const screenHash = workspaceScreenHash(screen);
+    const hash = screenHash ? '#' + screenHash : '';
     if (!followingLocation && location.hash !== hash) history.pushState({screen,chosenOptionId:incident.chosenOptionId}, '', location.pathname+location.search+hash);
   }
   rememberSosHistory();
@@ -726,7 +724,7 @@ function openAudience(): void {
   render();
 }
 function simulationScope(): string {
-  return result.mode === 'demo' ? 'demo:' + result.scenarioId : result.audit.runId;
+  return simulationDraftScope(result, researchHistory.accepted.length > 0);
 }
 function openSimulation(optionId?: string): void {
   const available = projection.options;
@@ -1281,11 +1279,13 @@ document.addEventListener('focusin', event => {
 function followAppHash():void {
   followingLocation=true;
   try {
-    const hash=window.location.hash.slice(1);
+    const originalHash=window.location.hash.slice(1);
+    const hash=canonicalWorkspaceHash(originalHash);
+    if(hash!==originalHash)history.replaceState(history.state,'',location.pathname+location.search+(hash?'#'+hash:''));
     const saved=historyWorkspaces.get(history.state?.tourRescueWorkspace);
-    const savedHash=saved?.screen==='today'?'':saved?.screen==='options'?'rescue':saved?.screen;
+    const savedHash=saved?workspaceScreenHash(saved.screen):undefined;
     if(saved&&hash===savedHash){restoreWorkspace(saved);render();return;}
-    if(typeof history.state?.tourRescueWorkspace==='number'&&!saved&&['simulation','evidence','audit','detail','draft'].includes(hash)){
+    if(isWorkspaceHistoryKey(history.state?.tourRescueWorkspace)&&!saved&&['simulation','evidence','detail','draft'].includes(hash)){
       if(hash==='simulation'){
         const draft=(()=>{try{return loadSimulation(window.localStorage,simulationScope());}catch{return null;}})();
         if(draft){openSimulation(draft.optionId);notice='Saved local draft restored and rechecked. Confirmed shows remain unchanged.';render();return;}
@@ -1293,11 +1293,11 @@ function followAppHash():void {
       incident=initialIncident();screen='options';notice='The earlier audited view is no longer held in this tab. Reopen a direction from the current comparison.';
       history.replaceState({screen},'',location.pathname+location.search+'#rescue');render();return;
     }
-    if(hash==='rescue'||hash==='options'){incident=initialIncident();startRescue();return;}
+    if(hash==='rescue'){incident=initialIncident();startRescue();return;}
     if(hash==='agency'){openAgency();return;}
     if(hash==='audience'){openAudience();return;}
-    if(hash==='simulation'||hash==='breakpoint'){openSimulation();return;}
-    if(hash==='evidence'||hash==='audit'){openEvidence();return;}
+    if(hash==='simulation'){openSimulation();return;}
+    if(hash==='evidence'){openEvidence();return;}
     if(hash==='live-preset'){screen='live-preset';render();return;}
     if(hash==='sos'){sos=restoreSosHistory(history.state?.sos,'problem');openSos();return;}
     if(hash==='detail'||hash==='draft'){

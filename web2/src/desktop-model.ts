@@ -11,6 +11,20 @@ import { recomputeResult } from '../../web/src/data.ts';
 import { projectRescue } from './model.ts';
 import { UNKNOWN, duration, dateInZone } from './model.ts';
 
+/** Only an unchanged synthetic comparison is reproducible after reloading.
+ * Accepted research and live runs keep their exact run identity. The compact
+ * demo fingerprint scopes preferences; it is not an audit or security check.
+ */
+export function simulationDraftScope(result: ApiDecisionResult, hasAcceptedResearch = false): string {
+  if (result.mode !== 'demo' || hasAcceptedResearch) return result.audit.runId;
+  const context = JSON.stringify({ scenarioId: result.scenarioId, replay: result.audit.replay });
+  let fingerprint = 0x6c62272e07bb014262b821756295c58dn;
+  for (let index = 0; index < context.length; index++) {
+    fingerprint = BigInt.asUintN(128, (fingerprint ^ BigInt(context.charCodeAt(index))) * 0x1000000000000000000013bn);
+  }
+  return 'demo:' + result.scenarioId + ':' + fingerprint.toString(16).padStart(32, '0');
+}
+
 export type AudienceSource = 'qloo' | 'fans';
 export interface AudiencePlace {
   readonly cityId: string;
