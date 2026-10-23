@@ -1,10 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { stripTypeScriptTypes } from 'node:module';
 import { createDemoResult, recomputeResult } from '../web/src/data.ts';
 import { createAiDemoSession } from '../src/ai/demo.ts';
 import { acceptResearchIntoComparison, emptyResearch } from '../web2/src/research-comparison.ts';
 import { loadSimulation, saveSimulation, simulationDraftScope } from '../web2/src/desktop-model.ts';
 import { createWorkspaceHistory, isWorkspaceHistoryKey, canonicalWorkspaceHash, workspaceScreenHash } from '../web2/src/workspace-history.ts';
+import { initialIncident, transitionIncident } from '../web2/src/state.ts';
+import { projectRescue } from '../web2/src/model.ts';
 
 const stamp = '2026-10-23T00:00:00Z';
 const storage = () => {
@@ -84,4 +88,43 @@ test('legacy hash aliases identify the same audited screen before history lookup
   }
   assert.equal(canonicalWorkspaceHash('detail'), 'detail');
   assert.equal(workspaceScreenHash('today'), '');
+});
+
+test('expired audited history reopens selectable current options and Review reaches the chosen detail', () => {
+  // Execute the actual entry-point handlers without mounting a browser/DOM.
+  const main = readFileSync(new URL('../web2/src/main.ts', import.meta.url), 'utf8');
+  const handlers = ['followAppHash', 'startRescue', 'review', 'optionById'].map(name => {
+    const match = main.match(new RegExp('function ' + name + '\\([^]*?\\n\\}'));
+    assert.ok(match, 'missing handler ' + name);
+    return match[0];
+  }).join('\n');
+  const run = new Function('context', 'with(context){' + stripTypeScriptTypes(handlers) +
+    '\nfollowAppHash();pendingId=projection.options[1].id;review();}');
+  const result = createDemoResult({ generatedAt: stamp, runId: 'reloaded-current-comparison' });
+  for (const hash of ['#simulation', '#evidence', '#draft']) {
+    const location = { hash, pathname: '/app/', search: '' };
+    const renders: { screen: string; incident: ReturnType<typeof initialIncident>; notice: string }[] = [];
+    const context = {
+      window: { location, localStorage: storage() }, location,
+      history: { state: { tourRescueWorkspace: 'expired-document:3' },
+        replaceState() {} },
+      historyWorkspaces: createWorkspaceHistory('new-document'),
+      isWorkspaceHistoryKey, canonicalWorkspaceHash, workspaceScreenHash,
+      loadSimulation: () => null, simulationScope: () => 'missing-saved-context',
+      initialIncident, transitionIncident, result, projection: projectRescue(result),
+      screen: 'today', incident: initialIncident(), pendingId: '', notice: '',
+      showEvidence: true, followingLocation: false, render() {
+        renders.push({ screen: context.screen, incident: context.incident, notice: context.notice });
+      },
+    };
+    run(context);
+    assert.equal(renders[0]!.screen, 'options', hash);
+    assert.equal(renders[0]!.incident.phase, 'proposals', hash);
+    assert.equal(renders[0]!.incident.runId, result.audit.runId, hash);
+    assert.match(renders[0]!.notice, /earlier audited view is no longer held/, hash);
+    assert.equal(context.screen, 'detail', hash);
+    assert.equal(context.incident.chosenOptionId, 'detour-frankfurt', hash);
+    assert.equal(context.incident.phase, 'chosen', hash);
+    assert.equal(context.result, result, 'fallback must retain the current comparison');
+  }
 });

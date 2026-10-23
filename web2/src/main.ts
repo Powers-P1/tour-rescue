@@ -618,14 +618,14 @@ function goHome(): void {
   notice = '';
   render();
 }
-function startRescue(): void {
+function startRescue(message = ''): void {
   incident = transitionIncident(incident, { type: 'start-search' });
   incident = transitionIncident(incident, {
     type: 'proposals-ready', runId: projection.runId, optionIds: projection.options.map(option => option.id),
   });
   pendingId = projection.options.find(option => option.recommended)?.id ?? projection.options[0]?.id ?? '';
   screen = 'options';
-  notice = '';
+  notice = message;
   render();
 }
 function review(): void {
@@ -1290,8 +1290,9 @@ function followAppHash():void {
         const draft=(()=>{try{return loadSimulation(window.localStorage,simulationScope());}catch{return null;}})();
         if(draft){openSimulation(draft.optionId);notice='Saved local draft restored and rechecked. Confirmed shows remain unchanged.';render();return;}
       }
-      incident=initialIncident();screen='options';notice='The earlier audited view is no longer held in this tab. Reopen a direction from the current comparison.';
-      history.replaceState({screen},'',location.pathname+location.search+'#rescue');render();return;
+      incident=initialIncident();
+      history.replaceState({screen:'options'},'',location.pathname+location.search+'#rescue');
+      startRescue('The earlier audited view is no longer held in this tab. Reopen a direction from the current comparison.');return;
     }
     if(hash==='rescue'){incident=initialIncident();startRescue();return;}
     if(hash==='agency'){openAgency();return;}
