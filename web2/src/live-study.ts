@@ -1,6 +1,6 @@
 import type { ApiDecisionResult } from '../../worker/src/app.ts';
 import { createDecisionAudit } from '../../src/core/audit.ts';
-import { recommendationName } from './evidence-view.ts';
+import { recommendationName } from './recommendation-name.ts';
 export const V2_RELEASE='web2-2026-10-23';
 /** Derived coverage and decisions only. Never export raw provider responses or affinities. */
 export function projectLiveStudy(result:ApiDecisionResult,workerVersion:string){
@@ -19,8 +19,8 @@ export function projectLiveStudy(result:ApiDecisionResult,workerVersion:string){
   fitStatus:fit.status,fitUnknownReason:fit.status==='unknown'?fit.reason:null,
   recommendation:{...audit.analysis.decision.recommendation,name:recommendationName(result)},
   withoutTaste:{...noTaste.analysis.decision.recommendation,changesDecision:signature(noTaste.analysis.decision.recommendation)!==signature(audit.analysis.decision.recommendation)},
-  control:control.status==='known'?{status:'known',recommendation:control.value.decision.recommendation,
-    changed:control.value.recommendedOptionChanged,gate:control.value.zeroViolationsGate.status}:{status:'unknown',reason:control.reason},
+  control:control.status==='known'?{status:'known' as const,recommendation:control.value.decision.recommendation,
+    changed:control.value.recommendedOptionChanged,gate:control.value.zeroViolationsGate.status}:{status:'unknown' as const,reason:control.reason},
   artistOmissions:audit.analysis.artistSensitivity.runs.map(row=>({artistId:row.removed.artistId,outcome:row.outcome,reason:row.reason,recommendation:row.decision.recommendation})),
   sources:audit.queries.map(query=>({queryId:query.queryId,parameters:query.parameters,operation:query.operation,source:query.source,status:query.status,recordedAt:query.responseRecordedAt})),
   limits:['Frozen Germany city set and city-centre OSRM snapshot.','Bookings and venue facts remain a sample scenario.','Incomplete evidence is UNKNOWN; no synthetic values replace missing data.','Different-artist and no-taste comparisons keep the same constraints; a lack of change is reported.']};
