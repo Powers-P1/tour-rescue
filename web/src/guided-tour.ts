@@ -23,6 +23,7 @@ export interface GuidedTourOptions {
   readonly descriptions?: readonly {readonly title:string;readonly body:string}[];
   readonly navigate: (step: TourStepIndex) => void;
   readonly getTarget: (step: TourStepIndex) => HTMLElement | null;
+  readonly objective?: (step:TourStepIndex)=>{complete:boolean;task:string};
   /** Prepare the labelled synthetic demo; called only after an explicit start/resume. */
   readonly onStart: () => void;
   readonly onExit: (completed: boolean) => void;
@@ -63,6 +64,7 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
   let oldTabIndex: string | null = null;
   let temporaryTabIndex = false;
   let saved = true;
+  let compact = false;
 
   const layer = el('div', 'guided-tour-layer');
   layer.hidden = true;
@@ -78,7 +80,15 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
   const label = el('p', 'guided-tour-label');
   const skip = button('Skip', () => exit(false), 'guided-tour-skip');
   skip.title = 'Skip guided tour (Esc)';
-  top.append(label, skip);
+  const minimize = button('−', () => {
+    compact = !compact;
+    card.classList.toggle('is-compact', compact);
+    minimize.textContent = compact ? '+' : '−';
+    minimize.setAttribute('aria-label', compact ? 'Expand guided tour' : 'Minimize guided tour');
+    refresh();
+  }, 'guided-tour-minimize');
+  minimize.setAttribute('aria-label', 'Minimize guided tour');
+  top.append(label, minimize, skip);
   const track = el('div', 'guided-tour-track');
   track.setAttribute('role', 'progressbar');
   track.setAttribute('aria-valuemin', '1');
@@ -96,10 +106,11 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
   const focus = button('Focus highlighted area', focusTarget, 'guided-tour-focus');
   const actions = el('div', 'guided-tour-actions');
   const back = button('Back', () => goTo(Math.max(0, progress.step - 1) as TourStepIndex), 'button button-secondary');
-  const next = button('Next', () => progress.step === 5 ? exit(true) : goTo((progress.step + 1) as TourStepIndex), 'button button-primary');
+  const next = button('Next', () => {if(options.objective&&!options.objective(progress.step).complete)return;progress.step === 5 ? exit(true) : goTo((progress.step + 1) as TourStepIndex);}, 'button button-primary');
   actions.append(back, next);
   const hint = el('p', 'guided-tour-hint');
-  card.append(top, track, title, description, focus, actions, hint);
+  const objective=el('p','guided-tour-objective');objective.setAttribute('role','status');objective.setAttribute('aria-live','polite');
+  card.append(top, track, title, description,objective, focus, actions, hint);
   layer.append(highlight, card);
   document.body.append(layer);
 
@@ -138,6 +149,7 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
   function position(): void {
     frame = 0;
     if (!active || disposed) return;
+    updateObjective();
     // The software keyboard can shrink the visual viewport without resizing the layout viewport.
     const view = window.visualViewport;
     const visible = {
@@ -204,6 +216,11 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
     next.textContent = progress.step === 5 ? 'Finish tour' : 'Next';
     hint.textContent = saved ? 'Esc to skip · Progress saved on this device.' : 'Esc to skip · Progress lasts for this tab.';
     layer.dataset.step = String(progress.step + 1);
+    updateObjective();
+  }
+  function updateObjective():void{
+    const value=options.objective?.(progress.step);objective.hidden=!value;next.disabled=!!value&&!value.complete;
+    const text=value?(value.complete?'✓ Done. ':'To continue: ')+value.task:'';if(objective.textContent!==text)objective.textContent=text;
   }
 
   function begin(resume: boolean, trigger?: HTMLElement): void {
@@ -215,6 +232,10 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
     progress = transitionTourProgress(progress, { type: resume ? 'resume' : 'start' });
     persist();
     active = true;
+    compact = false;
+    card.classList.remove('is-compact');
+    minimize.textContent = '−';
+    minimize.setAttribute('aria-label', 'Minimize guided tour');
     layer.hidden = false;
     document.body.classList.add('guided-tour-is-active');
     options.onStart();
@@ -231,6 +252,7 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
     if (!active || disposed) return;
     if (progress.step === step) { refresh(); return; }
     progress = transitionTourProgress(progress, { type: 'go-to', step });
+    next.disabled = !!options.objective;
     persist();
     paint();
     shouldFocus = true;
