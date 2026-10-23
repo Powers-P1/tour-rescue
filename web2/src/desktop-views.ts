@@ -194,7 +194,7 @@ function simulation(ctx:DesktopViewContext):string{
    '<div class="sim-check-list">'+s.checks.slice(0,3).map(check=>
       '<div><div><strong>'+esc(check.label)+'</strong>'+status(check.status)+'</div><p>'+esc(check.explanation)+'</p></div>').join('')+'</div>'+
    '<div class="sim-distance-status"><p class="soft-status">'+(s.dayOff?'<span class="status">N/A</span> Extra-distance preference · no added show':
-    status(s.checks[3]?.status??'UNKNOWN')+' Extra-distance preference · current cap '+esc(formatExtraKm(s.maxAdditionalDistanceKm)))+'</p>'+
+    status(s.checks[3]?.status??'UNKNOWN')+' Extra-distance preference')+' · current cap '+esc(formatExtraKm(s.maxAdditionalDistanceKm))+'</p>'+
     (!s.dayOff && s.checks[3] && s.checks[3].status!=='PASS'
       ? '<p class="sim-failed-explanation" role="status">'+esc(s.checks[3].explanation)+'</p>':'')+
    (ctx.actionNotice?'<p class="feature-action-notice" role="status">'+esc(ctx.actionNotice)+'</p>':'')+'</div>'+

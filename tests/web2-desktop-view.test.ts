@@ -50,6 +50,7 @@ test('day-off labels extra-show distance and replacement legs not applicable wit
  assert.equal((html.match(/<p class="sim-transfer">N\/A · no replacement leg<\/p>/g)??[]).length,2);
  const distance=html.match(/<div class="sim-distance-status">([^]*?)<\/div>/)?.[1]??'';
  assert.match(distance,/>N\/A<\/span> Extra-distance preference · no added show/);
+ assert.match(distance,/current cap 0 km/,'the saved preference remains visible after reload');
  assert.doesNotMatch(distance,/UNKNOWN|No distance evidence available/i);
  assert.equal(simulation.verdict,'PASS');
  assert.equal(JSON.stringify(simulation.sourceResult.audit),audit);
