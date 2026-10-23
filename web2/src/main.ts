@@ -33,7 +33,7 @@ import { initPwa } from './pwa.ts';
 import {loadKnowledge,saveKnowledge,putDocument,withBandProfile} from './knowledge-store.ts';
 import type {TourSkill} from '../../src/ai/knowledge.ts';
 import { LIVE_PRESETS } from './live-presets.ts';
-import { projectLiveStudy } from './live-study.ts';
+import { renderLiveStudyReport } from './live-study-view.ts';
 import { createAiClient } from '../../web/src/ai-client.ts';
 import { hadMountedScreen, selectFocusTarget } from './focus-policy.ts';
 import { projectAudience, projectSimulation, loadSimulation, saveSimulation, simulationDraftScope } from './desktop-model.ts';
@@ -333,7 +333,7 @@ function evidenceView():string {
    '<details class="evidence-disclosure" open><summary>Leave one comparison artist out</summary><div data-evidence-sensitivity></div></details>'+
    '<details class="evidence-disclosure"><summary>Tag Bridge · sourced tags only</summary><div data-evidence-tags></div></details>'+
    acceptedResearchSources()+'<details class="evidence-disclosure"><summary>Sources & limitations</summary><ul>'+projectRescue(source).evidence.map(item=>'<li>'+HTML(item)+'</li>').join('')+'</ul></details>'+
-   (source.mode==='live'?'<details class="evidence-disclosure"><summary>Live-Qloo completeness report</summary><pre class="live-study-report">'+HTML(JSON.stringify(projectLiveStudy(source,liveWorkerVersion),null,2))+'</pre></details>':'')+
+   (source.mode==='live'?renderLiveStudyReport(source,liveWorkerVersion):'')+
    '<div class="focused-bottom" data-tour="exports">'+primary('Download current audit ↓','audit')+
    (decision?.kind!=='day-off'&&decision?.status!=='FAIL'?softButton('Prepare promoter proposal →','evidence-proposal'):softButton('Review the three options →','rescue'))+
    softButton('Return to comparison','rescue')+'</div></section>';
