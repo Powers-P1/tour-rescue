@@ -4,7 +4,7 @@ import type { DecisionAudit } from '../../src/core/audit-types.ts';
 import { AI_MODEL, AI_PROVIDER_LIMITS, AiProviderError, createAnthropicClient, isRecord } from './ai-provider.ts';
 import { estimateAiCostUsd, AI_PRICING } from './config.ts';
 import type { AnthropicMessage, JsonRecord } from './ai-provider.ts';
-import {parseTourKnowledge,searchTourKnowledge,TOUR_SKILLS} from '../../src/ai/knowledge.ts';
+import {parseTourKnowledge,searchTourKnowledge,admitKnowledgeReads,TOUR_SKILLS} from '../../src/ai/knowledge.ts';
 import type {TourKnowledge,TourSkill,KnowledgeRead} from '../../src/ai/knowledge.ts';
 
 export const AI_SESSION_LIMITS = {
@@ -153,7 +153,7 @@ export async function runAiSession(options: RunAiSessionOptions): Promise<AiSess
   const knowledge=options.knowledge?parseTourKnowledge(options.knowledge):undefined;
   const skill=options.skill??'corridor-repair';
   const knowledgeReads:KnowledgeRead[]=[];
-  const retrieve=(query:string)=>{const rows=searchTourKnowledge(knowledge,query);for(const row of rows){if(!knowledgeReads.some(r=>r.documentId===row.documentId&&r.excerpt===row.excerpt)&&knowledgeReads.length<12)knowledgeReads.push(row);}return rows;};
+  const retrieve=(query:string)=>admitKnowledgeReads(knowledgeReads,searchTourKnowledge(knowledge,query));
   const sources: AiSource[] = [];
   const steps: AiStep[] = [];
   const warnings: string[] = [];

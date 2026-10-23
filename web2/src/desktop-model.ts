@@ -92,6 +92,7 @@ export interface SimulationModel {
   readonly originalDistanceCapKm: number;
   readonly recommendationChanged: boolean;
   readonly optionId: string;
+  readonly dayOff:boolean;
   readonly cityName: string;
   readonly fromCity: string;
   readonly toCity: string;
@@ -118,12 +119,12 @@ export function projectSimulation(
   base: ApiDecisionResult, optionId: string, maxAdditionalDistanceKm: number,
 ): SimulationModel {
   if (!Number.isFinite(maxAdditionalDistanceKm) || maxAdditionalDistanceKm < 0 || maxAdditionalDistanceKm > 500 ||
-    Math.round(maxAdditionalDistanceKm * 1000) !== maxAdditionalDistanceKm * 1000) {
+    Math.abs(Math.round(maxAdditionalDistanceKm * 1000)-maxAdditionalDistanceKm * 1000)>1e-7) {
     throw new RangeError('Additional distance must be 0–500 km in 1-metre increments.');
   }
   const baseline = projectRescue(base);
   const candidate = base.audit.replay.scenario.repairCandidates.find(row => row.id === optionId);
-  if (!candidate || candidate.kind === 'day-off') throw new RangeError('Choose one of the two audited show directions.');
+  if (!candidate) throw new RangeError('Choose an audited show direction or day off.');
   const selected = baseline.options.find(row => row.id === optionId);
   if (!selected) throw new Error('Selected option is not in the frozen decision.');
   const scenario = base.audit.replay.scenario;
@@ -158,11 +159,11 @@ export function projectSimulation(
     { id:'driving', label:'Driving windows / shared daily limit', status:routeStatus,
       explanation: 'Daily limit ' + duration({status:'known',value:scenario.tour.constraints.maxDailyDrivingSeconds}) +
         '; combined driving / arrival checks remain in the audit.' },
-    { id:'capacity', label:'Venue capacity', status:'UNKNOWN',
-      explanation: capacity.status === 'known' ?
+    { id:'capacity', label:'Venue capacity', status:candidate.kind==='day-off'?'PASS':'UNKNOWN',
+      explanation: candidate.kind==='day-off'?'Not applicable: no added show or venue.':capacity.status === 'known' ?
         'Scenario capacity ' + capacity.value + ' people. Not externally verified.' : 'Room size and capacity: ' + UNKNOWN },
-    { id:'venue', label:'Venue and date', status: venueCheck?.status === 'FAIL' ? 'FAIL' : 'UNKNOWN',
-      explanation: 'Synthetic input only. Real availability, booking and promoter terms: ' + UNKNOWN },
+    { id:'venue', label:'Venue and date', status: candidate.kind==='day-off'?'PASS':venueCheck?.status === 'FAIL' ? 'FAIL' : 'UNKNOWN',
+      explanation: candidate.kind==='day-off'?'No booking, fee or venue required for a day off.':'Synthetic input only. Real availability, booking and promoter terms: ' + UNKNOWN },
     { id:'distance', label:'Extra distance preference', status:extraDistanceCheck?.status ?? 'UNKNOWN',
       explanation: extraDistanceCheck?.message ?? 'No distance evidence available.' },
   ];
@@ -171,7 +172,7 @@ export function projectSimulation(
     originalDistanceCapKm: base.audit.replay.policy.maxAdditionalDistanceMetres / 1000,
     recommendationChanged: beforeRecommendation.optionId !== afterRecommendation.optionId ||
       base.audit.analysis.decision.recommendation.status !== revised.audit.analysis.decision.recommendation.status,
-    optionId, cityName: selected.cityName,
+    optionId,dayOff:candidate.kind==='day-off',cityName: selected.cityName,
     fromCity: baseline.fromCity, toCity: baseline.toCity, fromDate:localDate(prior),
     changedDate:localDate(cancelled), toDate:localDate(next),
     inbound:selected.inbound, outbound:selected.outbound,

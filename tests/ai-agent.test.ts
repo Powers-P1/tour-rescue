@@ -5,7 +5,14 @@ import { germanyDemoInputs, syntheticQueryEvidence } from '../src/demo/germany.t
 import type { AiDecisionContext, AiStep } from '../src/ai/types.ts';
 import { AI_SESSION_LIMITS, AI_TOOLS, FINALIZE_INSTRUCTION, compactReplay, runAiSession } from '../worker/src/ai-agent.ts';
 import { AI_MODEL } from '../worker/src/ai-provider.ts';
-import {parseTourKnowledge,searchTourKnowledge} from '../src/ai/knowledge.ts';
+import {parseTourKnowledge,searchTourKnowledge,admitKnowledgeReads} from '../src/ai/knowledge.ts';
+import type {KnowledgeRead} from '../src/ai/knowledge.ts';
+
+test('the model never receives a thirteenth private excerpt absent from its bounded exported audit',()=>{
+ const history:KnowledgeRead[]=[];
+ const rows=Array.from({length:15},(_,i)=>({documentId:'doc-'+i,title:'Private note',updatedAt:'2026-10-21T10:00:00Z',excerpt:'Private excerpt '+i,query:'query '+i}));
+ const sent=admitKnowledgeReads(history,rows);assert.equal(sent.length,12);assert.deepEqual(history,sent);assert.deepEqual(admitKnowledgeReads(history,[rows[0]!,rows[14]!]),[rows[0]!]);assert.equal(history.length,12);
+});
 
 const stamp = '2026-10-21T10:00:00.000Z';
 const now = () => Date.parse(stamp);

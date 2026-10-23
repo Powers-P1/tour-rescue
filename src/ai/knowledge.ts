@@ -34,3 +34,7 @@ export function parseKnowledgeReads(value:unknown):KnowledgeRead[]{
  if(!Array.isArray(value)||value.length>12)throw new TypeError('Invalid knowledge reads.');
  return value.map(raw=>{if(!obj(raw))throw new TypeError('Invalid knowledge read.');const updatedAt=str(raw.updatedAt,40);if(!Number.isFinite(Date.parse(updatedAt)))throw new TypeError('Invalid date.');return {documentId:str(raw.documentId,100),title:str(raw.title,120),updatedAt,excerpt:str(raw.excerpt,900),query:str(raw.query,600)};});
 }
+/** The model receives only excerpts that fit the same bounded exported audit. */
+export function admitKnowledgeReads(history:KnowledgeRead[],rows:readonly KnowledgeRead[]):KnowledgeRead[]{
+ return rows.filter(row=>{if(history.some(r=>r.documentId===row.documentId&&r.excerpt===row.excerpt&&r.query===row.query))return true;if(history.length>=12)return false;history.push(row);return true;});
+}
