@@ -43,6 +43,19 @@ test('board 06 renders audited route + separate unknown booking checks',()=>{
  assert.match(budget,/not derivable from Qloo affinity/);
 });
 
+test('day-off labels extra-show distance and replacement legs not applicable without changing its audit',()=>{
+ const simulation=projectSimulation(demo,'day-off',0);
+ const audit=JSON.stringify(simulation.sourceResult.audit);
+ const html=renderDesktopFeature('simulation',{...base,simulation});
+ assert.equal((html.match(/<p class="sim-transfer">N\/A · no replacement leg<\/p>/g)??[]).length,2);
+ const distance=html.match(/<div class="sim-distance-status">([^]*?)<\/div>/)?.[1]??'';
+ assert.match(distance,/>N\/A<\/span> Extra-distance preference · no added show/);
+ assert.doesNotMatch(distance,/UNKNOWN|No distance evidence available/i);
+ assert.equal(simulation.verdict,'PASS');
+ assert.equal(JSON.stringify(simulation.sourceResult.audit),audit);
+ assert.match(renderDesktopFeature('simulation',base),/Unknown \/ To confirm/,'unresolved show facts stay unknown');
+});
+
 test('board 07 is explicitly synthetic, with three issues and one unassigned owner',()=>{
  const html=renderDesktopFeature('agency',base);
  assert.equal((html.match(/class="agency-row"/g)??[]).length,3);

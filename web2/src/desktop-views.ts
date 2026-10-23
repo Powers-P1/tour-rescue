@@ -180,12 +180,12 @@ function simulation(ctx:DesktopViewContext):string{
    '<p class="muted">Current plan: '+esc(s.baseline)+'</p>'+
    '<div class="sim-line">'+
     itineraryRow(s.fromDate,s.fromCity,'Existing locked date')+
-    '<p class="sim-transfer">↝ '+esc(s.inbound)+' · frozen OSRM</p>'+
+    '<p class="sim-transfer">'+(s.dayOff?'N/A · no replacement leg':'↝ '+esc(s.inbound)+' · frozen OSRM')+'</p>'+
     itineraryRow(s.changedDate,s.cityName,s.dayOff?'No extra concert or booking':'Proposed · not booked')+
     '<div class="sim-city-switch">'+action(ctx.changeCityOpen?'Hide alternatives ↑':'Change city →','sim-change-city')+
       (ctx.changeCityOpen?'<div class="sim-alternatives">'+ctx.projection.options.filter(o=>o.kind!=='day-off').map(o=>
         '<button type="button" data-action="sim-pick" data-id="'+esc(o.id)+'">'+esc(o.cityName)+'</button>').join('')+'</div>':'')+'</div>'+
-    '<p class="sim-transfer">↝ '+esc(s.outbound)+' · frozen OSRM</p>'+
+    '<p class="sim-transfer">'+(s.dayOff?'N/A · no replacement leg':'↝ '+esc(s.outbound)+' · frozen OSRM')+'</p>'+
     itineraryRow(s.toDate,s.toCity,'Existing locked date')+'</div>'+
    '<div class="sim-totals"><div><span>Total tour driving</span><strong>'+esc(s.totalDriving)+'</strong></div>'+
     '<div><span>Versus day-off</span><strong>'+esc(s.difference)+'</strong></div></div></section>'+
@@ -193,9 +193,9 @@ function simulation(ctx:DesktopViewContext):string{
    '<p class="muted">Results are audited against the existing '+esc(s.maxDailyDriving)+' daily limit and declared preferences.</p>'+
    '<div class="sim-check-list">'+s.checks.slice(0,3).map(check=>
       '<div><div><strong>'+esc(check.label)+'</strong>'+status(check.status)+'</div><p>'+esc(check.explanation)+'</p></div>').join('')+'</div>'+
-   '<div class="sim-distance-status"><p class="soft-status">'+status(s.checks[3]?.status??'UNKNOWN')+
-    ' Extra-distance preference · current cap '+esc(formatExtraKm(s.maxAdditionalDistanceKm))+'</p>'+
-    (s.checks[3] && s.checks[3].status!=='PASS'
+   '<div class="sim-distance-status"><p class="soft-status">'+(s.dayOff?'<span class="status">N/A</span> Extra-distance preference · no added show':
+    status(s.checks[3]?.status??'UNKNOWN')+' Extra-distance preference · current cap '+esc(formatExtraKm(s.maxAdditionalDistanceKm)))+'</p>'+
+    (!s.dayOff && s.checks[3] && s.checks[3].status!=='PASS'
       ? '<p class="sim-failed-explanation" role="status">'+esc(s.checks[3].explanation)+'</p>':'')+
    (ctx.actionNotice?'<p class="feature-action-notice" role="status">'+esc(ctx.actionNotice)+'</p>':'')+'</div>'+
    '<div class="sim-final-action">'+action(ctx.savedDraft?'Save updated draft →':'Save draft scenario →','sim-save',true)+
