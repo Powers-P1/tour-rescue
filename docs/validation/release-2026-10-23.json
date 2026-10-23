@@ -1,0 +1,33 @@
+{
+  "checkedAt": "2026-10-23T00:28:00Z",
+  "production": "https://tour-rescue.pages.dev",
+  "pagesDeployment": "078101b9-19dd-4880-86ef-3cb641208176",
+  "frontendSource": "e95eb8c",
+  "mergedMain": "39ed38e283290cbe828aad1579512e9bfe0073fe",
+  "workerVersion": "2ff252ef-5810-4588-94a4-b1ffdbcdc10d",
+  "apiVersion": "0.7.1-review",
+  "preview": "https://3eda3b89.tour-rescue.pages.dev",
+  "rollbackBeforeNight": {
+    "pages": "0f615047-8148-45fa-adb9-530e3107273c",
+    "workerVersion": "a5337351-053e-40cb-8fba-948ecde01d67"
+  },
+  "tests": {
+    "unit": 371,
+    "completionStates": 165,
+    "completionWorkflows": 7,
+    "responsiveChecks": 35,
+    "judgeAndFinalReviewWidths": [
+      390,
+      1280
+    ],
+    "onePageA4": true,
+    "pngExport": true,
+    "pwaOfflineAndUpdate": true
+  },
+  "manualNotClaimed": [
+    "Physical Android/iOS installation",
+    "Actual tour-manager trial",
+    "Venue contact or booking"
+  ],
+  "deploymentPolicy": "Existing account, Worker address/routes and secrets preserved. Preview checked before production; final CI passed."
+}
