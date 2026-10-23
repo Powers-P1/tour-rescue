@@ -27,13 +27,13 @@ import { acceptResearchIntoComparison, emptyResearch } from './research-comparis
 import { safeAiSourceUrl } from '../../src/ai/tools.ts';
 import { createGuidedTour } from '../../web/src/guided-tour.ts';
 import type { GuidedTourController } from '../../web/src/guided-tour.ts';
-import { downloadPromoterPng } from '../../web/src/promoter.ts';
+import { downloadPromoterPng, installPromoterPrintSizing } from '../../web/src/promoter.ts';
 import { mountEvidence, recommendationName } from './evidence-view.ts';
 import { initPwa } from './pwa.ts';
 import {loadKnowledge,saveKnowledge,putDocument,withBandProfile} from './knowledge-store.ts';
 import type {TourSkill} from '../../src/ai/knowledge.ts';
 import { LIVE_PRESETS } from './live-presets.ts';
-import { renderLiveStudyReport } from './live-study-view.ts';
+import { renderLiveStudyReport, renderRecordedQlooStudy } from './live-study-view.ts';
 import {guideObjective} from './guide-objectives.ts';
 import { createAiClient } from '../../web/src/ai-client.ts';
 import { hadMountedScreen, selectFocusTarget } from './focus-policy.ts';
@@ -56,6 +56,7 @@ const aiApi = createAiClient(__WORKER_ORIGIN__);
 const root = document.getElementById('app');
 const printRoot = document.getElementById('print-area');
 if (!root || !printRoot) throw new Error('The application root is missing.');
+installPromoterPrintSizing('#print-area .sheet-paper');
 
 let result: ApiDecisionResult = createDemoResult();
 let projection: RescueProjection = projectRescue(result);
@@ -336,7 +337,7 @@ function evidenceView():string {
    '<details class="evidence-disclosure" open><summary>Leave one comparison artist out</summary><div data-evidence-sensitivity></div></details>'+
    '<details class="evidence-disclosure"><summary>Tag Bridge · sourced tags only</summary><div data-evidence-tags></div></details>'+
    acceptedResearchSources()+'<details class="evidence-disclosure"><summary>Sources & limitations</summary><ul>'+projectRescue(source).evidence.map(item=>'<li>'+HTML(item)+'</li>').join('')+'</ul></details>'+
-   (source.mode==='live'?renderLiveStudyReport(source,liveWorkerVersion):'')+
+   (source.mode==='live'?renderLiveStudyReport(source,liveWorkerVersion):'')+renderRecordedQlooStudy()+
    '<div class="focused-bottom" data-tour="exports">'+primary('Download current audit ↓','audit')+
    (decision?.kind!=='day-off'&&decision?.status!=='FAIL'?softButton('Prepare promoter proposal →','evidence-proposal'):softButton('Review the three options →','rescue'))+
    softButton('Return to comparison','rescue')+'</div></section>';
@@ -368,18 +369,18 @@ function defaultMessage(sheet: PromoterSheetModel): string {
 }
 function sheetHtml(sheet: PromoterSheetModel): string {
   return '<article class="sheet-paper"><div class="sheet-head"><strong>↱ TOUR RESCUE</strong><span>DRAFT / NOT SENT</span></div>' +
-    '<p class="overline">PROMOTER PROPOSAL · ' + HTML(sheet.modeLabel) + '</p>' +
+    '<p class="overline">'+(sheet.kind==='day-off'?'DAY-OFF BRIEF':'PROMOTER PROPOSAL')+' · ' + HTML(sheet.modeLabel) + '</p>' +
     '<h1>' + HTML(sheet.artist) + ' - ' + HTML(sheet.city) + '</h1>' +
-    '<p class="sheet-date">Proposed: ' + HTML(sheet.date) + ' · ' + HTML(sheet.timeZone) + '</p>' +
+    '<p class="sheet-date">'+(sheet.kind==='day-off'?'Day off: ':'Proposed: ') + HTML(sheet.date) + ' · ' + HTML(sheet.timeZone) + '</p>' +
     '<p>' + HTML(sheet.provenanceNote) + '</p>' +
     '<div class="sheet-grid"><div><small>Route & constraints</small><strong>' + HTML(sheet.extraDistance) + ' additional distance</strong><span>'+HTML(sheet.extraDriving)+' added driving · distance cap '+HTML(sheet.distanceLimit)+'</span><span>Max daily: ' + HTML(sheet.dailyDrivingLimit) + '</span></div>' +
     '<div><small>Qloo cultural affinity</small><strong>' + HTML(sheet.fit) + '</strong><span>' + HTML(sheet.fitNote) + '</span></div>' +
     '<div><small>Decision checks</small><strong>' + HTML(sheet.decisionStatus) + '</strong><span>' + HTML(sheet.recommendation) + '</span></div>' +
-    '<div><small>Venue & contact</small><strong>Unknown / To confirm</strong><span>'+HTML(sheet.venueNote)+'</span><span>No outreach has been sent</span></div></div>' +
+    '<div><small>'+(sheet.kind==='day-off'?'Day-off plan':'Venue & contact')+'</small><strong>'+HTML(sheet.confirmationNote)+'</strong><span>'+HTML(sheet.venueNote)+'</span><span>Nothing booked or sent</span></div></div>' +
     '<h2>Comparison artists & sensitivity</h2><p>'+sheet.comparisons.map(row=>HTML(row.slot+'. '+row.name)).join(' · ')+'</p><p>'+HTML(sheet.sensitivityNote)+'</p>'+
-    '<h2>What still needs confirming</h2><ul>' +
-    ['Date and venue availability', 'Room capacity and technical rider', 'Fee and promoter terms', 'Contact and acceptance'].map(x => '<li>' + HTML(x) + '</li>').join('') +
-    '</ul><h2>Evidence & limitations</h2><p>' + HTML(sheet.sourceLines.join(' ')) + '</p>' +
+    '<h2>'+(sheet.kind==='day-off'?'Next crew confirmation':'Next promoter conversation')+'</h2><ol class="sheet-next-steps">' +
+    sheet.nextSteps.map(x => '<li>' + HTML(x) + '</li>').join('') +
+    '</ol><h2>Evidence & limitations</h2><p>' + HTML(sheet.sourceLines.join(' ')) + '</p>' +
     '<p>' + HTML(sheet.recommendationNote) + '</p><p>'+HTML(sheet.risks.join(' '))+'</p>' +
     '<footer>Audit run: ' + HTML(sheet.runId) + ' · generated ' + HTML(sheet.generatedAt) +
     ' · This proposal is not an agreement, a booking or an email confirmation.</footer></article>';
@@ -389,7 +390,7 @@ function draft(): string {
   if (!sheet) return '<section class="mobile-view rescue-view">' + header(true, 'City') + '<p>Document not available.</p></section>';
   return '<section class="mobile-view rescue-view draft-view">' + header(true, 'Proposal') +
     '<p class="overline accent-text">DRAFT / NOT SENT</p>' +
-    '<div class="intro"><h1>Ready to start a conversation.</h1><p class="muted">A one-page proposal is ready for human review.</p></div>' +
+    '<div class="intro"><h1>Ready for the next call.</h1><p class="muted">Review the evidence, then ask the promoter to confirm the open questions. Nothing booked or sent.</p></div>' +
     '<div class="proposal-preview">' + sheetHtml(sheet) + '</div>' +
     '<div class="contact-area"><label for="promoter-contact">Promoter contact <span class="muted">(optional draft field)</span></label>' +
     '<input id="promoter-contact" type="email" autocomplete="off" placeholder="Unknown / To confirm" value="' + HTML(proposalContact) + '">' +

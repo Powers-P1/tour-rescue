@@ -22,35 +22,39 @@ function metric(title: string, value: string, note: string): HTMLElement {
 }
 
 let printHandlersInstalled = false;
-function installPrintSizing(): void {
+const printSelectors = new Set<string>();
+export function installPromoterPrintSizing(selector = '.promoter-sheet'): void {
+  printSelectors.add(selector);
   if (printHandlersInstalled) return;
   printHandlersInstalled = true;
   window.addEventListener('beforeprint', () => {
-    const page = document.querySelector<HTMLElement>('.promoter-sheet');
-    if (!page || page.offsetHeight === 0) return;
-    page.style.setProperty('--promoter-print-scale', '1');
-    // A4 minus the stylesheet's 12 mm margins; leave another 3 mm for rounding.
-    // Measure after print styles apply, so unusually long names keep their text
-    // without pushing constraints or source records onto a second sheet.
-    const availableHeight = 270 * 96 / 25.4;
-    const scale = Math.min(1, availableHeight / page.getBoundingClientRect().height);
-    page.style.setProperty('--promoter-print-scale', String(scale));
+    for (const page of document.querySelectorAll<HTMLElement>([...printSelectors].join(','))) {
+      if (page.offsetHeight === 0) continue;
+      page.style.setProperty('--promoter-print-scale', '1');
+      // A4 minus the stylesheet's 12 mm margins; leave another 3 mm for rounding.
+      // Measure after print styles apply, so unusually long names keep their text
+      // without pushing constraints or source records onto a second sheet.
+      const availableHeight = 270 * 96 / 25.4;
+      const scale = Math.min(1, availableHeight / page.getBoundingClientRect().height);
+      page.style.setProperty('--promoter-print-scale', String(scale));
+    }
   });
   window.addEventListener('afterprint', () => {
-    document.querySelector<HTMLElement>('.promoter-sheet')?.style.removeProperty('--promoter-print-scale');
+    for (const page of document.querySelectorAll<HTMLElement>([...printSelectors].join(',')))
+      page.style.removeProperty('--promoter-print-scale');
   });
 }
 
 /** Uses textContent throughout: artist names and evidence are data, never markup. */
 export function renderPromoterSheet(result: ApiDecisionResult, optionId: string): HTMLElement {
-  installPrintSizing();
+  installPromoterPrintSizing();
   const model = buildPromoterModel(result, optionId);
   const page = element('article', 'promoter-sheet');
   if (model.artist.length > 80) page.classList.add('promoter-sheet--long-name');
   if (model.artist.length > 200) page.classList.add('promoter-sheet--very-long-name');
   page.setAttribute('aria-label', `Promoter sheet for ${model.artist}, ${model.city}`);
   const header = element('header', 'promoter-header');
-  header.append(element('strong', 'promoter-brand', 'Tour Rescue'), element('span', 'promoter-eyebrow', 'PROMOTER BRIEF / PROPOSED DATE'));
+  header.append(element('strong', 'promoter-brand', 'Tour Rescue'), element('span', 'promoter-eyebrow', model.kind === 'day-off' ? 'DAY-OFF BRIEF / NO ADDED SHOW' : 'PROMOTER BRIEF / PROPOSED DATE'));
   const intro = element('div', 'promoter-intro');
   intro.append(element('p', 'promoter-mode', model.modeLabel), element('h1', '', model.artist),
     element('h2', '', `${model.city} · ${model.date}`),
@@ -83,12 +87,17 @@ export function renderPromoterSheet(result: ApiDecisionResult, optionId: string)
   const risksList = element('ul', 'promoter-risks');
   for (const risk of model.risks) risksList.append(element('li', '', risk));
   risks.append(risksList);
+  const next = section(model.kind === 'day-off' ? 'Next crew confirmation' : 'Next promoter conversation');
+  next.append(element('p', 'promoter-small', `${model.confirmationNote}. Nothing booked or sent.`));
+  const steps = element('ol', 'promoter-next-steps');
+  for (const step of model.nextSteps) steps.append(element('li', '', step));
+  next.append(steps);
   const source = element('footer', 'promoter-sources');
   source.append(element('strong', '', 'Sources and traceability'));
   for (const line of model.sourceLines) source.append(element('p', '', line));
   source.append(element('p', '', `Generated: ${model.generatedAt} · Run: ${model.runId}`),
     element('p', '', 'Keep the matching JSON audit with this brief for individual checks, query records and counterfactuals.'));
-  page.append(header, intro, banner, venue, metrics, comparisons, checks, risks, source);
+  page.append(header, intro, banner, venue, metrics, comparisons, checks, next, risks, source);
   return page;
 }
 
@@ -101,7 +110,7 @@ function canvasContent(model: PromoterSheetModel): CanvasLine[] {
   const lines: CanvasLine[] = [];
   const add = (text: string, size = 14, weight = 400, color = INK, gap = 5) => lines.push({ text, size, weight, color, gap });
   const heading = (text: string) => lines.push({ text, size: 16, weight: 700, color: INK, gap: 8, rule: true });
-  add('Tour Rescue  /  PROMOTER BRIEF', 18, 700, INK, 18);
+  add('Tour Rescue  /  ' + (model.kind === 'day-off' ? 'DAY-OFF BRIEF' : 'PROMOTER BRIEF'), 18, 700, INK, 18);
   add(model.modeLabel, 12, 700, MUTED, 7);
   // Long provider names must not consume the page at headline size, forcing
   // much smaller risk/source text. All characters are still rendered.
@@ -128,6 +137,9 @@ function canvasContent(model: PromoterSheetModel): CanvasLine[] {
   add(`${model.checkCount} checks: ${model.checkCounts.PASS} PASS / ${model.checkCounts.FAIL} FAIL / ${model.checkCounts.UNKNOWN} UNKNOWN. Every check is included below.`, 12, 400, MUTED, 8);
   for (const group of model.checkGroups) add(`${group.status}  ${group.label} (${group.checkIds.length})`, 13, 600, STATUS_COLORS[group.status], 3);
   add(`Venue fee: ${model.venueFee}. Fee-only ceiling: ${model.venueFeeLimit}; unpriced travel and other costs are excluded.`, 12, 400, MUTED, 12);
+  heading(model.kind === 'day-off' ? 'Next crew confirmation' : 'Next promoter conversation');
+  add(`${model.confirmationNote}. Nothing booked or sent.`, 12, 700, MUTED, 6);
+  for (const [index, step] of model.nextSteps.entries()) add(`${index + 1}. ${step}`, 12, 400, MUTED, 4);
   heading('What still needs attention');
   for (const risk of model.risks) add(`• ${risk}`, 12, 400, MUTED, 4);
   heading('Sources and traceability');

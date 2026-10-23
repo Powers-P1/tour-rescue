@@ -5,12 +5,48 @@ import { createHash } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
+import { runInNewContext } from 'node:vm';
+import { RECORDED_QLOO_STUDY } from '../web2/src/live-study.ts';
 import { judgesMarkup } from '../web2/src/marketing.ts';
 import { publicSiteModel } from '../web2/src/marketing-model.ts';
 
 test('jury player builds the exact final film with captions/transcript and leaves video outside the PWA cache',async()=>{
  const root=fileURLToPath(new URL('../',import.meta.url));
  await promisify(execFile)(process.execPath,['web2/build.mjs'],{cwd:root,timeout:30000});
+ // Execute the real built v2 entry point offline. Only the DOM surface is stubbed;
+ // the model, recommendation, summary and markup code all run from the bundle.
+ const stub=()=>({innerHTML:'',className:'',dataset:{},addEventListener(){},setAttribute(){},
+   querySelector(){return stub();},querySelectorAll(){return [];}});
+ const judges=stub();
+ const media=()=>({matches:false,addEventListener(){}});
+ let requests=0;
+ runInNewContext(await readFile(new URL('../web2/dist/judges.js',import.meta.url),'utf8'),{
+   document:{getElementById:()=>judges,createElement:stub,querySelector:()=>null,querySelectorAll:()=>[],
+     body:{append(){}},addEventListener(){}},
+   window:{matchMedia:media,addEventListener(){},setTimeout(){}},matchMedia:media,
+   navigator:{userAgent:'Offline bundle test',platform:'test',maxTouchPoints:0},
+   localStorage:{getItem:()=>null},location:{protocol:'https:',hostname:'offline.test'},
+   structuredClone,crypto:{randomUUID:()=> 'offline-bundle-test'},
+   fetch(){requests++;throw new Error('Built preview must not request provider data.');},
+ },{timeout:5000});
+ assert.equal(requests,0);
+ assert.doesNotMatch(judges.innerHTML,/Saved evidence preview unavailable/);
+ const recorded=judges.innerHTML.match(/<section class="recorded-qloo-study"[^]*?<\/section>/)?.[0]??'';
+ const synthetic=judges.innerHTML.match(/<div class="breakpoint-note"[^]*?<\/div>/)?.[0]??'';
+ assert.match(recorded,/data-evidence-kind="recorded-live"/);
+ assert.match(synthetic,/data-evidence-kind="synthetic"/);
+ for(const run of RECORDED_QLOO_STUDY.runs){
+   assert.ok(recorded.includes('<dt>'+run.target+'</dt>'));
+   assert.ok(recorded.includes('<strong>'+run.recommendation+'</strong>'));
+ }
+ assert.equal((recorded.match(/24\/24/g)??[]).length,3);
+ assert.equal((recorded.match(/both comparison omissions unchanged/g)??[]).length,3);
+ assert.match(recorded,/winner unchanged at 350 km/);
+ assert.doesNotMatch(recorded,/354\.1|Frankfurt/);
+ assert.match(synthetic,/350[^]*?354\.1/);
+ assert.match(synthetic,/Nuremberg[^]*?Frankfurt am Main/);
+ assert.match(synthetic,/six-hour driving limit stays fixed/);
+ assert.ok(recorded.includes(RECORDED_QLOO_STUDY.reportUrl));
  const canonical=new URL('../docs/demo/final-v2/',import.meta.url);
  const published=new URL('../web2/dist/video/',import.meta.url);
  const manifest=JSON.parse(await readFile(new URL('manifest.json',canonical),'utf8'));

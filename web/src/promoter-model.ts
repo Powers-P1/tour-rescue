@@ -1,5 +1,5 @@
 import type { ApiDecisionResult } from '../../worker/src/app.ts';
-import type { Knowledge, Money } from '../../src/core/domain.ts';
+import type { Knowledge, Money, RepairOptionKind } from '../../src/core/domain.ts';
 import type { CheckStatus, ConstraintCheck } from '../../src/core/travel-constraints.ts';
 
 /** Text and status content shared by the HTML print page and browser PNG. */
@@ -13,6 +13,7 @@ export interface PromoterCheckGroup {
 
 export interface PromoterSheetModel {
   readonly optionId: string;
+  readonly kind: RepairOptionKind;
   readonly optionLabel: string;
   readonly artist: string;
   readonly city: string;
@@ -41,6 +42,8 @@ export interface PromoterSheetModel {
   readonly checkCount: number;
   readonly checkCounts: Readonly<Record<CheckStatus, number>>;
   readonly risks: readonly string[];
+  readonly confirmationNote: string;
+  readonly nextSteps: readonly string[];
   readonly sourceLines: readonly string[];
   readonly generatedAt: string;
   readonly runId: string;
@@ -185,7 +188,7 @@ export function buildPromoterModel(result: ApiDecisionResult, optionId: string):
     : hasUsableFit ? 'LIVE - Qloo taste evidence' : 'LIVE RUN - Qloo fit UNKNOWN';
   const countsForOption = counts(selectedDecision.checks);
   return {
-    optionId, optionLabel: `${option.kind === 'replacement' ? 'A' : option.kind === 'detour' ? 'B' : 'C'} - ${option.kind === 'day-off' ? 'Day off' : option.kind === 'replacement' ? 'Replacement show' : 'Detour show'}`,
+    optionId, kind: option.kind, optionLabel: `${option.kind === 'replacement' ? 'A' : option.kind === 'detour' ? 'B' : 'C'} - ${option.kind === 'day-off' ? 'Day off' : option.kind === 'replacement' ? 'Replacement show' : 'Detour show'}`,
     artist: named(result.artists.target), city: option.kind === 'day-off' ? 'Day off - no performance city' : city?.name ?? 'UNKNOWN city',
     date, timeZone, drivingTimeZone: scenario.tour.constraints.drivingDayTimeZone, modeLabel: dataLabel,
     provenanceNote: scenario.dataKind === 'synthetic' ? 'Fictional booking scenario; no venue is confirmed by this document.' : 'Booker-supplied scenario; this document does not confirm a booking.',
@@ -205,6 +208,16 @@ export function buildPromoterModel(result: ApiDecisionResult, optionId: string):
     venueFee: option.kind === 'day-off' ? 'N/A' : option.venue.status === 'known' ? money(option.venue.value.fee) : 'UNKNOWN',
     venueFeeLimit: money(scenario.tour.constraints.additionalBudget),
     comparisons, sensitivityNote, checkGroups, checkCount: selectedDecision.checks.length, checkCounts: countsForOption,
+    confirmationNote: option.kind === 'day-off' ? 'N/A - no performance booking' : 'Booking confirmation: UNKNOWN',
+    nextSteps: option.kind === 'day-off' ? [
+      'Keep the day off; no performance venue or promoter fee is required.',
+      'Confirm rest, accommodation and the onward drive with the crew. The four locked shows stay unchanged.',
+    ] : [
+      `Confirm ${date} and venue availability with the promoter; external confirmation is UNKNOWN.`,
+      'Confirm room capacity and the technical rider; external confirmation is UNKNOWN.',
+      'Agree the fee and contract terms; external confirmation is UNKNOWN. A supplied scenario fee is not an offer.',
+      'Compare the agreed fee and added travel/accommodation costs with keeping the day off before choosing.',
+    ],
     risks, sourceLines: [qlooLine, roadLine], generatedAt: audit.generatedAt, runId: audit.runId,
   };
 }

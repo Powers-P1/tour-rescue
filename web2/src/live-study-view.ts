@@ -1,10 +1,28 @@
 import type { ApiDecisionResult } from '../../worker/src/app.ts';
 import type { Recommendation } from '../../src/core/decision-types.ts';
 import { optionName } from '../../web/src/visual-model.ts';
-import { projectLiveStudy } from './live-study.ts';
+import { projectLiveStudy, RECORDED_QLOO_STUDY } from './live-study.ts';
 
 const esc = (value: unknown): string => String(value ?? '').replace(/[&<>"']/g, char =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char] ?? char);
+
+/** A visible historical result, separate from the current audit and synthetic experiment. */
+export function renderRecordedQlooStudy(): string {
+  const study = RECORDED_QLOO_STUDY;
+  return '<section class="recorded-qloo-study" aria-labelledby="recorded-study-title" data-evidence-kind="recorded-live">'+
+    '<h2 id="recorded-study-title">Real Qloo study</h2><p><strong>'+study.runs.length+
+    ' artists tested · winner unchanged at '+study.maxAdditionalDistanceMetres/1000+' km</strong></p>'+
+    '<dl class="recorded-study-results">'+study.runs.map(run=>'<div><dt>'+esc(run.target)+'</dt><dd><strong>'+esc(run.recommendation)+
+      '</strong> · '+run.coverage+'/'+study.cityCount+' cities per selected profile</dd><dd>Control: '+esc(run.control)+
+      ' · '+(run.controlChanged?'changed':'unchanged')+'; both comparison omissions '+(run.omissionsChanged?'changed':'unchanged')+'.</dd></div>').join('')+'</dl>'+
+    '<p>Same frozen '+esc(study.candidateSetId)+' cities, OSRM snapshot, minimum fit '+study.minimumFit+
+    ' and synthetic booking scenario; four confirmed shows stayed locked. Removing taste evidence returned Needs evidence in all three runs. These runs did not demonstrate an artist-specific change of winning city.</p>'+
+    '<p class="recorded-study-meta">Measured <time datetime="'+study.measuredFrom+'">22 Oct 2026, 22:17</time>–<time datetime="'+study.measuredTo+'">22:19 UTC</time> (23 Oct in Warsaw). '+
+    'Candidate frontend tested on the production Pages origin through local browser interception → existing Worker; live Qloo and private Worker-cache evidence, with no synthetic affinity substitution. Candidate '+esc(study.appVersion)+
+    ' / '+esc(study.baseRevision)+'; Worker '+esc(study.workerVersion)+'.</p>'+
+    '<p>Cultural fit is evidence, not a demand forecast. Venue availability, fees and terms still need human confirmation.</p>'+
+    '<a href="'+esc(study.reportUrl)+'" target="_blank" rel="noopener noreferrer">Read the recorded study and provenance ↗</a></section>';
+}
 
 /** Present the existing study; retain its complete data in a closed disclosure. */
 export function renderLiveStudyReport(result: ApiDecisionResult, workerVersion: string): string {

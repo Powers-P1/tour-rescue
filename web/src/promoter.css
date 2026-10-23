@@ -45,6 +45,8 @@
 .promoter-status--unknown { background: #e7ebf1; color: #46546a; }
 .promoter-risks { padding-left: 16px; font-size: 10px; color: #52627a; }
 .promoter-risks li + li { margin-top: 3px; }
+.promoter-next-steps { padding-left: 16px; font-size: 10px; margin-top: 5px !important; }
+.promoter-next-steps li + li { margin-top: 3px; }
 .promoter-sources { margin-top: 13px; padding-top: 9px; border-top: 1px solid #dce3ec; font-size: 8.5px; color: #52627a; line-height: 1.4; }
 .promoter-sources strong { display: block; font-size: 10px; color: #101828; margin-bottom: 4px; }
 .promoter-sources p + p { margin-top: 3px; }

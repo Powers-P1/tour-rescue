@@ -1,6 +1,7 @@
 import { brand, icon } from './icons.ts';
 import type { PublicSiteModel } from './marketing-model.ts';
 import { renderGermanyGeographicMap } from './germany-map.ts';
+import { renderRecordedQlooStudy } from './live-study-view.ts';
 import { PUBLIC_REPOSITORY, PUBLIC_LICENSE, PUBLIC_API_DOCS, PUBLIC_AGENT_DOCS, publicOptionStatus, linkedEvidence } from './marketing-model.ts';
 
 const escape=(v:unknown):string=>String(v??'').replace(/[&<>"']/g,x=>
@@ -101,17 +102,19 @@ function breakpoint(model:PublicSiteModel):string{
  const point=model.landing.breakpoint;
  if(point.status!=='found'||point.afterMetres.status!=='known')
   return '<p class="muted">What could change this choice: '+escape(point.reason)+'.</p>';
- return '<div class="breakpoint-note"><span>Single-assumption breakpoint</span>'+
-  '<strong>'+escape(point.beforeText)+' → '+escape(point.afterText)+'</strong>'+
+ const round=point.beforeMetres.status==='known'&&point.afterMetres.value<point.beforeMetres.value?Math.floor:Math.ceil;
+ const recheckKm=round(point.afterMetres.value/100)/10;
+ return '<div class="breakpoint-note" data-evidence-kind="synthetic"><span>Synthetic sensitivity example</span>'+
+  '<strong>'+escape(point.beforeText)+' → '+escape(recheckKm)+' km</strong>'+
   '<p>From '+escape(point.beforeCity)+' to '+escape(point.afterCity)+
-  '. Changes only the allowed extra distance, not the six-hour driving limit.</p></div>';
+  '. Only the additional-distance cap changes; the six-hour driving limit stays fixed. Exact computed breakpoint: '+escape(point.afterText)+'. This is a synthetic constraint experiment, separate from the recorded Qloo study.</p></div>';
 }
 export function landingMarkup(model:PublicSiteModel):string{
  return header(false)+
  '<main id="main-content">'+
  '<section class="site-hero site-shell"><div class="hero-copy">'+
  '<h1>A canceled date.<span>A way forward.</span></h1>'+
- '<p class="hero-deck">Plan where your audience fits. Rescue the show when the route, people or gear let you down.</p>'+
+ '<p class="hero-deck">For tour managers and bookers: compare the options after a cancellation and prepare the next promoter conversation.</p>'+
  '<div class="hero-actions">'+link(model.appHref,'Rescue a sample date →','m-button')+
  link('#how-it-works','Explore the product ↗')+'</div>'+
  '<p class="mini-disclosure">ⓘ Sample tour · No sign-up to explore · Never a booked show</p></div>'+
@@ -173,7 +176,7 @@ export function judgesMarkup(model:PublicSiteModel):string{
  '<section class="judges-hero site-shell"><div class="judge-copy">'+
  '<p class="eyebrow">MOBILE FIRST · INSTALLABLE APP · NO SIGN-IN</p>'+
  '<h1>Leipzig canceled.<span>Keep the tour moving.</span></h1>'+
- '<p>Your tour desk, built for a phone. Cultural fit, road constraints and a promoter-ready plan. The complete workflow also works on desktop.</p>'+
+ '<p>For a tour manager or booker after a cancellation: compare three directions, inspect constraints and evidence, and prepare a brief for the next promoter conversation.</p>'+
  '<div class="hero-actions">'+link(model.appHref,'Rescue Leipzig →','m-button')+
  '<button type="button" class="m-button m-button-quiet" data-install-app>Install Tour Rescue</button></div>'+
  '<p class="mini-disclosure">Add it to your home screen. Sample rescue works offline; live Qloo and AI need a connection. '+ext(PUBLIC_REPOSITORY,'Public source & licence ↗','judges-external-link')+'</p>'+
@@ -186,15 +189,15 @@ export function judgesMarkup(model:PublicSiteModel):string{
  '<p>Start from the Berlin–Munich gap.</p></article>'+
  '<article><span>02 / ◇</span><h3>Compare feasible directions</h3>'+
  '<p>Review relative cultural fit, roads and unknown constraints.</p></article>'+
- '<article><span>03 / ↔</span><h3>Reverse the recommendation</h3><p>Change the additional-distance cap. Nuremberg → Frankfurt.</p></article>'+
- '<article><span>04 / ◇</span><h3>Inspect the evidence</h3><p>Artist omissions, a separate control and transparent UNKNOWN facts.</p></article>'+
+ '<article><span>03 / ↔</span><h3>Change one assumption</h3><p>Synthetic sensitivity example: change only the additional-distance cap. Nuremberg → Frankfurt.</p></article>'+
+ '<article><span>04 / ◇</span><h3>Inspect the evidence</h3><p>Compare the recorded three-artist Qloo study, controls and omissions. Booking unknowns stay visible.</p></article>'+
  '<article><span>05 / ▤</span><h3>Take the promoter draft</h3><p>Matching audit, A4 print and PNG. Nothing is booked or sent.</p></article></div>'+
  link('/app/?tour=start#rescue','Start the six-step guided demo →','text-amber')+'</section>'+
  '<section class="judge-last site-shell"><p class="eyebrow">CAN YOU CHANGE THE OUTCOME?</p>'+
  '<h2>Change one assumption.</h2>'+breakpoint(model)+
  link('/app/#simulation','Try 350 → 354.1 km →','m-button')+'</section>'+
  '<section id="why-qloo" class="judge-why"><div class="site-shell">'+
- '<div class="section-title"><p class="eyebrow">PROVENANCE BY DESIGN</p><h2>Why Qloo changes the decision.</h2></div>'+
+ '<div class="section-title"><p class="eyebrow">PROVENANCE BY DESIGN</p><h2>How cultural evidence informs the shortlist.</h2></div>'+
  '<div class="why-columns"><article><p>01 / CULTURAL FIT</p><h3>Where taste fits.</h3>'+
  '<span>Qloo heatmaps provide relative taste affinity for real resolved artist references in live mode.</span></article>'+
  '<article><p>02 / HARD CONSTRAINTS</p><h3>What can work.</h3>'+
@@ -202,7 +205,7 @@ export function judgesMarkup(model:PublicSiteModel):string{
  '<article><p>03 / AGENT WORKFLOW</p><h3>What happens next.</h3>'+
  '<span>Claude researches leads through the Worker; the same deterministic validator rechecks them before human acceptance.</span></article></div>'+
  '<div class="logic-flow"><span>Taste evidence + route checks</span><b>→</b><span>Audited directions</span><b>→</b><span>Draft for a promoter</span></div>'+
- '<p class="mini-disclosure">ⓘ Cultural fit is neither a listener count nor a ticket-sales forecast. No model confirms room availability.</p></div></section>'+
+ '<p class="mini-disclosure">ⓘ Cultural fit is neither a listener count nor a ticket-sales forecast. No model confirms room availability.</p>'+renderRecordedQlooStudy()+'</div></section>'+
  '<section id="evidence" class="site-shell judges-proof"><div class="section-title">'+
  '<p class="eyebrow">OPEN EVIDENCE</p><h2>Inspect the evidence.</h2>'+
  '<p>No hidden API key or fabricated live result is needed to reproduce the default demo.</p></div>'+
