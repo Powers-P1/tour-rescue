@@ -1,10 +1,10 @@
 # Tour Rescue
 
-[Jury demo](https://tour-rescue.pages.dev/judges/) · [Submission handoff](docs/HACKATHON_HANDOFF.md)
+[Jury demo](https://tour-rescue.pages.dev/judges/) · [Submission package](docs/SUBMISSION_PACKAGE.md) · [Release handoff](docs/HACKATHON_HANDOFF.md)
 
 Qloo-powered agent that repairs a concert tour when one date falls through.
 
-**Status: in development.** Built for the Qloo Agentic Hackathon 2026 (submission deadline 30 Oct 2026, 23:45 EDT).
+**Status: deployed hackathon prototype.** Built for the Qloo Agentic Hackathon 2026 (submission deadline 30 Oct 2026, 23:45 EDT). It prepares the next promoter conversation; it does not confirm or book a show.
 
 A booker or tour manager has a confirmed 5-date tour in one region and loses one date. Tour Rescue compares three repair options (replacement venue in another city, a detour, or a day off), keeps all confirmed shows feasible (dates, drive times, daily limits, minimum spacing), scores cities with a Qloo taste "fit index", and shows for every recommendation which single assumption or comparison artist would flip the choice. Every run produces a reproducible, downloadable decision audit.
 

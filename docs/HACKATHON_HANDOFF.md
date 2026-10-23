@@ -1,6 +1,6 @@
 # Tour Rescue — submission handoff
 
-Entry owner: Damian. Internal target: 29 October. [Official Qloo rules](https://qloo.devpost.com/rules), checked 23 October 2026: submission closes 30 October at 23:45 EDT, which is 31 October at 04:45 in Warsaw. The app must remain freely accessible through judging, ending 5 November. The public source repository must show a detectable open-source licence. GitHub reports this repository public with MIT; do not remove the licence.
+Entry owner: Damian. Internal target: 29 October. [Official Qloo rules](https://qloo.devpost.com/rules), checked 24 October 2026: submission closes 30 October at 23:45 EDT, which is 31 October at 04:45 in Warsaw. The app must remain freely accessible until judging ends: 5 November at 23:45 Eastern / 6 November at 05:45 Warsaw. The public source repository must show a detectable open-source licence. GitHub reports this repository public with MIT; do not remove the licence.
 
 The app and judging route are deployed. No Devpost entry has been submitted and no terms have been accepted on the owner's behalf.
 
@@ -17,7 +17,7 @@ The app and judging route are deployed. No Devpost entry has been submitted and 
 
 Follow cancellation → three options → change the extra-distance cap from 350 to 354.1 km → Nuremberg becomes Frankfurt → inspect evidence → export promoter document/current audit. Four confirmed concerts remain fixed. Optional AI is entered explicitly; accept a checked proposal to update a comparison card and export its sources. SOS, agency and planner are labelled sample extensions.
 
-The default case and authored AI replay are synthetic. Real Qloo/Sonnet probes are separately documented in [the live report](validation/live-qloo-2026-10-23.md) and [independent review closure](validation/final-review-2026-10-23.md). The three measured artists all retained Nuremberg at 350 km; control and omissions did not change their winner. This is not evidence of ticket demand or guaranteed booking.
+The default case and authored AI replay are synthetic. The judges page and app evidence now visibly distinguish the recorded three-artist study from the synthetic reversal. Real Qloo/Sonnet probes are separately documented in [the live report](validation/live-qloo-2026-10-23.md) and [earlier independent review closure](validation/final-review-2026-10-23.md). The three measured artists all retained Nuremberg at 350 km; control and omissions did not change their winner. This is not evidence of ticket demand or guaranteed booking. The promoter brief lists the next human confirmations for date, room/rider, fee/terms and cost assumptions; day off retains its own meaning.
 
 ## Submission description draft
 
@@ -29,7 +29,7 @@ The mobile-first PWA also has a full desktop workspace, six-step keyboard-access
 
 ## Checks and remaining manual acceptance
 
-382 tests and strict types pass, including the final presentation asset/player regression. Pages build and Worker dry-run pass. Browser suites cover 165 states, seven workflows, 35 responsive cases, both AI examples/explicit acceptance, current audit export, Back/Forward identity, saved reload, day off, guide, one-page A4, PNG and PWA. See the validation documents for provenance and actual live usage.
+The final release report records the exact revision, test count, builds, CI and final jury decisions. Browser suites cover 165 states, seven workflows, 35 responsive cases, both AI examples/explicit acceptance, current audit export, Back/Forward identity, saved reload, day off, guide, one-page A4, PNG and PWA. See the validation documents for provenance and actual live usage. Historical test counts belong to their stated revisions. The [copy-ready English submission package](SUBMISSION_PACKAGE.md) gives final description, testing instructions, criteria mapping and limits.
 
 | Check requiring a person | Status | Record before claiming it |
 | --- | --- | --- |
