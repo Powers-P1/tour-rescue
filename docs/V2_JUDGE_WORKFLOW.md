@@ -26,7 +26,7 @@ The mobile-first jury entry offers installation with a dismissible dialog. Suppo
 
 ## Validation and remaining scope
 
-- 367 offline tests and strict core/Worker/browser type checking passed before the evidence/PWA follow-up; release checks are rerun for its final commit.
+- 371 offline tests, strict core/Worker/browser type checking, the Pages build and Worker dry-run passed. The final completion suite checks 165 states, seven workflows and 35 responsive cases. The independent-review regression suite also checks exact audit identity on Back/Forward, saved simulation reload and day-off fallback at 390/1280.
 - `scripts/verify-judge-workflow.mjs` exercised the real v2 build at390 and1280px, including both AI fixtures, JSON downloads, the revised recommendation, preserved cards, promoter drafts and UNKNOWN venue facts. External provider traffic was blocked. Browser plugin not available; Playwright fallback.
 - `scripts/verify-mobile-agent-surface.mjs` tests evidence, genuine PNG downloads, one-page A4 PDFs, all six guide steps and restoration at 390/1280px; install-hook behaviour, iOS guidance, standalone labels, offline rescue, API cache exclusion and a service-worker update preserving profile data. Browser plugin unavailable; Playwright fallback. Physical phone installation remains a separate manual check.
 - Real Qloo and Sonnet evidence is recorded separately from offline fixtures. No booking availability was inferred and no message was sent to a promoter.

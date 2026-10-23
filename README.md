@@ -1,5 +1,7 @@
 # Tour Rescue
 
+[Jury demo](https://tour-rescue.pages.dev/judges/) · [Submission handoff](docs/HACKATHON_HANDOFF.md) · [97-second mobile walkthrough](docs/demo/README.md)
+
 Qloo-powered agent that repairs a concert tour when one date falls through.
 
 **Status: in development.** Built for the Qloo Agentic Hackathon 2026 (submission deadline 30 Oct 2026, 23:45 EDT).
