@@ -1,0 +1,57 @@
+[
+  {
+    "capture": "01-mobile-rescue",
+    "frames": [
+      4,
+      30
+    ],
+    "kind": "rigid stitched scroll",
+    "delta": 223,
+    "fixedSidebar": 0,
+    "overlapMAE": 2.235
+  },
+  {
+    "capture": "03-desktop-evidence",
+    "frames": [
+      0,
+      2
+    ],
+    "kind": "rigid stitched scroll",
+    "delta": 558,
+    "fixedSidebar": 233,
+    "overlapMAE": 0.493
+  },
+  {
+    "capture": "03-desktop-evidence",
+    "frames": [
+      2,
+      7
+    ],
+    "kind": "rigid stitched scroll",
+    "delta": 549,
+    "fixedSidebar": 233,
+    "overlapMAE": 0.795
+  },
+  {
+    "capture": "08-real-qloo-evidence",
+    "frames": [
+      0,
+      2
+    ],
+    "kind": "rigid stitched scroll",
+    "delta": 630,
+    "fixedSidebar": 233,
+    "overlapMAE": 0.519
+  },
+  {
+    "capture": "06-desktop-promoter",
+    "frames": [
+      1,
+      3
+    ],
+    "kind": "rigid stitched scroll",
+    "delta": 450,
+    "fixedSidebar": 233,
+    "overlapMAE": 0.601
+  }
+]

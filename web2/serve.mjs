@@ -8,6 +8,7 @@ const root=resolve(base);
 const port=Number(process.env.PORT ?? (deploy?4173:4174));
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8',
  '.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8',
+ '.mp4':'video/mp4','.vtt':'text/vtt; charset=utf-8','.jpg':'image/jpeg','.txt':'text/plain; charset=utf-8',
  '.woff2':'font/woff2','.svg':'image/svg+xml','.png':'image/png','.webp':'image/webp','.webmanifest':'application/manifest+json'};
 const headers=await readFile(resolve(root,'_headers'),'utf8').catch(()=> '');
 const csp=headers.match(/^  Content-Security-Policy:\s*(.+)$/m)?.[1];

@@ -1,0 +1,94 @@
+{
+  "schemaVersion": "tour-rescue.film-provenance.v1",
+  "createdAtUtc": "2026-10-23T16:59:36.306463+00:00",
+  "revision": "final-v2",
+  "film": "TourRescue-jury-final-v2.mp4",
+  "sha256": "9d5e25ece393070f3ab889e4cb2a41c8549259473b449d06e4863725d2413bb2",
+  "status": "Canonical optional jury presentation; no YouTube upload or Devpost submission by this package",
+  "ui": {
+    "source": "Actual browser CUA/CDP captures at mobile, tablet and desktop breakpoints",
+    "takes": [
+      "01-mobile-rescue",
+      "02-tablet-breakpoint",
+      "03-desktop-evidence",
+      "06-desktop-promoter",
+      "07-desktop-export-actions",
+      "08-real-qloo-evidence",
+      "12-ai-source-links",
+      "11-ai-accept"
+    ],
+    "synthetic": "Default rescue at 350 km, synthetic cap change 354.1 km and separate authored AI replay at 350 km",
+    "recordedLiveQloo": {
+      "observedAtUtc": "2026-10-23T16:18:00Z",
+      "runIdPrefix": "392fea92",
+      "target": "Radiohead",
+      "cityCoverage": "24/24",
+      "withTaste": "Nuremberg",
+      "withoutTaste": "needs-evidence",
+      "controlAndBothOmissions": "Nuremberg unchanged",
+      "bookingFacts": "Synthetic sample",
+      "rawProviderDataIncluded": false
+    },
+    "boundary": "Responsive browser capture, not a physical installed-phone test; no provider call implied by replay"
+  },
+  "motion": {
+    "method": "Short editorial dissolves/pushes and eased rigid scrolls stitched from overlapping actual pixels",
+    "ledger": "motion-ledger.json",
+    "generatedUiOrOpticalFlow": false,
+    "deployedNativeAnimationClaim": false
+  },
+  "images": {
+    "source": [
+      "web2/assets/touring-backstage-v2.webp",
+      "web2/assets/touring-drum-v2.webp"
+    ],
+    "kind": "Existing AI-generated project illustrations, not event photographs",
+    "provenance": "../../mockups/v2/ASSETS.md"
+  },
+  "narration": {
+    "provider": "vidIQ voiceover_generate",
+    "preset": "Chris â€” Charming, Down-to-Earth",
+    "voiceId": "iP95p4xoKVk53GoZ742B",
+    "jobId": "job_571af117-03ac-4ad0-bcd3-cecdae782191",
+    "voiceoverId": "42f5e87d-dd2c-44e9-84b7-e2cd5c6ca7bd",
+    "sourceDurationSeconds": 56.764,
+    "sourceCharacters": 856,
+    "reportedCredits": 14,
+    "backendModel": "Not disclosed; no model version inferred",
+    "sourceSha256": "c2b7d2ddd7487861fcb98528c9056a991e0aba6af52bf1f85219429eb20f8ec1",
+    "timeline": "voice-timeline.json",
+    "metadataEvidence": "Nonsecret production metadata supplied by the primary task; existing result retained"
+  },
+  "music": {
+    "source": "Original local numerical composition and synthesis using compose_original.py; no imported recording, melody, samples or soundfont",
+    "sourceSha256": "39abd92fb087b153d550c121f35364d9e8de627b4e498bef7d509a8caad1a630",
+    "compositionScriptSha256": "28fb920d895feb8b4df2cf63cc764a69f73e34778e31b264d20fd53f9794bad4",
+    "providerCalls": 0,
+    "downloads": 0,
+    "epidemicSoundRecordingIncluded": false,
+    "rightsLimit": "This is production provenance, not a legal uniqueness certification"
+  },
+  "typography": {
+    "rasterizedFilmFont": [
+      "Arial",
+      "Regular"
+    ],
+    "fontBinaryRedistributed": false,
+    "appFontLicense": "../../../web2/assets/fonts/OFL.txt"
+  },
+  "poster": {
+    "source": "Actual encoded MP4 frame 2100 at 35.000 seconds",
+    "width": 1920,
+    "height": 1080
+  },
+  "packaging": {
+    "newProviderJobs": 0,
+    "rawQlooOrPrivateAuditsIncluded": false,
+    "canonicalMp4Sources": 1,
+    "pwaPrecache": false,
+    "filmUpload": false,
+    "devpostSubmission": false,
+    "deployment": false
+  },
+  "ownerChecks": "Damian retains final account/third-party-rights and submission checks; no acceptance of terms is made here."
+}

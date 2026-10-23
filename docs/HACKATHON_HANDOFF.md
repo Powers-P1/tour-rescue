@@ -10,6 +10,7 @@ The app and judging route are deployed. No Devpost entry has been submitted and 
 - App: https://tour-rescue.pages.dev/app/#rescue
 - Direct breakpoint: https://tour-rescue.pages.dev/app/#breakpoint
 - Source: https://github.com/Powers-P1/tour-rescue
+- Optional 100-second presentation: https://tour-rescue.pages.dev/judges/#walkthrough ([canonical film package](demo/final-v2/README.md)). A YouTube URL is optional, not required for this presentation; no YouTube upload or Devpost submission has been made by this change.
 
 Follow cancellation → three options → change the extra-distance cap from 350 to 354.1 km → Nuremberg becomes Frankfurt → inspect evidence → export promoter document/current audit. Four confirmed concerts remain fixed. Optional AI is entered explicitly; accept a checked proposal to update a comparison card and export its sources. SOS, agency and planner are labelled sample extensions.
 
@@ -25,7 +26,7 @@ The mobile-first PWA also has a full desktop workspace, six-step keyboard-access
 
 ## Checks and remaining manual acceptance
 
-371 tests and strict types pass; Pages build and Worker dry-run pass. Browser suites cover 165 states, seven workflows, 35 responsive cases, both AI examples/explicit acceptance, current audit export, Back/Forward identity, saved reload, day off, guide, one-page A4, PNG and PWA. See the validation documents for provenance and actual live usage.
+382 tests and strict types pass, including the final presentation asset/player regression. Pages build and Worker dry-run pass. Browser suites cover 165 states, seven workflows, 35 responsive cases, both AI examples/explicit acceptance, current audit export, Back/Forward identity, saved reload, day off, guide, one-page A4, PNG and PWA. See the validation documents for provenance and actual live usage.
 
 | Check requiring a person | Status | Record before claiming it |
 | --- | --- | --- |
@@ -34,4 +35,4 @@ The mobile-first PWA also has a full desktop workspace, six-step keyboard-access
 | Tour manager uses an actual cancelled-date brief | Not run | Time, unclear step, evidence reviewed and resulting action; no invented metrics |
 | Real promoter contact or booking | Not performed | Any contact must be separately authorized; drafts are not sent |
 
-Before submission Damian should check the final public links/video and repository licence, verify team eligibility and third-party rights, and personally complete Devpost. The supplied mobile recording is an unapproved draft: the user rejected the films and deferred revision until tomorrow. Do not submit it without a later approved replacement. Live software receipts remain separate and valid. No unmeasured savings, conversion or booking outcomes should be claimed.
+Before submission Damian should check the final public links/video and repository licence, verify team eligibility and third-party rights, and personally complete Devpost. The canonical final-v2 presentation replaces the rejected earlier mobile draft; that draft is not offered by the player. The film uses actual responsive UI captures, separately labels the synthetic reversal, recorded real Qloo and authored AI replay, and includes edited presentation motion rather than a claim of native app animation. Live software receipts remain separate and valid. No unmeasured savings, conversion or booking outcomes should be claimed. Nothing has been submitted to Devpost on the owner's behalf.
