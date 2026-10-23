@@ -19,6 +19,7 @@ export interface ExtensionContext {
   readonly aiSkill?:TourSkill;
   readonly tabs: string;
   readonly sos: SosSampleState;
+  readonly sosGuide?:boolean;
   readonly planBrief: string;
   readonly bandProfile?: string;
   readonly planSummary: PlanSummary | null;
@@ -71,9 +72,14 @@ function routeHub(ctx: ExtensionContext): string {
     '</div>' + sample('Planning, economics and fans are sample extensions; bookings and sales are not connected.') +
     ctx.tabs + '</section>';
 }
+function sosCoach(ctx:ExtensionContext,step:number):string{
+ if(!ctx.sosGuide)return '';
+ const instructions=['Enter the incident, city, local deadline and budget. Then choose Find sample local options. This demonstrates a workflow, not a real search.','Select an illustrative supplier and review the quote. A sample travel time does not establish current availability.','Compare the estimate with your cap. Approval is disabled above budget. Preview approval only when the sample is within your cap.','Walkthrough complete. No supplier was contacted, no availability confirmed and no payment made.'];
+ return '<aside class="extension-callout" aria-label="SOS walkthrough"><strong>GUIDED SOS · '+(step===4?'COMPLETE':step+' OF 3')+'</strong><p>'+instructions[step-1]+'</p>'+action('Exit walkthrough','sos-guide-exit')+'</aside>';
+}
 function sosProblem(ctx: ExtensionContext): string {
   return frame('<div class="intro"><p class="eyebrow">LOCAL SOS · SAMPLE INCIDENT</p><h1>What went wrong?</h1></div>' +
-    '<label for="sos-problem">What do you need?</label>' +
+    sosCoach(ctx,1)+'<label for="sos-problem">What do you need?</label>' +
     '<textarea id="sos-problem" rows="3" maxlength="700">' + esc(ctx.sos.problem) + '</textarea>' +
     '<div class="extension-fieldrow"><label for="sos-location">Where</label>' +
     '<input id="sos-location" maxlength="120" value="' + esc(ctx.sos.location) + '"></div>' +
@@ -87,7 +93,7 @@ function sosProblem(ctx: ExtensionContext): string {
 }
 function sosOptions(ctx: ExtensionContext): string {
   return frame('<div class="intro"><p class="eyebrow">' + esc(ctx.sos.location) + ' · SAMPLE</p>' +
-    '<h1>Two local options.</h1><p class="muted">A head, fitting and delivery.</p></div>' +
+    '<h1>Two local options.</h1><p class="muted">A head, fitting and delivery.</p></div>' +sosCoach(ctx,2)+
     '<div class="extension-choices" role="radiogroup" aria-label="Illustrative local suppliers">' +
     SAMPLE_SUPPLIERS.map(provider => '<button type="button" role="radio" aria-checked="' +
       (provider.id === ctx.sos.selectedId) + '" data-action="sos-select" aria-controls="sos-choice-summary" data-id="' + provider.id +
@@ -109,7 +115,7 @@ function sosQuote(ctx: ExtensionContext): string {
   const within = supplier.estimateVnd <= ctx.sos.budgetCapVnd;
   return frame('<div class="intro"><p class="eyebrow">ILLUSTRATIVE QUOTE · NOT RECEIVED</p>' +
     '<h1>Ready to review.</h1><p class="muted">' + esc(supplier.name) + ' · sample, uncontacted supplier</p></div>' +
-    '<div class="extension-facts"><div><span>Solution</span><strong>22-inch head + fitting</strong></div>' +
+    sosCoach(ctx,3)+'<div class="extension-facts"><div><span>Solution</span><strong>22-inch head + fitting</strong></div>' +
     '<div><span>Estimated arrival</span><strong>Today, 15:40 · ICT</strong>' +
     '<small>Sample only - no arrival confirmed</small></div></div>' +
     '<div class="quote-amount">' + esc(money(supplier.estimateVnd)) + '</div>' +
@@ -124,7 +130,7 @@ function sosApproved(ctx: ExtensionContext): string {
   return frame('<div class="intro"><p class="eyebrow">SAMPLE APPROVAL PREVIEW</p>' +
     '<h1>Approval simulated.</h1><p>' + esc(selectedSupplier(ctx.sos).name) + ' · ' +
     esc(money(selectedSupplier(ctx.sos).estimateVnd)) + '</p></div>' +
-    '<div class="extension-callout"><strong>ⓘ Not ordered.</strong>' +
+    sosCoach(ctx,4)+'<div class="extension-callout"><strong>ⓘ Not ordered.</strong>' +
     '<p>No supplier was contacted, no quote was obtained and no money was committed. Live fulfilment is not implemented.</p></div>' +
     '<div class="focused-bottom">' + action('Start another sample incident →','sos-restart',true) + '</div>', 'Sample result');
 }

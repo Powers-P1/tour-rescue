@@ -66,6 +66,9 @@ await cp(new URL('./assets/',import.meta.url), new URL('assets/',destUrl), {recu
 await cp(new URL('./public/',import.meta.url),destUrl,{recursive:true});
 await mkdir(new URL('video/',destUrl),{recursive:true});
 for (const {target, bytes} of filmAssets) await writeFile(new URL('video/' + target,destUrl),bytes);
+const captions=filmAssets.find(asset=>asset.target.endsWith('.vtt')).bytes.toString('utf8');
+let cue=0;const srt=captions.replace(/^WEBVTT\s*/,'').trim().split(/\r?\n\r?\n/).map(block=>++cue+'\n'+block.replace(/(\d{2}:\d{2}:\d{2})[.](\d{3})/g,'$1,$2')).join('\n\n')+'\n';
+await writeFile(new URL('video/tour-rescue-final-v2.en.srt',destUrl),srt);
 await buildPwa(destUrl);
 await writeFile(new URL('_headers',destUrl),`/*
   Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com; connect-src 'self' ${origin.origin}; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'

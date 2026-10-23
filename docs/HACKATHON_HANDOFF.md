@@ -8,6 +8,9 @@ The app and judging route are deployed. No Devpost entry has been submitted and 
 
 - Demo: https://tour-rescue.pages.dev/judges/
 - App: https://tour-rescue.pages.dev/app/#rescue
+- Interactive six-step tutorial: https://tour-rescue.pages.dev/app/?tour=start#rescue. Next unlocks after the actual review, solver reversal, evidence inspection, export and explicit saved-AI acceptance. Exit restores the previous comparison. No live provider starts inside this guided sample.
+- Optional three-stage SOS walkthrough: https://tour-rescue.pages.dev/app/?learn=sos#sos. Suppliers, quotes, arrival and approval are simulations; live technician availability/fulfilment is not implemented.
+- English film captions/subtitles: [VTT](https://tour-rescue.pages.dev/video/tour-rescue-final-v2.en.vtt), [SRT](https://tour-rescue.pages.dev/video/tour-rescue-final-v2.en.srt). Default captions remain enabled in the player.
 - Direct breakpoint: https://tour-rescue.pages.dev/app/#breakpoint
 - Source: https://github.com/Powers-P1/tour-rescue
 - Optional 100-second presentation: https://tour-rescue.pages.dev/judges/#walkthrough ([canonical film package](demo/final-v2/README.md)). A YouTube URL is optional, not required for this presentation; no YouTube upload or Devpost submission has been made by this change.

@@ -17,7 +17,7 @@ test('jury player builds the exact final film with captions/transcript and leave
  const expectedSha='9d5e25ece393070f3ab889e4cb2a41c8549259473b449d06e4863725d2413bb2';
  assert.equal(manifest.sha256,expectedSha);
  assert.deepEqual((await readdir(published)).sort(),[
-  'tour-rescue-final-v2-poster.jpg','tour-rescue-final-v2.en.vtt','tour-rescue-final-v2.mp4','transcript.txt',
+  'tour-rescue-final-v2-poster.jpg','tour-rescue-final-v2.en.srt','tour-rescue-final-v2.en.vtt','tour-rescue-final-v2.mp4','transcript.txt',
  ]);
  for(const [source,target] of [
   ['TourRescue-jury-final-v2.mp4','tour-rescue-final-v2.mp4'],

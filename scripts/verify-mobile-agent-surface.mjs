@@ -36,6 +36,14 @@ try{
   for(let step=1;step<=6;step++){
     await page.locator('.guided-tour-layer[data-step="'+step+'"]').waitFor({state:'visible'});
     assert.equal(await page.getByRole('progressbar').getAttribute('aria-valuenow'),String(step));
+    const next=page.getByRole('button',{name:step===6?'Finish tour':'Next',exact:true});
+    assert.equal(await next.isEnabled(),false,'step needs an actual outcome');
+    if(step===1)await act(page,'rescue').click();
+    if(step===2)await act(page,'review').click();
+    if(step===3){await page.locator('.sim-edit summary').click();await page.locator('#sim-cap').fill('354.1');await act(page,'sim-recheck').click();}
+    if(step===4)await page.locator('details').filter({hasText:'Tag Bridge · sourced tags only'}).locator('summary').first().click();
+    if(step===5)await downloaded(page,'audit');
+    if(step===6){await act(page,'ai-replay').click();await page.locator('[data-action=ai-accept]').first().click();}
     await page.getByRole('button',{name:step===6?'Finish tour':'Next',exact:true}).click();
   }
   assert.equal(await page.locator('.guided-tour-layer:visible').count(),0);

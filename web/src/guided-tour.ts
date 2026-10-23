@@ -23,6 +23,7 @@ export interface GuidedTourOptions {
   readonly descriptions?: readonly {readonly title:string;readonly body:string}[];
   readonly navigate: (step: TourStepIndex) => void;
   readonly getTarget: (step: TourStepIndex) => HTMLElement | null;
+  readonly objective?: (step:TourStepIndex)=>{complete:boolean;task:string};
   /** Prepare the labelled synthetic demo; called only after an explicit start/resume. */
   readonly onStart: () => void;
   readonly onExit: (completed: boolean) => void;
@@ -96,10 +97,11 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
   const focus = button('Focus highlighted area', focusTarget, 'guided-tour-focus');
   const actions = el('div', 'guided-tour-actions');
   const back = button('Back', () => goTo(Math.max(0, progress.step - 1) as TourStepIndex), 'button button-secondary');
-  const next = button('Next', () => progress.step === 5 ? exit(true) : goTo((progress.step + 1) as TourStepIndex), 'button button-primary');
+  const next = button('Next', () => {if(options.objective&&!options.objective(progress.step).complete)return;progress.step === 5 ? exit(true) : goTo((progress.step + 1) as TourStepIndex);}, 'button button-primary');
   actions.append(back, next);
   const hint = el('p', 'guided-tour-hint');
-  card.append(top, track, title, description, focus, actions, hint);
+  const objective=el('p','guided-tour-objective');objective.setAttribute('role','status');objective.setAttribute('aria-live','polite');
+  card.append(top, track, title, description,objective, focus, actions, hint);
   layer.append(highlight, card);
   document.body.append(layer);
 
@@ -138,6 +140,7 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
   function position(): void {
     frame = 0;
     if (!active || disposed) return;
+    updateObjective();
     // The software keyboard can shrink the visual viewport without resizing the layout viewport.
     const view = window.visualViewport;
     const visible = {
@@ -204,6 +207,11 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
     next.textContent = progress.step === 5 ? 'Finish tour' : 'Next';
     hint.textContent = saved ? 'Esc to skip · Progress saved on this device.' : 'Esc to skip · Progress lasts for this tab.';
     layer.dataset.step = String(progress.step + 1);
+    updateObjective();
+  }
+  function updateObjective():void{
+    const value=options.objective?.(progress.step);objective.hidden=!value;next.disabled=!!value&&!value.complete;
+    const text=value?(value.complete?'✓ Done. ':'To continue: ')+value.task:'';if(objective.textContent!==text)objective.textContent=text;
   }
 
   function begin(resume: boolean, trigger?: HTMLElement): void {

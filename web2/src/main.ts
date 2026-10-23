@@ -34,6 +34,7 @@ import {loadKnowledge,saveKnowledge,putDocument,withBandProfile} from './knowled
 import type {TourSkill} from '../../src/ai/knowledge.ts';
 import { LIVE_PRESETS } from './live-presets.ts';
 import { renderLiveStudyReport } from './live-study-view.ts';
+import {guideObjective} from './guide-objectives.ts';
 import { createAiClient } from '../../web/src/ai-client.ts';
 import { hadMountedScreen, selectFocusTarget } from './focus-policy.ts';
 import { projectAudience, projectSimulation, loadSimulation, saveSimulation, simulationDraftScope } from './desktop-model.ts';
@@ -124,6 +125,7 @@ let chosenProposal: PromoterSheetModel | null = null;
 let evidenceSource:ApiDecisionResult|null=null;
 let evidenceOptionId='';
 let guide:GuidedTourController|undefined;
+let guideEvidenceReads=0,guideExports=0;
 let livePresetId=LIVE_PRESETS[0]!.id;
 let liveWorkerVersion='UNKNOWN';
 function captureGuideWorkspace() {
@@ -146,6 +148,7 @@ function rememberWorkspaceHistory():void{
  history.replaceState({...history.state,screen,tourRescueWorkspace:id},'');
 }
 function beginGuide():void {
+ guideEvidenceReads=0;guideExports=0;
  guideWorkspace=captureGuideWorkspace();
  result=createDemoResult();projection=projectRescue(result);incident=initialIncident();
  pendingId=projection.options.find(row=>row.recommended)?.id??projection.options[0]!.id;
@@ -443,7 +446,7 @@ function desktopHome(): string {
     originNote() + '</section>';
 }
 function extensionContext(): ExtensionContext {
-  return { tabs: mobileTabs(), sos, planBrief, planSummary, bandProfile, showAssumptions: economicsExpanded,
+  return { tabs: mobileTabs(), sos,sosGuide:new URLSearchParams(location.search).get('learn')==='sos', planBrief, planSummary, bandProfile, showAssumptions: economicsExpanded,
     economics, economicsError, economicsDraft, fanPreviewed, aiBusy, aiNotice, aiMode, aiSteps, aiSession,
     aiDemoScenario, aiSkill,aiAccepted: researchHistory.accepted, aiLiveReady:!!liveResearchBaseRunId, sourceMode: projection.mode };
 }
@@ -697,6 +700,7 @@ function downloadAudit(source?:ApiDecisionResult,kind:'baseline'|'what-if'='base
   link.download = exported.filename;
   document.body.append(link);
   link.click();
+  if(guide?.isActive()){guideExports++;guide.refresh();}
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
@@ -936,6 +940,7 @@ root!.addEventListener('click', async event => {
   const button = element.closest<HTMLElement>('[data-action]');
   if (!button) return;
   const action = button.dataset.action;
+  if(guide?.isActive()&&['open-live','run-live','ai-mode-live','ai-run-live','run-live-preset'].includes(action??'')){notice='Pause the guided sample before starting live provider requests. The walkthrough uses saved evidence and never spends credits.';render();return;}
   if (liveBusy && action !== 'close-live') return;
   switch (action) {
     case 'rescue': startRescue(); break;
@@ -1169,6 +1174,7 @@ root!.addEventListener('click', async event => {
         screen = 'sos-approved';
       } catch(err) { notice = err instanceof Error ? err.message : 'Cannot preview approval.'; }
       render(); break;
+    case 'sos-guide-exit':{const url=new URL(location.href);url.searchParams.delete('learn');history.replaceState(history.state,'',url);render();break;}
     case 'sos-self-call':
       notice = 'Self-call is outside Tour Rescue. No supplier has been contacted.';
       render(); break;
@@ -1336,10 +1342,10 @@ guide=createGuidedTour({
  descriptions:[
   {title:'Start with the cancelled date',body:'Choose Rescue this date. Four confirmed shows stay locked.'},
   {title:'Compare three options',body:'Replacement, detour or day off. Read PASS, FAIL and UNKNOWN separately from the recommendation.'},
-  {title:'Overturn one assumption',body:'Expand Adjust extra-distance preference. Enter354.1km and choose Recheck one assumption. Watch Nuremberg change to Frankfurt; daily driving stays fixed.'},
+  {title:'Overturn one assumption',body:'Expand Adjust extra-distance preference. Enter 354.1 km and choose Recheck one assumption. Watch Nuremberg change to Frankfurt; daily driving stays fixed.'},
   {title:'Inspect the evidence',body:'Read the two-axis plot, artist omissions, control result and sourced Tag Bridge. UNKNOWN stays unknown.'},
   {title:'Export the current decision',body:'Download the audit or prepare the promoter proposal. Its print A4 and PNG exports share the same audited metrics.'},
-  {title:'Explore AI research, optionally',body:'Choose either saved transcript or explicitly run live Claude Sonnet5.5 research after loading fresh Qloo evidence. Accept a lead only after review.'},
+  {title:'Accept checked AI research',body:'Replay either saved transcript. Inspect its labelled sources, then explicitly Accept into comparison. The validator runs again and keeps the other card. No live model, booking or outreach starts in this walkthrough.'},
  ],
  onStart:beginGuide,
  onExit:finishGuide,
@@ -1350,8 +1356,10 @@ guide=createGuidedTour({
    else if(step===3||step===4){const source=simulationModel?.sourceResult??result;const id=simulationModel?.afterRecommendation.optionId??pendingId;openEvidence(source,id);}
    else{screen='ai';render();}
  },
- getTarget:step=>root!.querySelector('[data-tour="'+['cancelled-date','options','breakpoint-limit','evidence','exports','ai'][step]+'"]'),
+ getTarget:step=>root!.querySelector('[data-tour="'+['cancelled-date','options','breakpoint-limit','evidence','exports','ai'][step]+'"]')??root!.querySelector<HTMLElement>('#main,.focused-screen'),
+ objective:step=>guideObjective(step,{screen,chosen:incident.phase==='chosen',cap:simulationModel?.maxAdditionalDistanceKm??null,winner:simulationModel?.afterRecommendation.optionId??null,evidenceReads:guideEvidenceReads,exports:guideExports,acceptedDemo:researchHistory.accepted.length}),
 });
+root!.addEventListener('toggle',event=>{const detail=event.target;if(guide?.isActive()&&screen==='evidence'&&detail instanceof HTMLDetailsElement&&detail.open&&(detail.textContent?.includes('Tag Bridge')||detail.textContent?.includes('Sources & limitations'))){guideEvidenceReads++;guide.refresh();}},true);
 followAppHash();
 initPwa();
 if(new URL(location.href).searchParams.get('tour')==='start'){

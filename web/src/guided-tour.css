@@ -83,3 +83,4 @@ body.guided-tour-is-active { padding-bottom: min(340px, 50vh); }
   .guided-tour-layer { display: none !important; }
   body.guided-tour-is-active { padding-bottom: 0; }
 }
+.guided-tour-objective{font-size:14px;line-height:1.5;font-weight:650;margin:12px 0}.guided-tour-label,.guided-tour-hint,.guided-tour-description,.guided-tour-focus,.guided-tour-skip{font-size:14px}.guided-tour-skip,.guided-tour-focus,.guided-tour-actions .button{min-height:44px}
