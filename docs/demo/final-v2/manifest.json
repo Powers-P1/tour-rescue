@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "tour-rescue.film-manifest.v1",
+  "revision": "final-v2",
+  "film": "TourRescue-jury-final-v2.mp4",
+  "sha256": "9d5e25ece393070f3ab889e4cb2a41c8549259473b449d06e4863725d2413bb2",
+  "durationSeconds": 100,
+  "width": 1920,
+  "height": 1080,
+  "fps": 60,
+  "publicVideoUrl": null,
+  "youtubeUrlOptional": true,
+  "submitted": false,
+  "files": [
+    {
+      "name": ".gitattributes",
+      "bytes": 123,
+      "sha256": "820f2821053af5c8c3061bbc4b97ddc63014ef504c43492afd73465a738b9732"
+    },
+    {
+      "name": "captions.en.vtt",
+      "bytes": 1515,
+      "sha256": "df1d893b7abdfdffcb61fa38a491cf1e6d2682db1e438d478303a48c23cda6b3"
+    },
+    {
+      "name": "motion-ledger.json",
+      "bytes": 955,
+      "sha256": "792aab0046167d1142728703dda5dbd0ceb3fa7507d52ae7be2923d6e9ec44cf"
+    },
+    {
+      "name": "narration.txt",
+      "bytes": 857,
+      "sha256": "6f26289e4752ffa39878a7ba5ad4a8afc5c75c7af7b0c9c67c5b4d7a5280b527"
+    },
+    {
+      "name": "poster.jpg",
+      "bytes": 268554,
+      "sha256": "8d61dec487cb78ee7440cdc1ee3601feb8c17a299aad3ffbb8a2fa564ba3f463"
+    },
+    {
+      "name": "PROVENANCE.json",
+      "bytes": 3719,
+      "sha256": "5cbddcfea4bfb0583148e1f767920cbaede37690d1dcc0cb601a4cd85f9807e1"
+    },
+    {
+      "name": "QA.json",
+      "bytes": 1610,
+      "sha256": "6c5aee0a523d2481c7f6eff578970bf13b06602f26e8f837315bebbfba4dba57"
+    },
+    {
+      "name": "README.md",
+      "bytes": 1556,
+      "sha256": "ba96acbe90265f0477782cfea6e728fcfea576b7d2bc0f2bf06e331f639ad9d1"
+    },
+    {
+      "name": "TourRescue-jury-final-v2.mp4",
+      "bytes": 13258545,
+      "sha256": "9d5e25ece393070f3ab889e4cb2a41c8549259473b449d06e4863725d2413bb2"
+    },
+    {
+      "name": "voice-timeline.json",
+      "bytes": 3266,
+      "sha256": "675031e25f599c36ce33313b9c65a9ed24ddbf7ba204f34bef85e1034c4bc665"
+    }
+  ]
+}

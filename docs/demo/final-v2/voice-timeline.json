@@ -1,0 +1,156 @@
+{
+  "chunks": [
+    {
+      "sourceStart": 0,
+      "sourceEnd": 5.1,
+      "filmStart": 0.8
+    },
+    {
+      "sourceStart": 5.3,
+      "sourceEnd": 15.4,
+      "filmStart": 8.2
+    },
+    {
+      "sourceStart": 15.5,
+      "sourceEnd": 26.9,
+      "filmStart": 24.3
+    },
+    {
+      "sourceStart": 27.15,
+      "sourceEnd": 32.35,
+      "filmStart": 44
+    },
+    {
+      "sourceStart": 32.55,
+      "sourceEnd": 39.1,
+      "filmStart": 57
+    },
+    {
+      "sourceStart": 39.4,
+      "sourceEnd": 45.2,
+      "filmStart": 68
+    },
+    {
+      "sourceStart": 45.45,
+      "sourceEnd": 53.15,
+      "filmStart": 80
+    },
+    {
+      "sourceStart": 53.25,
+      "sourceEnd": 56.74,
+      "filmStart": 93
+    }
+  ],
+  "cues": [
+    {
+      "start": 0.8,
+      "end": 3.1399999999999997,
+      "text": "One canceled show, four nights locked in."
+    },
+    {
+      "start": 3.5,
+      "end": 5.56,
+      "text": "Tour Rescue helps you find a way forward."
+    },
+    {
+      "start": 8.379999999999999,
+      "end": 12.120000000000001,
+      "text": "On your phone, compare a replacement, a detour, or a day off."
+    },
+    {
+      "start": 12.559999999999999,
+      "end": 13.899999999999999,
+      "text": "Keep confirmed shows intact."
+    },
+    {
+      "start": 14.7,
+      "end": 18.02,
+      "text": "Qloo adds cultural fit evidence beyond the shortest drive."
+    },
+    {
+      "start": 24.48,
+      "end": 26.54,
+      "text": "On a tablet, test the trade off."
+    },
+    {
+      "start": 26.8,
+      "end": 29.8,
+      "text": "In this synthetic example, raise the extra distance limit"
+    },
+    {
+      "start": 29.8,
+      "end": 33.3,
+      "text": "from 350 to 354.1 kilometers."
+    },
+    {
+      "start": 34.14,
+      "end": 35.480000000000004,
+      "text": "Nuremberg becomes Frankfurt."
+    },
+    {
+      "start": 44.19,
+      "end": 45.69,
+      "text": "On desktop, inspect the evidence."
+    },
+    {
+      "start": 45.69,
+      "end": 49.01,
+      "text": "Control artist and comparison artist checks."
+    },
+    {
+      "start": 57.150000000000006,
+      "end": 58.95,
+      "text": "Real Qloo results are labeled separately."
+    },
+    {
+      "start": 59.63,
+      "end": 60.71,
+      "text": "Missing data stays unknown."
+    },
+    {
+      "start": 61.550000000000004,
+      "end": 63.27,
+      "text": "Fit is not a ticket sales forecast."
+    },
+    {
+      "start": 68.25999999999999,
+      "end": 69.98,
+      "text": "Export a promoter draft and audit."
+    },
+    {
+      "start": 70.4,
+      "end": 73.52000000000001,
+      "text": "Availability, fees, and booking still need confirmation."
+    },
+    {
+      "start": 80.21,
+      "end": 80.97,
+      "text": "Need another lead?"
+    },
+    {
+      "start": 81.44999999999999,
+      "end": 82.43,
+      "text": "Try the research demo."
+    },
+    {
+      "start": 82.87,
+      "end": 85.35,
+      "text": "Check its sources, then accept it into comparison."
+    },
+    {
+      "start": 86.19,
+      "end": 87.44999999999999,
+      "text": "The checker runs again."
+    },
+    {
+      "start": 93.19,
+      "end": 95.47,
+      "text": "Tour Rescue, keep the tour moving."
+    },
+    {
+      "start": 95.47,
+      "end": 96.45,
+      "text": "Try the app."
+    }
+  ]
+}

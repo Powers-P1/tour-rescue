@@ -120,3 +120,7 @@
   .product-site .line-facts p+p {border-left:0;border-top:1px solid var(--line);padding-left:0;}
 }
 @media(min-width:1100px){.judge-step-columns{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.judge-walkthrough{padding-top:36px;padding-bottom:40px;scroll-margin-top:24px}
+.judge-walkthrough h2{font-size:clamp(31px,3vw,38px)}
+.judge-walkthrough>p:not(.eyebrow){max-width:72ch;color:var(--muted);font-size:16px}
+.judge-walkthrough video{display:block;width:100%;max-width:960px;height:auto;aspect-ratio:16/9;object-fit:contain;background:#0f181d;border:1px solid var(--line);border-radius:10px;margin:24px auto 0}

@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "tour-rescue.film-qa.v1",
+  "reviewedAtUtc": "2026-10-23T16:59:36.306463+00:00",
+  "film": "TourRescue-jury-final-v2.mp4",
+  "sha256": "9d5e25ece393070f3ab889e4cb2a41c8549259473b449d06e4863725d2413bb2",
+  "durationSeconds": 100,
+  "video": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 60,
+    "frames": 6000,
+    "codec": "H.264 High",
+    "pixelFormat": "yuv420p",
+    "colorSpace": "BT.709"
+  },
+  "audio": {
+    "codec": "AAC LC",
+    "channels": 2,
+    "sampleRate": 48000,
+    "integratedLufs": -17.12,
+    "truePeakDbtp": -4.28,
+    "loudnessRangeLu": 3.1
+  },
+  "fullDecode": "PASS; 6000 frames, no errors",
+  "independentReview": {
+    "status": "PASS within stated scope",
+    "encodedFramesInspected": 50,
+    "materialFindings": [],
+    "correctedPriorFindings": [
+      "Clean drawn arrow",
+      "Explicit return to synthetic 354.1 km",
+      "Separate saved AI 350 km boundary",
+      "Actual source links before Accept"
+    ],
+    "scrolls": "Five actual encoded intermediate scroll sequences inspected; no hole, seam or distorted text observed",
+    "captions": "22 monotonic in-bounds cues; ASR/mix mapping retains every word within trim boundaries"
+  },
+  "limitations": [
+    "No subjective audio listening or pronunciation approval",
+    "Sampled encoded-frame review rather than all 6000 frames manually viewed in real time",
+    "No physical-phone installation claim",
+    "Player browser/production checks remain with the primary task"
+  ],
+  "cleanup": "All reviewer one-off Python/FFmpeg processes exited; no browser/provider/server started by packaging"
+}
