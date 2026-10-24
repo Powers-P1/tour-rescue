@@ -172,6 +172,8 @@ fieldset { border: 0; min-width: 0; padding: 0; margin: 0; }
 .sheet-grid strong { font-size: 14px; }
 .sheet-grid span { font-size: 11px; color: #4d5f67; }
 .sheet-paper ul { margin: 4px 0 16px; padding-left: 19px; }
+.sheet-paper .sheet-next-steps { margin: 4px 0 12px; padding-left: 19px; }
+.sheet-next-steps li + li { margin-top: 5px; }
 .sheet-paper footer { border-top: 1px solid #b5b6b2; padding-top: 10px; font-size: 10px; margin-top: 16px; overflow-wrap: anywhere; color: #52636a; }
 #print-area { display: none; }
 @media (min-width: 980px) {
@@ -263,11 +265,13 @@ fieldset { border: 0; min-width: 0; padding: 0; margin: 0; }
   html, body { background: white !important; color: black !important; margin: 0; }
   #app { display: none !important; }
   #print-area { display: block !important; }
-  #print-area .sheet-paper { color: #17252b; width: 100%; max-width: none; border-radius: 0; padding: 0; font: 11pt/1.32 "IBM Plex Sans", Arial, sans-serif; }
+  #print-area .sheet-paper { color: #17252b; width: 100%; max-width: none; border-radius: 0; padding: 0; font: 9pt/1.28 "IBM Plex Sans", Arial, sans-serif; zoom: var(--promoter-print-scale, 1); }
   #print-area .sheet-paper h1 { font-size: 22pt; }
   #print-area .sheet-paper h2 { font-size: 13pt; }
-  #print-area .sheet-paper footer { font-size: 9pt; }
   #print-area .sheet-grid > div { break-inside: avoid; }
+  #print-area .sheet-grid { margin: 12px 0; }
+  #print-area .sheet-paper h2 { margin-top: 12px; }
+  #print-area .sheet-paper footer { font-size: 8pt; margin-top: 10px; }
   #print-area .sheet-paper { break-after: avoid; }
 }
 

@@ -49,6 +49,43 @@ function browserStorage(): TourStorage | undefined {
 const focusable = 'button:not([disabled]), a[href], input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])';
 const clamp = (value: number, minimum: number, maximum: number) => Math.max(minimum, Math.min(maximum, value));
 
+export interface GuideRectangle { readonly left:number;readonly top:number;readonly width:number;readonly height:number }
+/** Place the coach and, when needed, move the control into the remaining free band. */
+export function placeGuideCard(view:GuideRectangle,card:{readonly width:number;readonly height:number},
+  control:GuideRectangle|null,compactDock:boolean,scrollRange:{readonly minimum:number;readonly maximum:number}) {
+  const margin=16,gap=14,right=view.left+view.width,bottom=view.top+view.height;
+  const minLeft=view.left+margin,minTop=view.top+margin;
+  const maxLeft=Math.max(minLeft,right-card.width-margin),maxTop=Math.max(minTop,bottom-card.height-margin);
+  let left=maxLeft,top=maxTop,scrollDelta=0;
+  if(!control)return {left,top,scrollDelta};
+  const controlRight=control.left+control.width,controlBottom=control.top+control.height;
+  if(compactDock){
+    // A stable dock lets adjacent actions scroll clear instead of following the goal.
+    if(controlBottom>top-gap&&control.top<bottom)
+      scrollDelta=clamp(controlBottom+gap-top,scrollRange.minimum,scrollRange.maximum);
+  }else if(controlRight+gap+card.width<=right-margin){
+    left=controlRight+gap;top=clamp(control.top,minTop,maxTop);
+  }else if(control.left-gap-card.width>=minLeft){
+    left=control.left-gap-card.width;top=clamp(control.top,minTop,maxTop);
+  }else{
+    left=clamp(control.left,minLeft,maxLeft);
+    if(controlBottom+gap+card.height<=bottom-margin)top=controlBottom+gap;
+    else if(control.top-gap-card.height>=minTop)top=control.top-gap-card.height;
+    else{
+      const choices=[{top:maxTop,controlTop:maxTop-gap-control.height},
+        {top:minTop,controlTop:minTop+card.height+gap}]
+        .map(choice=>({...choice,scrollDelta:control.top-choice.controlTop}))
+        .filter(choice=>choice.controlTop>=minTop&&choice.controlTop+control.height<=bottom-margin&&
+          choice.scrollDelta>=scrollRange.minimum&&choice.scrollDelta<=scrollRange.maximum)
+        .sort((a,b)=>Math.abs(a.scrollDelta)-Math.abs(b.scrollDelta));
+      const choice=choices[0];
+      if(choice){top=choice.top;scrollDelta=choice.scrollDelta;}
+      else top=control.top>view.top+view.height/2?minTop:maxTop;
+    }
+  }
+  return {left:clamp(left,minLeft,maxLeft),top:clamp(top,minTop,maxTop),scrollDelta};
+}
+
 /** Nonmodal coach marks: real controls remain clickable, keyboard-focusable and unmodified. */
 export function createGuidedTour(options: GuidedTourOptions): GuidedTourController {
   const storage = options.storage ?? browserStorage();
@@ -65,6 +102,7 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
   let temporaryTabIndex = false;
   let saved = true;
   let compact = false;
+  let revealControl = false;
 
   const layer = el('div', 'guided-tour-layer');
   layer.hidden = true;
@@ -85,6 +123,7 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
     card.classList.toggle('is-compact', compact);
     minimize.textContent = compact ? '+' : '−';
     minimize.setAttribute('aria-label', compact ? 'Expand guided tour' : 'Minimize guided tour');
+    revealControl = true;
     refresh();
   }, 'guided-tour-minimize');
   minimize.setAttribute('aria-label', 'Minimize guided tour');
@@ -157,25 +196,54 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
       width: view?.width ?? window.innerWidth, height: view?.height ?? window.innerHeight,
     };
     const right = visible.left + visible.width;
-    const bottom = visible.top + visible.height;
+    let bottom = visible.top + visible.height;
+    const mobile = visible.width <= 600;
+    if(mobile)for(const nav of document.querySelectorAll<HTMLElement>('.mobile-tabs')){
+      const rect=nav.getBoundingClientRect();
+      if(getComputedStyle(nav).position==='fixed'&&rect.width>0&&rect.height>0&&
+        rect.top<bottom&&rect.bottom>visible.top&&rect.left<right&&rect.right>visible.left)
+        bottom=Math.min(bottom,rect.top);
+    }
+    const previousTarget=target;
     setTarget(options.getTarget(progress.step));
+    if(target!==previousTarget&&target?.matches(focusable)&&!options.objective?.(progress.step).complete)shouldScroll=true;
     focus.disabled = target === null;
+    const reveal=shouldScroll||revealControl;
+    revealControl=false;
     if (shouldScroll && target) {
       target.scrollIntoView({ behavior: 'auto', block: target.getBoundingClientRect().height > visible.height * .55 ? 'start' : 'center' });
       shouldScroll = false;
     }
     const margin = 16;
-    const gap = 14;
     const width = Math.max(1, Math.min(356, visible.width - margin * 2));
     card.style.width = `${width}px`;
-    card.style.maxHeight = `${Math.max(1, visible.height - margin * 2)}px`;
-    const height = card.getBoundingClientRect().height;
-    const minimumTop = visible.top + margin;
-    const minimumLeft = visible.left + margin;
-    const roomBottom = Math.max(minimumTop, bottom - height - margin);
-    let left = Math.max(minimumLeft, right - width - margin);
-    let topPosition = roomBottom;
     const rect = target?.getBoundingClientRect();
+    let protectedRect:GuideRectangle|null=rect??null;
+    const focused=document.activeElement;
+    if(focused instanceof HTMLElement&&!layer.contains(focused)&&focused.matches(focusable)&&focused.getClientRects().length){
+      const focusedRect=focused.getBoundingClientRect();
+      if(rect&&rect.bottom>visible.top&&rect.top<bottom){
+        const combined={left:Math.min(rect.left,focusedRect.left),top:Math.min(rect.top,focusedRect.top),
+          width:Math.max(rect.right,focusedRect.right)-Math.min(rect.left,focusedRect.left),
+          height:Math.max(rect.bottom,focusedRect.bottom)-Math.min(rect.top,focusedRect.top)};
+        protectedRect=combined.height<=bottom-visible.top-32-14-76?combined:focusedRect;
+      }else protectedRect=focusedRect;
+    }
+    // On a short phone, allow the coach to scroll internally before covering a control.
+    const usableHeight=bottom-visible.top;
+    const controlHeight=protectedRect&&protectedRect.height<=usableHeight-32-14-76?protectedRect.height:48;
+    card.style.maxHeight = `${Math.max(76,usableHeight-margin*2-(mobile&&!compact?controlHeight+14:0))}px`;
+    const height = card.getBoundingClientRect().height;
+    const scrolling=document.scrollingElement??document.documentElement;
+    const placement=placeGuideCard({...visible,height:usableHeight},{width,height},protectedRect,mobile&&compact,
+      {minimum:-window.scrollY,maximum:Math.max(0,scrolling.scrollHeight-scrolling.clientHeight)-window.scrollY});
+    card.style.left = `${placement.left}px`;
+    card.style.top = `${placement.top}px`;
+    if(placement.scrollDelta&&(!(mobile&&compact)||reveal)){
+      const before=window.scrollY;
+      window.scrollBy({top:placement.scrollDelta,behavior:'auto'});
+      if(Math.abs(window.scrollY-before)>.5){revealControl=true;refresh();return;}
+    }
     highlight.hidden = !rect || rect.bottom <= visible.top || rect.top >= bottom || rect.right <= visible.left || rect.left >= right;
     if (rect) {
       const x = clamp(rect.left - 5, visible.left + 3, right - 3);
@@ -184,21 +252,7 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
       highlight.style.top = `${y}px`;
       highlight.style.width = `${Math.max(0, Math.min(right - 3, rect.right + 5) - x)}px`;
       highlight.style.height = `${Math.max(0, Math.min(bottom - 3, rect.bottom + 5) - y)}px`;
-      if (rect.right + gap + width <= right - margin) {
-        left = rect.right + gap;
-        topPosition = clamp(rect.top, minimumTop, roomBottom);
-      } else if (rect.left - gap - width >= minimumLeft) {
-        left = rect.left - gap - width;
-        topPosition = clamp(rect.top, minimumTop, roomBottom);
-      } else {
-        left = clamp(rect.left, minimumLeft, right - width - margin);
-        if (rect.bottom + gap + height <= bottom - margin) topPosition = rect.bottom + gap;
-        else if (rect.top - gap - height >= minimumTop) topPosition = rect.top - gap - height;
-        else topPosition = rect.top > visible.top + visible.height / 2 ? minimumTop : roomBottom;
-      }
     }
-    card.style.left = `${clamp(left, minimumLeft, right - width - margin)}px`;
-    card.style.top = `${clamp(topPosition, minimumTop, roomBottom)}px`;
     if (shouldFocus) { shouldFocus = false; card.focus({ preventScroll: true }); }
   }
 
@@ -289,16 +343,12 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
   }
 
   function keepFocusVisible(destination: HTMLElement): void {
-    if (!active || !target?.contains(destination)) return;
-    const rect = destination.getBoundingClientRect();
-    const floating = card.getBoundingClientRect();
-    if (rect.right <= floating.left || rect.left >= floating.right || rect.bottom <= floating.top || rect.top >= floating.bottom) return;
-    const view = window.visualViewport;
-    const middle = (view?.offsetTop ?? 0) + (view?.height ?? window.innerHeight) / 2;
-    const desired = floating.top < middle ? floating.bottom + 14 : floating.top - rect.height - 14;
-    window.scrollBy({ top: rect.top - desired, behavior: 'auto' });
+    if (!active || layer.contains(destination) || !destination.matches(focusable)) return;
+    revealControl=true;
     refresh();
   }
+
+  function viewportChanged():void {revealControl=true;refresh();}
 
   function keydown(event: KeyboardEvent): void {
     if (active && event.key === 'Escape') { event.preventDefault(); exit(false); }
@@ -308,13 +358,13 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
   }
   const observer = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(refresh);
   observer?.observe(card);
-  window.addEventListener('resize', refresh);
+  window.addEventListener('resize', viewportChanged);
   window.addEventListener('scroll', refresh, true);
   document.addEventListener('keydown', keydown);
   document.addEventListener('focusin', focusChanged);
   const viewport = window.visualViewport;
-  viewport?.addEventListener('resize', refresh);
-  viewport?.addEventListener('scroll', refresh);
+  viewport?.addEventListener('resize', viewportChanged);
+  viewport?.addEventListener('scroll', viewportChanged);
 
   return {
     start: trigger => begin(false, trigger), resume: trigger => begin(true, trigger), goTo, refresh,
@@ -325,12 +375,12 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
       disposed = true;
       if (frame) window.cancelAnimationFrame(frame);
       observer?.disconnect();
-      window.removeEventListener('resize', refresh);
+      window.removeEventListener('resize', viewportChanged);
       window.removeEventListener('scroll', refresh, true);
       document.removeEventListener('keydown', keydown);
       document.removeEventListener('focusin', focusChanged);
-      viewport?.removeEventListener('resize', refresh);
-      viewport?.removeEventListener('scroll', refresh);
+      viewport?.removeEventListener('resize', viewportChanged);
+      viewport?.removeEventListener('scroll', viewportChanged);
       layer.remove();
     },
   };

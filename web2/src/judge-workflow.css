@@ -74,3 +74,12 @@
 .guided-tour-actions .button-primary { background:var(--accent); color:var(--on-accent); }
 @media(max-width:600px){.decision-evidence .visual-panel{padding:16px 8px}.decision-evidence .control-evidence{padding:18px}.decision-evidence .fit-scatter svg{height:300px}}
 @media(max-width:600px){.recommendation-change{grid-template-columns:1fr;padding:18px}.recommendation-arrow{display:none}.recommendation-change p,.recommendation-change>.text-button{grid-column:1}.recommendation-change>div+div{border-top:1px solid var(--border);padding-top:12px}}
+.recorded-qloo-study{margin:28px 0;padding:20px 0;border-top:1px solid var(--border);font-size:15px;line-height:1.5}
+.recorded-qloo-study h2{font-size:24px;margin-bottom:12px}
+.recorded-qloo-study p{color:var(--muted)}
+.recorded-study-results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:20px 0}
+.recorded-study-results>div{border-top:1px solid var(--border);padding-top:12px;min-width:0}
+.recorded-study-results dt{font-weight:700;margin-bottom:7px}
+.recorded-study-results dd{margin:0 0 8px;font-size:14px;color:var(--muted)}
+.recorded-qloo-study>a{display:inline-flex;min-height:48px;align-items:center;color:var(--accent);text-decoration:underline;text-underline-offset:4px}
+@media(max-width:790px){.recorded-study-results{grid-template-columns:minmax(0,1fr);gap:10px}}
