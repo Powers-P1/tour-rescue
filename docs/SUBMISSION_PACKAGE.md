@@ -12,7 +12,7 @@ Prepared 24 October 2026. The [handoff](HACKATHON_HANDOFF.md) records the releas
 - Direct sensitivity experiment: https://tour-rescue.pages.dev/app/#breakpoint
 - Public source: https://github.com/Powers-P1/tour-rescue
 - Licence: MIT, detectable in the repository About area.
-- Optional 100-second presentation: https://tour-rescue.pages.dev/judges/#walkthrough
+- Optional 100-second presentation: https://youtu.be/PT3Iysktgn0 (Damian's channel, prepared English captions); also https://tour-rescue.pages.dev/judges/#walkthrough
 - Built with: Qloo API, Claude Sonnet 5.5, TypeScript, Cloudflare Pages and Workers, SQLite Durable Objects, an OSRM road snapshot, HTML Canvas and a scoped PWA service worker.
 
 ## Description
@@ -62,7 +62,7 @@ No sign-in or key is needed for the saved demo. Keep live research separate from
 5. Optionally open AI Rescue in saved-example mode, choose either corridor-repair or evidence-gaps, inspect sources and explicitly accept a checked lead. Revalidation updates one comparison card, preserves the other and includes accepted sources in the current audit. UNKNOWN availability and fees stay UNKNOWN. Cancellation or an error preserves the previous comparison.
 6. Optionally explore the separate SOS tutorial. Its supplier approval is simulated and sends no contact or payment.
 
-Use Node 24 and `npm ci --ignore-scripts`, `npm run check`, `npm run web:build`, `npm run worker:build` for local verification. The Pages build comes from **web2/** into **web/dist**. Offline tests need no provider credential. Do not publish raw Qloo replies or private band excerpts in source.
+Use Node 24 and `npm ci --ignore-scripts`, `npm run check`, `npm run web:build`, `npm run worker:build` for local verification. The guide-geometry application revision `2ad5133` passes **394 offline tests**, strict types, the Pages build and both core/browser CI. The Pages build comes from **web2/** into **web/dist**. Offline tests need no provider credential. Do not publish raw Qloo replies or private band excerpts in source.
 
 ## Judging criteria and evidence
 
@@ -75,6 +75,6 @@ Use Node 24 and `npm ci --ignore-scripts`, `npm run check`, `npm run web:build`,
 
 ## Media, rights and final owner actions
 
-The approved [final-v2 film package](demo/final-v2/README.md) contains the 100-second H.264/AAC film, English narration, 22-cue VTT/SRT subtitles, poster, provenance and QA. Its SHA-256 is `9d5e25ece393070f3ab889e4cb2a41c8549259473b449d06e4863725d2413bb2`. It uses actual responsive app captures with edited presentation motion. It shows the core rescue journey; SOS is a separate extension, not an unshown claim about this film. No footage or soundtrack from reference videos was reused. Retain generation/account rights evidence.
+The approved [final-v2 film package](demo/final-v2/README.md) contains the 100-second H.264/AAC film, English narration, 22-cue VTT/SRT subtitles, poster, provenance and QA. Its SHA-256 is `9d5e25ece393070f3ab889e4cb2a41c8549259473b449d06e4863725d2413bb2`. It uses actual responsive app captures with edited presentation motion. It shows the core rescue journey; SOS is a separate extension, not an unshown claim about this film. It was published on Damian's YouTube channel **UCpJTOM_Aiaysdgqpl6N8yyA** on 24 October, with the prepared SRT imported and the approved poster. YouTube's automated copyright check reported no issues; that is not an independent rights certificate. No footage or soundtrack from reference videos was reused. Retain generation/account rights evidence.
 
 The [official rules](https://qloo.devpost.com/rules), checked 24 October, require a working demo, English description and a public repository with an open-source licence visible in About. Video is optional. Maintain free judging access until the judging period ends: **5 November, 23:45 Eastern / 6 November, 05:45 Warsaw**. Damian must confirm eligibility, team representation and rights, then personally submit Devpost before **30 October 2026, 23:45 EDT / 31 October, 04:45 Warsaw** and retain the receipt. The internal target is 29 October. This package accepts no legal terms and submits nothing on the owner's behalf.

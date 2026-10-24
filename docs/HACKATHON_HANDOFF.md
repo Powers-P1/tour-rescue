@@ -13,7 +13,7 @@ The app and judging route are deployed. No Devpost entry has been submitted and 
 - English film captions/subtitles: [VTT](https://tour-rescue.pages.dev/video/tour-rescue-final-v2.en.vtt), [SRT](https://tour-rescue.pages.dev/video/tour-rescue-final-v2.en.srt). Default captions remain enabled in the player.
 - Direct breakpoint: https://tour-rescue.pages.dev/app/#breakpoint
 - Source: https://github.com/Powers-P1/tour-rescue
-- Optional 100-second presentation: https://tour-rescue.pages.dev/judges/#walkthrough ([canonical film package](demo/final-v2/README.md)). A YouTube URL is optional, not required for this presentation; no YouTube upload or Devpost submission has been made by this change.
+- Optional 100-second presentation: https://youtu.be/PT3Iysktgn0 (published 24 October on Damian's channel, prepared English captions and approved poster), also https://tour-rescue.pages.dev/judges/#walkthrough ([canonical film package](demo/final-v2/README.md)). YouTube is optional for this contest. No Devpost submission has been made.
 
 Follow cancellation → three options → change the extra-distance cap from 350 to 354.1 km → Nuremberg becomes Frankfurt → inspect evidence → export promoter document/current audit. Four confirmed concerts remain fixed. Optional AI is entered explicitly; accept a checked proposal to update a comparison card and export its sources. SOS, agency and planner are labelled sample extensions.
 
@@ -29,7 +29,7 @@ The mobile-first PWA also has a full desktop workspace, six-step keyboard-access
 
 ## Checks and remaining manual acceptance
 
-The final release report records the exact revision, test count, builds, CI and final jury decisions. Browser suites cover 165 states, seven workflows, 35 responsive cases, both AI examples/explicit acceptance, current audit export, Back/Forward identity, saved reload, day off, guide, one-page A4, PNG and PWA. See the validation documents for provenance and actual live usage. Historical test counts belong to their stated revisions. The [copy-ready English submission package](SUBMISSION_PACKAGE.md) gives final description, testing instructions, criteria mapping and limits.
+The [final focus acceptance](validation/submission-focus-2026-10-24.md) records the application revision, **394 tests**, builds, CI and three independent jury decisions. Exact production receipts are in the owner kit. Browser suites cover 165 states, seven workflows, 35 responsive cases, both AI examples/explicit acceptance, current audit export, Back/Forward identity, saved reload, day off, guide, one-page A4, PNG and PWA. The final mobile guide regression checks normal clicks on Recheck, the neighboring promoter action, Replay and Accept at 390×844. See the validation documents for provenance and actual live usage. Historical test counts belong to their stated revisions. The [copy-ready English submission package](SUBMISSION_PACKAGE.md) gives final description, testing instructions, criteria mapping and limits.
 
 | Check requiring a person | Status | Record before claiming it |
 | --- | --- | --- |
