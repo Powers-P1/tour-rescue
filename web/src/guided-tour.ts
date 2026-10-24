@@ -253,11 +253,14 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
     card.style.maxHeight = `${Math.max(76,usableHeight-margin*2-(mobile&&!compact?controlHeight+14:0))}px`;
     const height = card.getBoundingClientRect().height;
     const scrolling=document.scrollingElement??document.documentElement;
-    const placement=placeGuideCard({...visible,height:usableHeight},{width,height},protectedRect,mobile&&compact,
+    const readingEvidence=mobile&&progress.step===3&&!!options.objective?.(progress.step).complete;
+    const placement=placeGuideCard({...visible,height:usableHeight},{width,height},protectedRect,mobile&&(compact||readingEvidence),
       {minimum:-window.scrollY,maximum:Math.max(0,scrolling.scrollHeight-scrolling.clientHeight)-window.scrollY});
     card.style.left = `${placement.left}px`;
     card.style.top = `${placement.top}px`;
-    if(placement.scrollDelta&&(!(mobile&&compact)||reveal)){
+    // Once evidence is open, let the reader scroll its contents. Reposition only
+    // after an explicit focus/reveal request, rather than snapping to its summary.
+    if(placement.scrollDelta&&(!(mobile&&compact)||reveal)&&(!readingEvidence||reveal)){
       const before=window.scrollY;
       window.scrollBy({top:placement.scrollDelta,behavior:'auto'});
       if(Math.abs(window.scrollY-before)>.5){revealControl=true;refresh();return;}

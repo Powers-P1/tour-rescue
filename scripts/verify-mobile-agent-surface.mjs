@@ -89,6 +89,18 @@ try{
       await sources.locator('ul').waitFor({state:'visible'});
       await page.waitForFunction(()=>!document.querySelector('.guided-tour-actions .button-primary')?.disabled);
       assert.ok(await next.isEnabled(),'opening Sources & limitations satisfies the evidence objective');
+      if(width===390){
+       const before=await page.evaluate(()=>scrollY);
+       await page.mouse.move(8,400);await page.mouse.wheel(0,180);
+       await page.waitForFunction(before=>scrollY>before+90,before);
+       const first=sources.locator('ul > li').first();
+       await centerHit(page,first,'opened source text stays readable after ordinary wheel scrolling');
+       const readable=await first.evaluate(node=>{
+        const r=node.getBoundingClientRect(),coach=document.querySelector('.guided-tour-card').getBoundingClientRect();
+        return r.bottom<=coach.top||r.top>=coach.bottom;
+       });
+       assert.ok(readable,'the whole first source entry is outside the expanded coach');
+      }
       if(width===390)await page.screenshot({path:join(out,'guide-step4-sources-open-390.png')});
       await page.locator('details').filter({hasText:'Tag Bridge · sourced tags only'}).locator('summary').first().click();
       await page.locator('.tag-state').waitFor({state:'visible'});
@@ -125,7 +137,7 @@ try{
   await page.locator('.tour-knowledge article').filter({hasText:'Our technical rider'}).locator('[data-action=knowledge-delete]').click();assert.equal(await page.locator('.tour-knowledge article').count(),0);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(errors,[]);
   checks.push({width,evidence:'passed',png:'passed',printPdf:'generated',sixStepGuide:'passed',escapeAndRestore:'passed',
-   ...(width===390?{expandedRecheckCenterHit:'passed',expandedSourcesCenterClick:'passed',compactPromoterCenterClick:'passed',compactAboveFixedNav:'passed',
+   ...(width===390?{expandedRecheckCenterHit:'passed',expandedSourcesCenterClick:'passed',expandedSourcesReading:'passed',compactPromoterCenterClick:'passed',compactAboveFixedNav:'passed',
     expandedReplayAndAcceptCenterHit:'passed'}:{})});await context.close();
  }
  // Android native-prompt hook, close affordance and dismissal across reload.
