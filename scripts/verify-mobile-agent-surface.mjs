@@ -10,11 +10,24 @@ const out=process.env.QA_OUTPUT??join(tmpdir(),'tour-rescue-mobile-agent');let b
 const launch={headless:true,...(process.env.PLAYWRIGHT_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_EXECUTABLE_PATH}:{})};
 const act=(p,id)=>p.locator('[data-action="'+id+'"]:visible').first();
 async function downloaded(p,id){const pending=p.waitForEvent('download');await act(p,id).click();const d=await pending;return {bytes:await readFile(await d.path()),name:d.suggestedFilename()};}
+async function centerHit(page,control,label){
+ let result;
+ for(let attempt=0;attempt<30;attempt++){
+  result=await control.evaluate(node=>{
+   const r=node.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,hit=document.elementFromPoint(x,y);
+   return {clear:r.width>0&&r.height>0&&r.top>=0&&r.bottom<=innerHeight&&!!hit&&node.contains(hit),
+    rect:{x:r.left,y:r.top,width:r.width,height:r.height},hit:hit?.textContent?.slice(0,100)};
+  });
+  if(result.clear)return;
+  await page.waitForTimeout(50);
+ }
+ assert.ok(result?.clear,label+': '+JSON.stringify(result));
+}
 try{
  for(let i=0;i<60;i++){try{if((await fetch(base)).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
  await mkdir(out,{recursive:true});browser=await chromium.launch(launch);
  for(const width of [390,1280]){
-  const context=await browser.newContext({viewport:{width,height:900},serviceWorkers:'block'});
+  const context=await browser.newContext({viewport:{width,height:width===390?844:900},serviceWorkers:'block'});
   const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));
   await context.route('**/*',r=>new URL(r.request().url()).origin===new URL(base).origin?r.continue():r.abort());
   await page.goto(base+'/app/#simulation');await page.locator('.sim-edit summary').click();
@@ -38,12 +51,50 @@ try{
     assert.equal(await page.getByRole('progressbar').getAttribute('aria-valuenow'),String(step));
     const next=page.getByRole('button',{name:step===6?'Finish tour':'Next',exact:true});
     assert.equal(await next.isEnabled(),false,'step needs an actual outcome');
-    if(step===1)await act(page,'rescue').click();
+    if(step===1){
+      if(width===390){
+       await page.getByRole('button',{name:'Minimize guided tour',exact:true}).click();
+       await centerHit(page,act(page,'rescue'),'compact guide leaves Rescue reachable');
+       const card=await page.locator('.guided-tour-card').boundingBox(),nav=await page.locator('.home-view .mobile-tabs').boundingBox();
+       assert.ok(card&&nav&&card.y+card.height<nav.y,'compact guide docks above fixed mobile navigation');
+       await page.getByRole('button',{name:'Expand guided tour',exact:true}).click();
+      }
+      await act(page,'rescue').click();
+    }
     if(step===2)await act(page,'review').click();
-    if(step===3){await page.locator('.sim-edit summary').click();await page.locator('#sim-cap').fill('354.1');await act(page,'sim-recheck').click();}
+    if(step===3){
+      await page.locator('.sim-edit summary').click();await page.locator('#sim-cap').fill('354.1');
+      if(width===390){
+       assert.equal(await page.locator('.guided-tour-card.is-compact').count(),0,'regression uses the expanded card');
+       await centerHit(page,act(page,'sim-recheck'),'step 3 after fill: expanded guide leaves Recheck center reachable');
+       await page.screenshot({path:join(out,'guide-step3-expanded-390.png')});
+      }
+      await act(page,'sim-recheck').click();
+      assert.equal(await page.locator('[data-recommendation=after]').innerText(),'Frankfurt am Main');
+    }
     if(step===4)await page.locator('details').filter({hasText:'Tag Bridge · sourced tags only'}).locator('summary').first().click();
-    if(step===5)await downloaded(page,'audit');
-    if(step===6){await act(page,'ai-replay').click();await page.locator('[data-action=ai-accept]').first().click();}
+    if(step===5){
+      await downloaded(page,'audit');
+      if(width===390){
+       await page.getByRole('button',{name:'Minimize guided tour',exact:true}).click();
+       await centerHit(page,act(page,'evidence-proposal'),'step 5 compact guide leaves adjacent promoter action center reachable');
+       await page.screenshot({path:join(out,'guide-step5-compact-390.png')});
+       await act(page,'evidence-proposal').click();
+       await page.locator('#main .sheet-paper').waitFor({state:'visible'});
+       assert.match(await page.locator('#main .sheet-paper').innerText(),/Frankfurt am Main/);
+       await act(page,'back').click();await page.locator('.decision-evidence').waitFor({state:'visible'});
+       await page.getByRole('button',{name:'Expand guided tour',exact:true}).click();
+      }
+    }
+    if(step===6){
+      if(width===390)await centerHit(page,act(page,'ai-replay'),'step 6 expanded guide leaves Replay center reachable');
+      await act(page,'ai-replay').click();
+      if(width===390){
+       await centerHit(page,page.locator('[data-action=ai-accept]').first(),'step 6 expanded guide leaves Accept center reachable');
+       await page.screenshot({path:join(out,'guide-step6-expanded-390.png')});
+      }
+      await page.locator('[data-action=ai-accept]').first().click();
+    }
     await page.getByRole('button',{name:step===6?'Finish tour':'Next',exact:true}).click();
   }
   assert.equal(await page.locator('.guided-tour-layer:visible').count(),0);
@@ -53,7 +104,9 @@ try{
   await page.reload();await page.locator('.tour-knowledge article').filter({hasText:'Our technical rider'}).waitFor();await page.locator('.tour-knowledge article').filter({hasText:'Our technical rider'}).locator('[data-action=knowledge-edit]').click();await page.locator('#knowledge-text').fill('Updated: acoustic piano only.');await act(page,'knowledge-save').click();assert.match(await page.locator('.tour-knowledge').innerText(),/Updated: acoustic piano only/);
   await page.locator('.tour-knowledge article').filter({hasText:'Our technical rider'}).locator('[data-action=knowledge-delete]').click();assert.equal(await page.locator('.tour-knowledge article').count(),0);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(errors,[]);
-  checks.push({width,evidence:'passed',png:'passed',printPdf:'generated',sixStepGuide:'passed',escapeAndRestore:'passed'});await context.close();
+  checks.push({width,evidence:'passed',png:'passed',printPdf:'generated',sixStepGuide:'passed',escapeAndRestore:'passed',
+   ...(width===390?{expandedRecheckCenterHit:'passed',compactPromoterCenterClick:'passed',compactAboveFixedNav:'passed',
+    expandedReplayAndAcceptCenterHit:'passed'}:{})});await context.close();
  }
  // Android native-prompt hook, close affordance and dismissal across reload.
  const android=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,userAgent:'Mozilla/5.0 (Linux; Android14) AppleWebKit/537.36 Chrome/130.0.0.0 Mobile Safari/537.36'});
