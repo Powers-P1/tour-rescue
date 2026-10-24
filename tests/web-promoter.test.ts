@@ -205,6 +205,8 @@ test('v2 actual preview handler keeps the browsed candidate and current threshol
      assert.equal(sheet.runId,simulation.sourceResult.audit.runId);
      assert.ok(html!.includes('<h1>'+escape(sheet.artist)+' - '+escape(sheet.city)+'</h1>'));
      assert.ok(html!.includes('distance cap '+cap+' km'));
+     assert.ok(html!.includes('<span>Daily driving limit: '+escape(sheet.dailyDrivingLimit)+'</span>'));
+     assert.doesNotMatch(html!,/Max daily:/);
      assert.ok(html!.includes(escape(sheet.confirmationNote)));
      for(const step of sheet.nextSteps)assert.ok(html!.includes('<li>'+escape(step)+'</li>'));
      assert.ok(context.proposalMessage.includes(sheet.city));assert.ok(context.proposalMessage.includes(sheet.date));

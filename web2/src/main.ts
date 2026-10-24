@@ -373,7 +373,7 @@ function sheetHtml(sheet: PromoterSheetModel): string {
     '<h1>' + HTML(sheet.artist) + ' - ' + HTML(sheet.city) + '</h1>' +
     '<p class="sheet-date">'+(sheet.kind==='day-off'?'Day off: ':'Proposed: ') + HTML(sheet.date) + ' · ' + HTML(sheet.timeZone) + '</p>' +
     '<p>' + HTML(sheet.provenanceNote) + '</p>' +
-    '<div class="sheet-grid"><div><small>Route & constraints</small><strong>' + HTML(sheet.extraDistance) + ' additional distance</strong><span>'+HTML(sheet.extraDriving)+' added driving · distance cap '+HTML(sheet.distanceLimit)+'</span><span>Max daily: ' + HTML(sheet.dailyDrivingLimit) + '</span></div>' +
+    '<div class="sheet-grid"><div><small>Route & constraints</small><strong>' + HTML(sheet.extraDistance) + ' additional distance</strong><span>'+HTML(sheet.extraDriving)+' added driving · distance cap '+HTML(sheet.distanceLimit)+'</span><span>Daily driving limit: ' + HTML(sheet.dailyDrivingLimit) + '</span></div>' +
     '<div><small>Qloo cultural affinity</small><strong>' + HTML(sheet.fit) + '</strong><span>' + HTML(sheet.fitNote) + '</span></div>' +
     '<div><small>Decision checks</small><strong>' + HTML(sheet.decisionStatus) + '</strong><span>' + HTML(sheet.recommendation) + '</span></div>' +
     '<div><small>'+(sheet.kind==='day-off'?'Day-off plan':'Venue & contact')+'</small><strong>'+HTML(sheet.confirmationNote)+'</strong><span>'+HTML(sheet.venueNote)+'</span><span>Nothing booked or sent</span></div></div>' +
