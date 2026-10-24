@@ -336,7 +336,7 @@ function evidenceView():string {
      'UNKNOWN whether the control changes the recommendation. No successful change is inferred.')+'</p></section>'+
    '<details class="evidence-disclosure" open><summary>Leave one comparison artist out</summary><div data-evidence-sensitivity></div></details>'+
    '<details class="evidence-disclosure"><summary>Tag Bridge · sourced tags only</summary><div data-evidence-tags></div></details>'+
-   acceptedResearchSources()+'<details class="evidence-disclosure"><summary>Sources & limitations</summary><ul>'+projectRescue(source).evidence.map(item=>'<li>'+HTML(item)+'</li>').join('')+'</ul></details>'+
+   acceptedResearchSources()+'<details class="evidence-disclosure"><summary data-evidence-sources>Sources & limitations</summary><ul>'+projectRescue(source).evidence.map(item=>'<li>'+HTML(item)+'</li>').join('')+'</ul></details>'+
    (source.mode==='live'?renderLiveStudyReport(source,liveWorkerVersion):'')+renderRecordedQlooStudy()+
    '<div class="focused-bottom" data-tour="exports">'+primary('Download current audit ↓','audit')+
    (decision?.kind!=='day-off'&&decision?.status!=='FAIL'?softButton('Prepare promoter proposal →','evidence-proposal'):softButton('Review the three options →','rescue'))+
@@ -1367,6 +1367,7 @@ guide=createGuidedTour({
    if(step===5){const accept=root!.querySelector<HTMLButtonElement>('[data-action=ai-accept]:not([disabled])');if(accept)return accept;}
    return root!.querySelector<HTMLElement>(selectors[step]!)??root!.querySelector('[data-tour="'+['cancelled-date','options','breakpoint-limit','evidence','exports','ai'][step]+'"]')??root!.querySelector<HTMLElement>('#main,.focused-screen');
  },
+ getRelatedControls:step=>step===3?[...root!.querySelectorAll<HTMLElement>('[data-evidence-sources]')]:[],
  objective:step=>guideObjective(step,{screen,chosen:incident.phase==='chosen',cap:simulationModel?.maxAdditionalDistanceKm??null,winner:simulationModel?.afterRecommendation.optionId??null,evidenceReads:guideEvidenceReads,exports:guideExports,acceptedDemo:researchHistory.accepted.length}),
 });
 root!.addEventListener('toggle',event=>{const detail=event.target;if(guide?.isActive()&&detail instanceof HTMLDetailsElement){if(screen==='evidence'&&detail.open&&(detail.textContent?.includes('Tag Bridge')||detail.textContent?.includes('Sources & limitations')))guideEvidenceReads++;guide.refresh();}},true);

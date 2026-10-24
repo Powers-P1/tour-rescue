@@ -4,9 +4,10 @@ import {guideObjective,type GuideFacts} from '../web2/src/guide-objectives.ts';
 import {createDemoResult} from '../web/src/data.ts';
 import {projectSimulation} from '../web2/src/desktop-model.ts';
 // The browser module is checked with DOM types by web/tsconfig.json. Import its
-// pure placement function dynamically so Node's core typecheck stays DOM-free.
+// pure geometry functions dynamically so Node's core typecheck stays DOM-free.
 type Rect={left:number;top:number;width:number;height:number};
-const {placeGuideCard}:{placeGuideCard(view:Rect,card:{width:number;height:number},control:Rect|null,
+const {placeGuideCard,guideControlBounds}:{guideControlBounds(primary:Rect|null,related:readonly Rect[],view:Rect):Rect|null;
+ placeGuideCard(view:Rect,card:{width:number;height:number},control:Rect|null,
  compact:boolean,range:{minimum:number;maximum:number}):{left:number;top:number;scrollDelta:number}}=
  await import(new URL('../web/src/guided-tour.ts',import.meta.url).href);
 const baseline:GuideFacts={screen:'today',chosen:false,cap:350,winner:'replacement-nuremberg',evidenceReads:0,exports:0,acceptedDemo:0};
@@ -22,6 +23,19 @@ test('guide completion requires actual user outcomes, including the real solver 
 const phone:Rect={left:0,top:0,width:390,height:844};
 const range={minimum:-2000,maximum:2000};
 const overlaps=(a:Rect,b:Rect)=>a.left<b.left+b.width&&a.left+a.width>b.left&&a.top<b.top+b.height&&a.top+a.height>b.top;
+test('step 4 protects both evidence disclosure controls after normal scrolling',()=>{
+ const card={width:356,height:407};
+ for(const top of [255.71875,435.71875]){
+  const tags={left:24,top,width:342,height:48},sources={...tags,top:top+72};
+  const bounds=guideControlBounds(tags,[sources],phone);
+  assert.deepEqual(bounds,{...tags,height:120});
+  const placed=placeGuideCard(phone,card,bounds,false,range);
+  for(const control of [tags,sources])assert.equal(overlaps({...control,top:control.top-placed.scrollDelta},
+   {...card,left:placed.left,top:placed.top}),false);
+ }
+ const offscreenTags={left:24,top:-700,width:342,height:48},sources={...offscreenTags,top:330};
+ assert.deepEqual(guideControlBounds(offscreenTags,[sources],phone),sources,'protect the visible source when expanded tags are above the viewport');
+});
 test('expanded phone coach scrolls the actual goal and focused neighboring input into a free band',()=>{
  const card={width:356,height:440};
  // Reviewer reproduction: Recheck at y408 after filling 354.1 while expanded.
