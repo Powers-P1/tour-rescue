@@ -1,6 +1,6 @@
 # Final judging-focus acceptance — 24 October 2026
 
-The final application revision is `2ad51339b5ae6c221a46dc8f8b227b7c45aecd46`, tested at immutable preview https://bd5051f8.tour-rescue.pages.dev. Earlier full acceptance used `09cb9ef` / https://0cf246e4.tour-rescue.pages.dev; `822511b` / https://814408dc.tour-rescue.pages.dev added the accurate daily-driving-limit label. Subsequent submission-text/publication records do not change application assets. [PR #34](https://github.com/Powers-P1/tour-rescue/pull/34) identifies the source history.
+The last independently reaccepted application revision is `2ad51339b5ae6c221a46dc8f8b227b7c45aecd46`, tested at immutable preview https://bd5051f8.tour-rescue.pages.dev. Earlier full acceptance used `09cb9ef` / https://0cf246e4.tour-rescue.pages.dev; `822511b` / https://814408dc.tour-rescue.pages.dev added the accurate daily-driving-limit label. [PR #34](https://github.com/Powers-P1/tour-rescue/pull/34) identifies that source history. The step 4 follow-up below changes guide assets; its independent reacceptance is pending.
 
 ## Result
 
@@ -23,6 +23,12 @@ Three independent simulated jury/investor conversations, including a separate As
 At390×844, the guide could cover Recheck after entering354.1 in step3, a neighboring promoter button after minimizing in step5, or Replay in step6. The compact mobile card now docks within the visual viewport above any visible fixed navigation. Expanded placement reserves room for the active goal and nearby focused control and moves controls into a clear area. The guide may scroll internally on short screens; focus, step gates, Escape and workspace restoration remain intact.
 
 The real browser regression checks center hit-testing and ordinary, unforced clicks on Recheck after input, the adjacent promoter action after Minimize, Replay and Accept, then Finish/restoration. The independent targeted reacceptance repeats those previously blocked actions on the immutable final preview. Astra completed6/6 and closed P2; the other two reviewers confirmed the previously covered controls and complete flow. The complete review texts preserve their exact scopes.
+
+### Step 4 source-control follow-up
+
+At 390×844, ordinary 180 px wheel scrolling could put the center of “Sources & limitations” beneath the expanded coach even though Tag Bridge stayed clear. The coach now reserves a shared clear area for both evidence controls when they fit, or protects the visible source control after Tag Bridge leaves the viewport. A new geometry regression and the existing browser path cover this state. The browser waits for stable center geometry, clicks the actual center without force, checks that the source list opens and unlocks Next, then completes the remaining guide steps and restores the prior comparison.
+
+Local verification for `codex/guide-evidence-clearance`: **395/395 offline tests**, strict core/web/web2 types, both frontend builds and the existing 390/1280 Playwright regression using installed Chromium 1243 (Browser plugin unavailable). Evidence is outside the repository at `C:/Projekty/2026-10-24/tour-guide-evidence-clearance/`: `before/guide-step4-expanded-390.png`, `after/guide-step4-expanded-390.png` and `after/report.json`. This is local browser QA, not a new independent jury closure or a physical-phone check.
 
 ## Limits
 

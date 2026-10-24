@@ -23,6 +23,8 @@ export interface GuidedTourOptions {
   readonly descriptions?: readonly {readonly title:string;readonly body:string}[];
   readonly navigate: (step: TourStepIndex) => void;
   readonly getTarget: (step: TourStepIndex) => HTMLElement | null;
+  /** Neighboring controls for the same task that must also stay clear of the coach. */
+  readonly getRelatedControls?: (step: TourStepIndex) => readonly HTMLElement[];
   readonly objective?: (step:TourStepIndex)=>{complete:boolean;task:string};
   /** Prepare the labelled synthetic demo; called only after an explicit start/resume. */
   readonly onStart: () => void;
@@ -50,6 +52,20 @@ const focusable = 'button:not([disabled]), a[href], input:not([disabled]):not([t
 const clamp = (value: number, minimum: number, maximum: number) => Math.max(minimum, Math.min(maximum, value));
 
 export interface GuideRectangle { readonly left:number;readonly top:number;readonly width:number;readonly height:number }
+/** Reserve nearby visible task controls together when they fit in the free band. */
+export function guideControlBounds(primary:GuideRectangle|null,related:readonly GuideRectangle[],view:GuideRectangle):GuideRectangle|null {
+  const visible=[...(primary?[primary]:[]),...related].filter(rect=>rect.width>0&&rect.height>0&&
+    rect.top+rect.height>view.top&&rect.top<view.top+view.height);
+  let bounds=visible[0]??primary;
+  for(const rect of visible.slice(1)){
+    if(!bounds){bounds=rect;continue;}
+    const left=Math.min(bounds.left,rect.left),top=Math.min(bounds.top,rect.top);
+    const combined={left,top,width:Math.max(bounds.left+bounds.width,rect.left+rect.width)-left,
+      height:Math.max(bounds.top+bounds.height,rect.top+rect.height)-top};
+    if(combined.height<=view.height-32-14-76)bounds=combined;
+  }
+  return bounds;
+}
 /** Place the coach and, when needed, move the control into the remaining free band. */
 export function placeGuideCard(view:GuideRectangle,card:{readonly width:number;readonly height:number},
   control:GuideRectangle|null,compactDock:boolean,scrollRange:{readonly minimum:number;readonly maximum:number}) {
@@ -218,19 +234,21 @@ export function createGuidedTour(options: GuidedTourOptions): GuidedTourControll
     const width = Math.max(1, Math.min(356, visible.width - margin * 2));
     card.style.width = `${width}px`;
     const rect = target?.getBoundingClientRect();
-    let protectedRect:GuideRectangle|null=rect??null;
+    const usableHeight=bottom-visible.top;
+    const related=options.getRelatedControls?.(progress.step)??[];
+    let protectedRect=guideControlBounds(rect??null,related.filter(control=>control.getClientRects().length)
+      .map(control=>control.getBoundingClientRect()),{...visible,height:usableHeight});
     const focused=document.activeElement;
     if(focused instanceof HTMLElement&&!layer.contains(focused)&&focused.matches(focusable)&&focused.getClientRects().length){
       const focusedRect=focused.getBoundingClientRect();
-      if(rect&&rect.bottom>visible.top&&rect.top<bottom){
-        const combined={left:Math.min(rect.left,focusedRect.left),top:Math.min(rect.top,focusedRect.top),
-          width:Math.max(rect.right,focusedRect.right)-Math.min(rect.left,focusedRect.left),
-          height:Math.max(rect.bottom,focusedRect.bottom)-Math.min(rect.top,focusedRect.top)};
+      if(protectedRect&&protectedRect.top+protectedRect.height>visible.top&&protectedRect.top<bottom){
+        const combined={left:Math.min(protectedRect.left,focusedRect.left),top:Math.min(protectedRect.top,focusedRect.top),
+          width:Math.max(protectedRect.left+protectedRect.width,focusedRect.right)-Math.min(protectedRect.left,focusedRect.left),
+          height:Math.max(protectedRect.top+protectedRect.height,focusedRect.bottom)-Math.min(protectedRect.top,focusedRect.top)};
         protectedRect=combined.height<=bottom-visible.top-32-14-76?combined:focusedRect;
       }else protectedRect=focusedRect;
     }
     // On a short phone, allow the coach to scroll internally before covering a control.
-    const usableHeight=bottom-visible.top;
     const controlHeight=protectedRect&&protectedRect.height<=usableHeight-32-14-76?protectedRect.height:48;
     card.style.maxHeight = `${Math.max(76,usableHeight-margin*2-(mobile&&!compact?controlHeight+14:0))}px`;
     const height = card.getBoundingClientRect().height;

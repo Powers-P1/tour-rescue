@@ -11,17 +11,19 @@ const launch={headless:true,...(process.env.PLAYWRIGHT_EXECUTABLE_PATH?{executab
 const act=(p,id)=>p.locator('[data-action="'+id+'"]:visible').first();
 async function downloaded(p,id){const pending=p.waitForEvent('download');await act(p,id).click();const d=await pending;return {bytes:await readFile(await d.path()),name:d.suggestedFilename()};}
 async function centerHit(page,control,label){
- let result;
+ let result,previous,stable=0;
  for(let attempt=0;attempt<30;attempt++){
   result=await control.evaluate(node=>{
    const r=node.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,hit=document.elementFromPoint(x,y);
-   return {clear:r.width>0&&r.height>0&&r.top>=0&&r.bottom<=innerHeight&&!!hit&&node.contains(hit),
+   return {clear:r.width>0&&r.height>0&&r.top>=0&&r.bottom<=innerHeight&&!!hit&&node.contains(hit),x,y,
     rect:{x:r.left,y:r.top,width:r.width,height:r.height},hit:hit?.textContent?.slice(0,100)};
   });
-  if(result.clear)return;
+  stable=result.clear&&previous?.clear&&Object.keys(result.rect).every(key=>Math.abs(result.rect[key]-previous.rect[key])<.5)?stable+1:0;
+  if(stable>=2)return result;
+  previous=result;
   await page.waitForTimeout(50);
  }
- assert.ok(result?.clear,label+': '+JSON.stringify(result));
+ assert.ok(stable>=2,label+': '+JSON.stringify(result));
 }
 try{
  for(let i=0;i<60;i++){try{if((await fetch(base)).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
@@ -48,6 +50,7 @@ try{
   await page.evaluate(()=>{location.hash='rescue';});await act(page,'start-guide').click();
   for(let step=1;step<=6;step++){
     await page.locator('.guided-tour-layer[data-step="'+step+'"]').waitFor({state:'visible'});
+    await page.waitForFunction(()=>document.activeElement?.classList.contains('guided-tour-card'));
     assert.equal(await page.getByRole('progressbar').getAttribute('aria-valuenow'),String(step));
     const next=page.getByRole('button',{name:step===6?'Finish tour':'Next',exact:true});
     assert.equal(await next.isEnabled(),false,'step needs an actual outcome');
@@ -72,7 +75,24 @@ try{
       await act(page,'sim-recheck').click();
       assert.equal(await page.locator('[data-recommendation=after]').innerText(),'Frankfurt am Main');
     }
-    if(step===4)await page.locator('details').filter({hasText:'Tag Bridge · sourced tags only'}).locator('summary').first().click();
+    if(step===4){
+      const sources=page.locator('.evidence-disclosure').filter({has:page.locator('summary',{hasText:'Sources & limitations'})});
+      if(width===390){
+       assert.equal(await page.locator('.guided-tour-card.is-compact').count(),0,'sources regression uses the expanded card');
+       await centerHit(page,page.locator('.evidence-disclosure:has([data-evidence-tags]) > summary'),'step 4 Tag Bridge is reachable before scrolling');
+       await page.mouse.move(8,400);await page.mouse.wheel(0,180);
+       let center;
+       try{center=await centerHit(page,sources.locator('summary'),'step 4 expanded guide leaves Sources & limitations center reachable');}
+       finally{await page.screenshot({path:join(out,'guide-step4-expanded-390.png')});}
+       await page.mouse.click(center.x,center.y);
+      }else await sources.locator('summary').click();
+      await sources.locator('ul').waitFor({state:'visible'});
+      await page.waitForFunction(()=>!document.querySelector('.guided-tour-actions .button-primary')?.disabled);
+      assert.ok(await next.isEnabled(),'opening Sources & limitations satisfies the evidence objective');
+      if(width===390)await page.screenshot({path:join(out,'guide-step4-sources-open-390.png')});
+      await page.locator('details').filter({hasText:'Tag Bridge · sourced tags only'}).locator('summary').first().click();
+      await page.locator('.tag-state').waitFor({state:'visible'});
+    }
     if(step===5){
       await downloaded(page,'audit');
       if(width===390){
@@ -105,7 +125,7 @@ try{
   await page.locator('.tour-knowledge article').filter({hasText:'Our technical rider'}).locator('[data-action=knowledge-delete]').click();assert.equal(await page.locator('.tour-knowledge article').count(),0);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(errors,[]);
   checks.push({width,evidence:'passed',png:'passed',printPdf:'generated',sixStepGuide:'passed',escapeAndRestore:'passed',
-   ...(width===390?{expandedRecheckCenterHit:'passed',compactPromoterCenterClick:'passed',compactAboveFixedNav:'passed',
+   ...(width===390?{expandedRecheckCenterHit:'passed',expandedSourcesCenterClick:'passed',compactPromoterCenterClick:'passed',compactAboveFixedNav:'passed',
     expandedReplayAndAcceptCenterHit:'passed'}:{})});await context.close();
  }
  // Android native-prompt hook, close affordance and dismissal across reload.
