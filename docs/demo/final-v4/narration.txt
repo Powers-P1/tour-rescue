@@ -1,0 +1,90 @@
+Tour Rescue — final-v4 (120 seconds)
+English narration transcript
+
+[00:02.300] The band is already on the road.
+
+[00:04.480] Then the message comes:
+
+[00:06.160] Tonight’s show is cancelled.
+
+[00:10.230] For the person everyone calls, that’s more than a blank date.
+
+[00:14.330] The crew needs a plan.
+
+[00:16.090] Four other shows still have to happen.
+
+[00:18.820] Tour Rescue helps you find the next move.
+
+[00:22.970] Compare a replacement, a detour, or a day off.
+
+[00:26.230] Keep confirmed shows fixed.
+
+[00:29.200] A chart shows the trade-off.
+
+[00:31.520] Qloo adds evidence about where the music fits.
+
+[00:36.640] Test the trade-off.
+
+[00:38.020] In this synthetic demo,
+
+[00:39.620] a little more extra distance
+
+[00:41.000] changes the recommendation from Nuremberg to Frankfurt.
+
+[00:49.460] See the reasons.
+
+[00:50.800] Keep the unknowns visible.
+
+[00:54.340] Take a concrete brief to the next promoter conversation.
+
+[00:58.160] Availability, fees and bookings still need human confirmation.
+
+[01:02.320] Need another lead?
+
+[01:03.600] Research it, check its sources,
+
+[01:05.500] then choose what enters your comparison.
+
+[01:09.330] For tour managers and independent bookers.
+
+[01:12.050] On the road, or back at the desk.
+
+[01:14.400] Broken gear?
+
+[01:15.860] A missing delivery?
+
+[01:17.120] Open Tour SOS.
+
+[01:19.340] Describe the problem.
+
+[01:23.320] Compare sample suppliers.
+
+[01:26.160] Review a sample quote against your budget.
+
+[01:30.030] This is a supplier demo.
+
+[01:31.690] No one is contacted.
+
+[01:32.970] Nothing is booked or paid.
+
+[01:35.520] With real partners,
+
+[01:36.820] the proposed business model is agency subscriptions,
+
+[01:39.560] plus fees on completed local services.
+
+[01:52.290] Tour Rescue.
+
+[01:53.310] The show’s off. The tour isn’t.
+
+[01:55.810] Try the working demo.
+
+On-screen context (not additional narration)
+
+Recorded real Qloo evidence is separate from the synthetic 350 → 354.1 km additional-distance example. The saved AI research is an authored replay, not a recording of a fresh model request.
+
+Tour SOS is a separate illustrative Ho Chi Minh City supplier sample. No supplier is contacted, no availability is confirmed, and nothing is ordered, booked or paid. Agency subscriptions and fees on completed services are a proposed model requiring real partner onboarding.
+
+Touring, gear and stage footage is labelled AI-generated illustration. Device frames and motion are presentation edits over actual app captures.
+
+Music: SONTALK — We Stay (Instrumental Version). Narration: Mike, Epidemic Sound Voices / ElevenLabs.

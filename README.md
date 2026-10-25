@@ -1,6 +1,6 @@
 # Tour Rescue
 
-[Jury demo](https://tour-rescue.pages.dev/judges/) · [Submission package](docs/SUBMISSION_PACKAGE.md) · [Release handoff](docs/HACKATHON_HANDOFF.md)
+[Jury demo](https://tour-rescue.pages.dev/judges/) · [Two-minute film package](docs/demo/final-v4/README.md) · [Submitted Devpost entry](https://devpost.com/software/tour-rescue) · [Submission package](docs/SUBMISSION_PACKAGE.md) · [Release handoff](docs/HACKATHON_HANDOFF.md)
 
 **The show’s off. The tour isn’t.** The band is already on the road and the crew still needs a plan. Tour Rescue helps tour managers and independent bookers compare their next move and prepare the next promoter conversation, using Qloo cultural-fit evidence alongside route checks.
 

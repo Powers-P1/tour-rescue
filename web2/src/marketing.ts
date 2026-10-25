@@ -185,7 +185,7 @@ export function judgesMarkup(model:PublicSiteModel):string{
  '<p class="mini-disclosure">Add it to your home screen. Sample rescue works offline; live Qloo and AI need a connection. '+ext(PUBLIC_REPOSITORY,'Public source & licence ↗','judges-external-link')+'</p>'+
  '<p class="mini-disclosure">ⓘ '+escape(model.rescue.cancelledDate)+
   ' · Synthetic taste fixture · Frozen OSRM · Not a booking</p>'+
- link('#walkthrough','Watch the 100-second walkthrough','text-amber')+'</div>'+proposalPreview(model)+'</section>'+
+ link('#walkthrough','Watch the two-minute film','text-amber')+'</div>'+proposalPreview(model)+'</section>'+
  '<section id="steps" class="site-shell judge-steps">'+
  '<div class="section-title"><p class="eyebrow">THE CASE</p><h2>One clear path.</h2></div>'+
  '<div class="judge-step-columns"><article><span>01 / ↗</span><h3>Open the canceled date</h3>'+
@@ -224,12 +224,13 @@ export function judgesMarkup(model:PublicSiteModel):string{
  '</section>'+
  '<section id="walkthrough" class="judge-walkthrough site-shell" aria-labelledby="walkthrough-title">'+
  '<p class="eyebrow">OPTIONAL PRESENTATION</p><h2 id="walkthrough-title">Keep the tour moving.</h2>'+
- '<p>A 100-second walkthrough of the actual interface. The synthetic rescue and saved AI replay are labelled separately from recorded live Qloo evidence. Motion and device frames are edited for this presentation.</p>'+
- '<video controls playsinline preload="metadata" width="1920" height="1080" poster="/video/tour-rescue-final-v2-poster.jpg" aria-label="Tour Rescue 100-second walkthrough">'+
- '<source src="/video/tour-rescue-final-v2.mp4" type="video/mp4" />'+
- '<track kind="captions" src="/video/tour-rescue-final-v2.en.vtt" srclang="en" label="English" default />'+
- '<a href="/video/tour-rescue-final-v2.mp4">Download the walkthrough</a></video>'+
- '<p>'+link('/video/transcript.txt','Read the English transcript')+' · '+link('/video/tour-rescue-final-v2.en.vtt','English captions (VTT)')+' · '+link('/video/tour-rescue-final-v2.en.srt','English subtitles (SRT)')+'</p></section>'+
+ '<p>A two-minute film with actual responsive app captures. Recorded real Qloo evidence is separate from the synthetic 350 → 354.1 km experiment and authored AI replay. Tour SOS is a supplier sample: no contact, order or payment. Its proposed business model requires real partners.</p>'+
+ '<p>Touring, gear and stage scenes are labelled AI illustrations. Motion and device frames are edited for this presentation.</p>'+
+ '<video controls playsinline preload="metadata" width="1920" height="1080" poster="/video/tour-rescue-final-v4-poster.jpg" aria-label="Tour Rescue two-minute film">'+
+ '<source src="/video/tour-rescue-final-v4.mp4" type="video/mp4" />'+
+ '<track kind="captions" src="/video/tour-rescue-final-v4.en.vtt" srclang="en" label="English" default />'+
+ '<a href="/video/tour-rescue-final-v4.mp4">Download the film</a></video>'+
+ '<p>'+link('/video/tour-rescue-final-v4.mp4','Open MP4')+' · '+link('/video/transcript.txt','Read the English transcript')+' · '+link('/video/tour-rescue-final-v4.en.vtt','English captions (VTT)')+' · '+link('/video/tour-rescue-final-v4.en.srt','English subtitles (SRT)')+'</p></section>'+
  '<section class="site-shell judge-walkthrough"><p class="eyebrow">OPTIONAL EXTENSION · SAMPLE</p><h2>When the guitar breaks. Or the delivery never comes.</h2><p>Tour SOS shows the incident → supplier options → budget review workflow. The current guided example is a damaged drum head in Ho Chi Minh City. Suppliers, prices and response times are illustrative. It does not confirm a real technician or delivery is available, contact anyone or place an order.</p>'+sosBusinessHypothesis+link('/app/?learn=sos#sos','Try the guided SOS sample →','m-button m-button-quiet')+'<p class="mini-disclosure">The partner network and payments still need to be built. No service revenue is claimed.</p></section>'+
  '<details class="judge-optional site-shell"><summary>Scope and known limits</summary>'+knownLimitsSection()+
  scopeTable()+'</details>'+

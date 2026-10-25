@@ -1,0 +1,73 @@
+{
+  "schemaVersion": "tour-rescue.film-manifest.v1",
+  "revision": "final-v4",
+  "film": "TourRescue-jury-final-v4.mp4",
+  "sha256": "c9c6a5b8f3a25fc6d25093026567e57ec7cfe4e9fffe3f9da7b701a196c10d4f",
+  "durationSeconds": 120,
+  "width": 1920,
+  "height": 1080,
+  "fps": 60,
+  "captionDelivery": "clean-picture-plus-native-vtt",
+  "captionCueCount": 39,
+  "publicVideoUrl": null,
+  "maxPublicationBytes": 25165824,
+  "files": [
+    {
+      "name": ".gitattributes",
+      "bytes": 141,
+      "sha256": "ba4654d5173f5bfd3e66900f5fd3d2d5a17a239a686ba1e11e72c7f29b3a66f9"
+    },
+    {
+      "name": "PROVENANCE.json",
+      "bytes": 4934,
+      "sha256": "dbd9431262bf19a8db42dccc505de309563f222bd90e81cc1962b95c2ce3c52b"
+    },
+    {
+      "name": "QA.json",
+      "bytes": 5901,
+      "sha256": "8460afdda95bcade179acb816d1bc8b77f2cdaadf270acb757f0bffdf094fe71"
+    },
+    {
+      "name": "README.md",
+      "bytes": 2877,
+      "sha256": "33ad8c66a5bf99e13ee128cf201a3e12b38759bf205ec478e00c4004f042548a"
+    },
+    {
+      "name": "TourRescue-jury-final-v4.mp4",
+      "bytes": 23144942,
+      "sha256": "c9c6a5b8f3a25fc6d25093026567e57ec7cfe4e9fffe3f9da7b701a196c10d4f"
+    },
+    {
+      "name": "captions.en.srt",
+      "bytes": 2580,
+      "sha256": "5fbf00dcb50ec5adfb6f8c2eb8e5377b4d19eeb09c58561134775ead1948b891"
+    },
+    {
+      "name": "captions.en.vtt",
+      "bytes": 2480,
+      "sha256": "7e4044c8647d924ff042fa88bb97b5377487d2c3c90ac00c699792978f31790d"
+    },
+    {
+      "name": "motion-ledger.json",
+      "bytes": 2501,
+      "sha256": "31572a15ab1f23cb60beffff2f126691e2bfeaecd3f64b8a4c25122aec569c24"
+    },
+    {
+      "name": "narration.txt",
+      "bytes": 2604,
+      "sha256": "4810be7fa3b7c048e36196eecd833f51c78b425d8c862b4ab91af8e6e1d35be4"
+    },
+    {
+      "name": "poster.jpg",
+      "bytes": 437227,
+      "sha256": "b3f3b48f242ca3de4ef4b7e3dfb8022de0a0e0e00ea16ac42f84732a0e510cb1"
+    },
+    {
+      "name": "voice-timeline.json",
+      "bytes": 6450,
+      "sha256": "606e0c18820a4873a3ef6df7654cb876e1a0de9d97ea9f8bb4ca9e80300cb313"
+    }
+  ],
+  "publicPlaybackPath": "/video/tour-rescue-final-v4.mp4",
+  "publicVideoUrlStatus": "pending-owner-publication"
+}
