@@ -13,6 +13,7 @@ const badge=(message:string,variant='neutral')=>'<span class="m-badge m-badge-'+
 const wordmark='<a class="site-brand" href="/">'+brand()+'</a>';
 const heroPhoto='/assets/touring-backstage-v2.webp';
 const drumPhoto='/assets/touring-drum-v2.webp';
+const sosBusinessHypothesis='<p><strong>Business hypothesis.</strong> Agency subscriptions, plus fees or commissions on completed local services. First, build a vetted local partner network for backline, repairs and urgent delivery.</p>';
 
 function header(judges:boolean):string {
  if(judges) return '<div class="judges-utility"><span>Qloo Agentic Hackathon</span><strong>Judges · Start here</strong></div>'+
@@ -132,8 +133,9 @@ export function landingMarkup(model:PublicSiteModel):string{
  '<section id="local-sos" class="sos-section"><div class="site-shell sos-grid">'+
  '<div class="section-copy"><p class="eyebrow">02 / LOCAL SOS · SAMPLE</p><h2>Broken gear.<span>Local help.</span></h2>'+
  '<p>Say what happened, where you are and when it is needed. Review a concrete scope, arrival estimate and price before approving any spend.</p>'+
+ sosBusinessHypothesis+
  link('/app/#sos','See a sample local rescue →','text-amber')+
- '<p class="mini-disclosure">No supplier is contacted. Quote and travel values are fictional.</p></div>'+
+ '<p class="mini-disclosure">No supplier is contacted. Quote and travel values are fictional. The partner network and payments still need to be built. No service revenue is claimed.</p></div>'+
  '<figure class="sos-photo" role="img" aria-label="Illustrative drum fitting, not a real supplier visit"><img src="'+drumPhoto+'" alt="AI-generated illustration of a drum technician working on a bass drum" loading="lazy" width="1200" height="760"/>'+
  '<figcaption>AI illustration · not the sample supplier</figcaption>'+
  '<div class="sos-card"><small>SAMPLE QUOTE · NOT RECEIVED</small><h3>Ready to review.</h3><p>Minh Backline</p>'+
@@ -228,7 +230,7 @@ export function judgesMarkup(model:PublicSiteModel):string{
  '<track kind="captions" src="/video/tour-rescue-final-v2.en.vtt" srclang="en" label="English" default />'+
  '<a href="/video/tour-rescue-final-v2.mp4">Download the walkthrough</a></video>'+
  '<p>'+link('/video/transcript.txt','Read the English transcript')+' · '+link('/video/tour-rescue-final-v2.en.vtt','English captions (VTT)')+' · '+link('/video/tour-rescue-final-v2.en.srt','English subtitles (SRT)')+'</p></section>'+
- '<section class="site-shell judge-walkthrough"><p class="eyebrow">OPTIONAL EXTENSION · SAMPLE</p><h2>When the guitar breaks. Or the delivery never comes.</h2><p>Tour SOS shows the incident → supplier options → budget review workflow. The current guided example is a damaged drum head in Ho Chi Minh City. Suppliers, prices and response times are illustrative. It does not confirm a real technician or delivery is available, contact anyone or place an order.</p>'+link('/app/?learn=sos#sos','Explore the guided Tour SOS sample →','m-button m-button-quiet')+'</section>'+
+ '<section class="site-shell judge-walkthrough"><p class="eyebrow">OPTIONAL EXTENSION · SAMPLE</p><h2>When the guitar breaks. Or the delivery never comes.</h2><p>Tour SOS shows the incident → supplier options → budget review workflow. The current guided example is a damaged drum head in Ho Chi Minh City. Suppliers, prices and response times are illustrative. It does not confirm a real technician or delivery is available, contact anyone or place an order.</p>'+sosBusinessHypothesis+link('/app/?learn=sos#sos','Try the guided SOS sample →','m-button m-button-quiet')+'<p class="mini-disclosure">The partner network and payments still need to be built. No service revenue is claimed.</p></section>'+
  '<details class="judge-optional site-shell"><summary>Scope and known limits</summary>'+knownLimitsSection()+
  scopeTable()+'</details>'+
  '</main>'+footer(true);

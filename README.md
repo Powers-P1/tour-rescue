@@ -14,6 +14,8 @@ The jury entry immediately identifies the mobile-first PWA. Install it on a phon
 
 Private band knowledge is editable in the profile and Documents screens and persists on the current device. Live AI uses bounded lexical retrieval over that snapshot, records the excerpts used, and keeps them separate from verified public venue evidence. The two research procedures map to real tools. Notes never override hard constraints, and downloaded AI audits may contain the user's private excerpts. See [the AI contract](docs/AI_RESCUE.md).
 
+**Tour SOS business hypothesis.** Agency subscription plans could be paired with fees or commissions on completed local services. This requires first building and onboarding a vetted local partner network for backline, repairs and urgent delivery. The current SOS flow is an offline sample with illustrative suppliers, prices and travel times; the partner network and payments still need to be built, and no service revenue is claimed. Willingness to pay and service economics remain untested.
+
 ## Documents
 
 - [docs/BRIEF.md](docs/BRIEF.md): product brief, scope, architecture, acceptance criteria, plan
