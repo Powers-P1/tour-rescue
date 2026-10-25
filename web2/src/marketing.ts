@@ -113,8 +113,8 @@ export function landingMarkup(model:PublicSiteModel):string{
  return header(false)+
  '<main id="main-content">'+
  '<section class="site-hero site-shell"><div class="hero-copy">'+
- '<h1>A canceled date.<span>A way forward.</span></h1>'+
- '<p class="hero-deck">For tour managers and bookers: compare the options after a cancellation and prepare the next promoter conversation.</p>'+
+ '<h1>The show’s off.<span>The tour isn’t.</span></h1>'+
+ '<p class="hero-deck">For tour managers and bookers: the band is already on the road. Find the next move, keep confirmed dates fixed and prepare the next promoter conversation.</p>'+
  '<div class="hero-actions">'+link(model.appHref,'Rescue a sample date →','m-button')+
  link('#how-it-works','Explore the product ↗')+'</div>'+
  '<p class="mini-disclosure">ⓘ Sample tour · No sign-up to explore · Never a booked show</p></div>'+
@@ -124,8 +124,8 @@ export function landingMarkup(model:PublicSiteModel):string{
  miniaturePhone(model)+'</div></section>'+
  '<section id="how-it-works" class="landing-section site-shell rescue-section"><div class="landing-map">'+
  journeyDiagram(model)+'</div><div class="section-copy"><p class="eyebrow">01 / DATE RESCUE · CORE</p>'+
- '<h2>Three directions.<span>One next move.</span></h2>'+
- '<p>Compare cultural fit and realistic travel. Pick a direction. Prepare a one-page proposal for the promoter.</p>'+
+ '<h2>A plan you can<span>stand behind.</span></h2>'+
+ '<p>Your crew still needs a plan. Compare a replacement, a detour or a day off. Qloo adds cultural-fit evidence alongside the road checks, so you can take a clear draft to the next promoter conversation.</p>'+
  '<div class="line-facts"><p>'+icon('people')+'<strong>Taste fit · Qloo</strong></p><p>'+icon('route')+'<strong>Road and timing checks</strong></p><p>'+icon('document')+'<strong>Draft outreach, ready to review</strong></p></div>'+
  link(model.appHref,'Explore the rescue →','text-amber')+
  '<p class="mini-disclosure">The demo uses synthetic taste profiles and a frozen OSRM matrix. Fresh Qloo is a separate action.</p></div></section>'+
@@ -141,8 +141,9 @@ export function landingMarkup(model:PublicSiteModel):string{
  '<strong class="sos-money">1,800,000 VND</strong>'+
  '<span class="phone-button">Preview approval →</span></div></figure></div></section>'+
  '<section id="for-agencies" class="agency-band"><div class="site-shell agency-band-inner">'+
- '<div><p class="eyebrow">03 / AGENCY · SAMPLE WORKSPACE</p><h2>One calm desk.<span>Every tour.</span></h2></div>'+
- '<div><p>A clear queue of decisions, a named owner and venue-local deadlines. Switch from agency view to the artist in one step.</p>'+
+ '<div><p class="eyebrow">03 / AGENCY · SAMPLE WORKSPACE</p><h2>For the person<span>everyone calls.</span></h2></div>'+
+ '<div><p>One disrupted date can become everyone’s problem. Explore a sample queue with named owners and venue-local deadlines, then open the artist’s rescue.</p>'+
+ '<p class="mini-disclosure">Business hypothesis: per-tour or agency licensing. Willingness to pay and time saved still need to be tested with working bookers.</p>'+
  link('/app/#agency','Explore the sample agency workspace →')+'</div></div></section>'+
  '<section class="landing-judges-promo site-shell"><p class="eyebrow">FOR HACKATHON JUDGES</p>'+
  '<h2>Open the demo.<span>Try to overturn it.</span></h2><p>A short, reproducible route from cancellation to checked proposal.</p>'+
@@ -175,8 +176,8 @@ export function judgesMarkup(model:PublicSiteModel):string{
  '<main id="main-content">'+
  '<section class="judges-hero site-shell"><div class="judge-copy">'+
  '<p class="eyebrow">MOBILE FIRST · INSTALLABLE APP · NO SIGN-IN</p>'+
- '<h1>Leipzig canceled.<span>Keep the tour moving.</span></h1>'+
- '<p>For a tour manager or booker after a cancellation: compare three directions, inspect constraints and evidence, and prepare a brief for the next promoter conversation.</p>'+
+ '<h1>The show’s off.<span>The tour isn’t.</span></h1>'+
+ '<p>Leipzig canceled. The crew still needs a plan. For a tour manager or booker: compare three directions, keep four confirmed shows fixed and take a concrete brief to the next promoter conversation.</p>'+
  '<div class="hero-actions">'+link(model.appHref,'Rescue Leipzig →','m-button')+
  '<button type="button" class="m-button m-button-quiet" data-install-app>Install Tour Rescue</button></div>'+
  '<p class="mini-disclosure">Add it to your home screen. Sample rescue works offline; live Qloo and AI need a connection. '+ext(PUBLIC_REPOSITORY,'Public source & licence ↗','judges-external-link')+'</p>'+
