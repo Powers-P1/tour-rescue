@@ -13,7 +13,8 @@
     "height": 1080,
     "fps": 60,
     "frames": 7200,
-    "redistributed": false
+    "includedInRepository": false,
+    "youtubeUploadSource": true
   },
   "burnedReviewBackup": {
     "file": "TourRescue-v4-captioned.mp4",
@@ -118,5 +119,76 @@
     "previousPackageRetained": "../final-v2/",
     "pwaPrecache": false
   },
-  "ownerActions": "Public hosting, rights/account coverage, Devpost state and deployment receipts are maintained separately."
+  "ownerActions": "The publication field records the authorized 26 October release verified through platform and public-browser checks. Original account, eligibility and third-party rights evidence remain with the owner.",
+  "publication": {
+    "verifiedAtUtc": "2026-10-26T00:30:11.030898+00:00",
+    "date": "2026-10-26",
+    "website": {
+      "status": "published",
+      "url": "https://tour-rescue.pages.dev/judges/#walkthrough",
+      "immutableUrl": "https://6f3fd002.tour-rescue.pages.dev/judges/",
+      "deploymentId": "6f3fd002-1023-4512-8e7c-7631d4e07c4a",
+      "sourceCommit": "2e57ab524f2f1699cb99af70b013d41ebf1d2447",
+      "mainMergeCommit": "e1e39ef8b0fce253d1bb88a334243f8e311ccae4",
+      "mergedPullRequest": "https://github.com/Powers-P1/tour-rescue/pull/36",
+      "sourceTreeMatchesMain": true,
+      "filmSha256": "c9c6a5b8f3a25fc6d25093026567e57ec7cfe4e9fffe3f9da7b701a196c10d4f",
+      "bytes": 23144942
+    },
+    "youtube": {
+      "status": "published",
+      "url": "https://youtu.be/uwiPr3YNfNA",
+      "title": "Tour Rescue — The show’s off. The tour isn’t. | Qloo Hackathon",
+      "anonymousOembedStatus": 200,
+      "uploadSource": "Higher-bitrate clean review master",
+      "uploadSourceSha256": "ffb7e749b14434b7682aa70c90a6f78a5f1bb37d6772c52ed0b826cda97be2c1",
+      "uploadSourceBytes": 40067802,
+      "sourceDurationSeconds": 120,
+      "platformDisplayedDuration": "2:01 (interface display; source master is 120 seconds)",
+      "hostedFrameExactDurationClaim": false,
+      "preparedEnglishSrtCueCount": 39,
+      "importedCaptionLanguage": "en-US",
+      "captionImport": "The publishing UI confirmed the English (United States) SRT import.",
+      "publicManualCaptions": {
+        "status": "published-and-publicly-verified",
+        "verifiedDate": "2026-10-26",
+        "language": "en-US",
+        "studioStatus": "Published on 26 October 2026",
+        "playerTrackSelected": "English (US), manual",
+        "automaticEnglishTrackSeparate": true,
+        "sampleAtSeconds": 15,
+        "sampleText": "The crew needs a plan.",
+        "sampleVisible": true,
+        "playerQuality": "1080p60 HD"
+      },
+      "thumbnail": "Prepared final-v4 poster uploaded",
+      "aiDisclosure": true,
+      "madeForKids": false,
+      "paidPromotion": false,
+      "copyrightChecks": "YouTube reported no issues during upload"
+    },
+    "devpost": {
+      "url": "https://devpost.com/software/tour-rescue",
+      "submissionId": 1259533,
+      "stateAfterSave": "SUBMITTED, 5/5 steps complete",
+      "publicVideoEmbed": "https://www.youtube.com/watch?v=uwiPr3YNfNA",
+      "newVideoIframePresent": true,
+      "oldVideoIframePresent": false,
+      "offlineTestsInStory": 398,
+      "newFilmTextLink": true
+    },
+    "archivedVideo": {
+      "id": "PT3Iysktgn0",
+      "status": "private",
+      "anonymousOembedStatus": 403,
+      "permanentlyDeleted": false,
+      "sourcePackageRetained": "../final-v2/"
+    },
+    "worker": {
+      "version": "2ff252ef-5810-4588-94a4-b1ffdbcdc10d",
+      "trafficPercent": 100,
+      "changed": false
+    },
+    "providerJobsStarted": 0
+  }
 }

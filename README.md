@@ -1,10 +1,12 @@
 # Tour Rescue
 
-[Jury demo](https://tour-rescue.pages.dev/judges/) · [Two-minute film package](docs/demo/final-v4/README.md) · [Submitted Devpost entry](https://devpost.com/software/tour-rescue) · [Submission package](docs/SUBMISSION_PACKAGE.md) · [Release handoff](docs/HACKATHON_HANDOFF.md)
+[Jury demo](https://tour-rescue.pages.dev/judges/) · [Watch the two-minute film](https://youtu.be/uwiPr3YNfNA) · [Submitted Devpost entry](https://devpost.com/software/tour-rescue) · [Submission package](docs/SUBMISSION_PACKAGE.md) · [Release handoff](docs/HACKATHON_HANDOFF.md)
 
 **The show’s off. The tour isn’t.** The band is already on the road and the crew still needs a plan. Tour Rescue helps tour managers and independent bookers compare their next move and prepare the next promoter conversation, using Qloo cultural-fit evidence alongside route checks.
 
 **Status: deployed hackathon prototype.** Built for the Qloo Agentic Hackathon 2026 (submission deadline 30 Oct 2026, 23:45 EDT). It prepares the next promoter conversation; it does not confirm or book a show.
+
+The final-v4 film is published on the website and YouTube and is embedded in the submitted Devpost entry. The 26 October release passed **398 offline tests**, complete core/visual CI and public mobile/desktop playback checks. See the [publication receipt](docs/validation/publication-2026-10-26.md) and [canonical film package](docs/demo/final-v4/README.md).
 
 A booker or tour manager has a confirmed 5-date tour in one region and loses one date. Tour Rescue compares three repair options (replacement venue in another city, a detour, or a day off), keeps all confirmed shows feasible (dates, drive times, daily limits, minimum spacing), scores cities with a Qloo taste "fit index", and shows for every recommendation which single assumption or comparison artist would flip the choice. Every run produces a reproducible, downloadable decision audit.
 
