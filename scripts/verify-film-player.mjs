@@ -14,6 +14,7 @@ const filmPath = '/video/tour-rescue-final-v4.mp4';
 const sha256 = 'c9c6a5b8f3a25fc6d25093026567e57ec7cfe4e9fffe3f9da7b701a196c10d4f';
 const report = { createdAt: new Date().toISOString(), base, browserRouting: 'Browser plugin not available; isolated Playwright',
   environment: 'Actual built Pages assets. Ordinary web2/serve.mjs returns full HTTP 200 bodies, including for Range requests.',
+  browserChannel: process.env.PLAYWRIGHT_CHANNEL ?? 'bundled-chromium-headless-shell',
   checks: [], cleanup: { browserClosed: false, ownServerStopped: null } };
 let server, browser;
 const settle = page => page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
@@ -35,6 +36,34 @@ try {
   assert.equal(full.length, 23144942);
   assert.equal(createHash('sha256').update(full).digest('hex'), sha256);
   report.httpRange = { status: range.status, bytes: full.length, contentRange: null, sha256 };
+  if (process.env.FILM_COMPARE_BUNDLED === '1') {
+    // Diagnostic comparison only. The selected browser below must still decode,
+    // play and seek the unchanged H.264/AAC film; no assertion is skipped.
+    const bundled = await chromium.launch({ headless: true });
+    try {
+      const context = await bundled.newContext({ serviceWorkers: 'block' });
+      await context.route('**/*', route => new URL(route.request().url()).origin === new URL(base).origin ? route.continue() : route.abort('blockedbyclient'));
+      const page = await context.newPage();
+      await page.goto(base + '/judges/', { waitUntil: 'domcontentloaded' });
+      report.bundledCodecProbe = { browserVersion: bundled.version(), ...await page.evaluate(async path => {
+        const v = document.createElement('video');
+        const support = { h264: v.canPlayType('video/mp4; codecs="avc1.64002a"'), aac: v.canPlayType('audio/mp4; codecs="mp4a.40.2"'),
+          combined: v.canPlayType('video/mp4; codecs="avc1.64002a, mp4a.40.2"') };
+        const response = await fetch(path), blob = await response.blob(), url = URL.createObjectURL(blob);
+        const decoded = await new Promise(done => {
+          const finish = event => { clearTimeout(timer); done({ event, error: v.error ? { code: v.error.code, message: v.error.message } : null,
+            readyState: v.readyState, networkState: v.networkState, duration: Number.isFinite(v.duration) ? v.duration : null, width: v.videoWidth, height: v.videoHeight }); };
+          const timer = setTimeout(() => finish('timeout'), 10000);
+          v.addEventListener('loadeddata', () => finish('loadeddata'), { once: true });
+          v.addEventListener('error', () => finish('error'), { once: true });
+          v.preload = 'auto'; v.src = url; v.load();
+        });
+        v.removeAttribute('src'); v.load(); URL.revokeObjectURL(url);
+        return { userAgent: navigator.userAgent, support, responseStatus: response.status, bytes: blob.size, decoded };
+      }, filmPath) };
+      await context.close();
+    } finally { await bundled.close(); }
+  }
   browser = await chromium.launch({ headless: true,
     ...(process.env.PLAYWRIGHT_CHANNEL ? { channel: process.env.PLAYWRIGHT_CHANNEL } : {}),
     ...(process.env.PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH } : {}) });
@@ -48,6 +77,16 @@ try {
       const create = URL.createObjectURL.bind(URL), revoke = URL.revokeObjectURL.bind(URL);
       URL.createObjectURL = blob => { sessionStorage.setItem('film-created', String(Number(sessionStorage.getItem('film-created') ?? 0) + 1)); return create(blob); };
       URL.revokeObjectURL = url => { sessionStorage.setItem('film-revoked', String(Number(sessionStorage.getItem('film-revoked') ?? 0) + 1)); revoke(url); };
+      window.__filmMediaEvents = [];
+      for (const type of ['loadedmetadata', 'loadeddata', 'canplay', 'error', 'stalled', 'waiting', 'abort', 'emptied']) {
+        // Capture before the player's error handler releases the failed source.
+        document.addEventListener(type, event => {
+          const v = event.target;
+          if (!(v instanceof HTMLVideoElement)) return;
+          window.__filmMediaEvents.push({ type, readyState: v.readyState, networkState: v.networkState,
+            error: v.error ? { code: v.error.code, message: v.error.message } : null });
+        }, true);
+      }
     });
     const page = await context.newPage();
     let phase = 'initial', releaseCancelled;
@@ -56,10 +95,25 @@ try {
     page.on('request', request => { if (new URL(request.url()).pathname === filmPath) row.requests.push({ phase, range: request.headers().range ?? null }); });
     page.on('response', response => { if (new URL(response.url()).pathname === filmPath) row.responses.push({ phase, status: response.status() }); });
     const capture = async name => { const file = width + '-' + name + '.png'; await page.screenshot({ path: resolve(out, file) }); row.screenshots.push(file); };
-    const ready = async () => page.waitForFunction(() => {
+    const diagnostics = () => page.evaluate(() => {
       const v = document.querySelector('[data-film-video]');
-      return v?.currentSrc.startsWith('blob:') && v.readyState >= 2 && v.duration === 120 && v.querySelector('track').readyState === 2;
+      return { userAgent: navigator.userAgent,
+        support: { h264: v.canPlayType('video/mp4; codecs="avc1.64002a"'), aac: v.canPlayType('audio/mp4; codecs="mp4a.40.2"'),
+          combined: v.canPlayType('video/mp4; codecs="avc1.64002a, mp4a.40.2"') },
+        state: document.querySelector('[data-film-player]').dataset.filmState, status: document.querySelector('[data-film-status]').textContent,
+        readyState: v.readyState, networkState: v.networkState, duration: Number.isFinite(v.duration) ? v.duration : null,
+        error: v.error ? { code: v.error.code, message: v.error.message } : null,
+        mediaEvents: window.__filmMediaEvents };
     });
+    const ready = async () => {
+      await page.waitForFunction(() => {
+        const v = document.querySelector('[data-film-video]');
+        return document.querySelector('[data-film-player]').dataset.filmState === 'error' ||
+          (v?.currentSrc.startsWith('blob:') && v.readyState >= 2 && v.duration === 120 && v.querySelector('track').readyState === 2);
+      });
+      row.mediaDiagnostics = await diagnostics();
+      assert.equal(row.mediaDiagnostics.state, 'ready', JSON.stringify(row.mediaDiagnostics));
+    };
     try {
       await page.goto(base + '/judges/', { waitUntil: 'networkidle' });
       assert.match(await page.title(), /Tour Rescue/);
@@ -150,7 +204,12 @@ try {
       assert.ok(row.requests.every(request => request.range === null), 'native video must never request remote ranges');
       assert.ok(row.responses.filter(response => response.phase === 'playback').every(response => response.status === 200));
       row.status = 'passed';
-    } catch (error) { row.status = 'failed'; row.error = String(error?.stack ?? error); throw error; }
+    } catch (error) {
+      row.status = 'failed'; row.error = String(error?.stack ?? error);
+      row.mediaDiagnostics = await diagnostics().catch(diagnosticError => ({ error: String(diagnosticError) }));
+      await capture('failure').catch(() => {});
+      throw error;
+    }
     finally { releaseCancelled?.(); await context.close(); }
   }
   report.status = 'passed';
@@ -164,5 +223,7 @@ finally {
   }
   report.completedAt = new Date().toISOString();
   await writeFile(resolve(out, 'report.json'), JSON.stringify(report, null, 2) + '\n');
-  console.log(JSON.stringify({ status: report.status, error: report.error, checks: report.checks.map(row => ({ viewport: row.viewport, status: row.status, media: row.media, seeks: row.seeks, errors: row.errors })), cleanup: report.cleanup }, null, 2));
+  console.log(JSON.stringify({ status: report.status, error: report.error, browserChannel: report.browserChannel, browserVersion: report.browserVersion,
+    bundledCodecProbe: report.bundledCodecProbe, checks: report.checks.map(row => ({ viewport: row.viewport, status: row.status,
+      media: row.media, mediaDiagnostics: row.mediaDiagnostics, seeks: row.seeks, errors: row.errors })), cleanup: report.cleanup }, null, 2));
 }

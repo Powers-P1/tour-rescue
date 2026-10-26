@@ -35,9 +35,16 @@ jobs:
           npx playwright install chromium
       - run: npm run web:build
       - name: Verify lazy film loading, full-200 seeking, captions and recovery
-        run: node scripts/verify-film-player.mjs
+        # H.264/AAC media needs the official codec-enabled browser. Other UI
+        # checks retain bundled Chromium. The runner already includes Chrome.
+        # https://playwright.dev/docs/browsers#media-codecs
+        run: |
+          google-chrome --version
+          node scripts/verify-film-player.mjs
         env:
           QA_OUTPUT: artifacts/screenshots/v2/film-player
+          PLAYWRIGHT_CHANNEL: chrome
+          FILM_COMPARE_BUNDLED: '1'
       - run: node scripts/capture-v2.mjs
       - name: Verify all v2 ARIA and responsive polish
         run: node scripts/verify-polish.mjs
