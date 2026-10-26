@@ -16,4 +16,4 @@ Touring, gear and stage scenes are labelled AI-generated illustrations, not evid
 
 The poster is the existing clean picture frame at 4.000 seconds, showing the illustrated tour manager. `manifest.json` records the packaged assets and hashes; the build verifies playback assets before copying them to ignored `dist/video/`. Video remains outside the PWA shell cache. The [final-v2 package](../final-v2/README.md) remains intact as an archive and rollback source. Its older YouTube film is private rather than permanently deleted.
 
-This package records the film, technical validation and owner-confirmed publication. The original third-party rights and account evidence remain with the project owner; technical QA is not a rights certificate.
+This package records the film, technical validation and authorized publication verified through platform and public-browser checks. The original third-party rights and account evidence remain with the project owner; technical QA is not a rights certificate.

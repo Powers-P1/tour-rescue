@@ -19,18 +19,18 @@
     },
     {
       "name": "PROVENANCE.json",
-      "bytes": 7939,
-      "sha256": "7cb98b27d0e14d2184ce983beeab861ed506b955118373a3d68547fa49f6eb64"
+      "bytes": 7978,
+      "sha256": "1286e11bb36cae49e768c28f98d2b4c025200f10abf261a54b7f335d1310a186"
     },
     {
       "name": "QA.json",
-      "bytes": 19841,
-      "sha256": "2c0bbc128354e02a4a5e9accc1710088e8184226df492c97a21f066c8c3e756f"
+      "bytes": 19833,
+      "sha256": "7ffc95ab682eabd5f78d2ce51e58c24b4a009849a061fdc15fcf7fbd36d8cc29"
     },
     {
       "name": "README.md",
-      "bytes": 4354,
-      "sha256": "5914abecfb233e78b219643cb78eb5375f3c00b13eebeef7ea3adaf0111b73ba"
+      "bytes": 4401,
+      "sha256": "ae1cbfbf800056562218ed73ead39b6389470031b23b277501baa0a0f26f72da"
     },
     {
       "name": "TourRescue-jury-final-v4.mp4",
@@ -69,7 +69,7 @@
     }
   ],
   "publicPlaybackPath": "/video/tour-rescue-final-v4.mp4",
-  "publicVideoUrlStatus": "published-owner-verified",
+  "publicVideoUrlStatus": "published-ui-verified",
   "publicVideoPublishedDate": "2026-10-26",
   "publicVideoUploadSourceSha256": "ffb7e749b14434b7682aa70c90a6f78a5f1bb37d6772c52ed0b826cda97be2c1",
   "publicationReceipt": "../../validation/publication-2026-10-26.md"

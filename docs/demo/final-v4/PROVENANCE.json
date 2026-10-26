@@ -119,9 +119,9 @@
     "previousPackageRetained": "../final-v2/",
     "pwaPrecache": false
   },
-  "ownerActions": "The publication field records the owner-confirmed 26 October release. Original account, eligibility and third-party rights evidence remain with the owner.",
+  "ownerActions": "The publication field records the authorized 26 October release verified through platform and public-browser checks. Original account, eligibility and third-party rights evidence remain with the owner.",
   "publication": {
-    "verifiedAtUtc": "2026-10-26T00:23:01.116979+00:00",
+    "verifiedAtUtc": "2026-10-26T00:30:11.030898+00:00",
     "date": "2026-10-26",
     "website": {
       "status": "published",
@@ -148,7 +148,7 @@
       "hostedFrameExactDurationClaim": false,
       "preparedEnglishSrtCueCount": 39,
       "importedCaptionLanguage": "en-US",
-      "captionImport": "Owner verified the English (United States) SRT import in the publishing UI.",
+      "captionImport": "The publishing UI confirmed the English (United States) SRT import.",
       "publicManualCaptions": {
         "status": "published-and-publicly-verified",
         "verifiedDate": "2026-10-26",

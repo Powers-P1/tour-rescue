@@ -1,6 +1,6 @@
 # Tour Rescue — publication receipt, 26 October 2026
 
-The owner completed website, YouTube and Devpost publication on 26 October. This receipt records deployment output, public browser QA, platform confirmation and anonymous readback.
+Published with the owner's authorization on 26 October. This receipt records website, YouTube and Devpost deployment output, public browser QA, platform confirmation and anonymous readback.
 
 | Item | Verified result |
 | --- | --- |
@@ -20,7 +20,7 @@ The current Devpost text also includes the new film link and the 398-test valida
 | Website | Clean H.264/AAC derivative, 23,144,942 bytes | SHA-256 `c9c6a5b8f3a25fc6d25093026567e57ec7cfe4e9fffe3f9da7b701a196c10d4f` |
 | YouTube | Higher-bitrate clean master, 40,067,802 bytes | Upload-source SHA-256 `ffb7e749b14434b7682aa70c90a6f78a5f1bb37d6772c52ed0b826cda97be2c1` |
 
-Both source files are 120 seconds at 1920×1080/60 fps. YouTube's UI shows 2:01; no frame-exact duration or hash is asserted for YouTube's transcoded streams. The website uses the default 39-cue English VTT with clean picture. YouTube accepted the separately prepared 39-cue English SRT as English (United States), and the final-v4 thumbnail was uploaded. Studio showed the manual English (US) captions as published on 26 October, separately from automatic English captions. The owner selected the manual track in the public player's settings and verified the visible cue “The crew needs a plan.” at 15 seconds, with 1080p60 HD selected. The owner confirmed the platform's published-success state, AI-content disclosure enabled, not made for kids, and no paid promotion. YouTube reported no copyright-check issues during upload; that platform result is not a rights certificate. Original account and rights records remain with the owner.
+Both source files are 120 seconds at 1920×1080/60 fps. YouTube's UI shows 2:01; no frame-exact duration or hash is asserted for YouTube's transcoded streams. The website uses the default 39-cue English VTT with clean picture. YouTube accepted the separately prepared 39-cue English SRT as English (United States), and the final-v4 thumbnail was uploaded. Studio showed the manual English (US) captions as published on 26 October, separately from automatic English captions. A public-browser check selected the manual track in the player's settings and verified the visible cue “The crew needs a plan.” at 15 seconds, with 1080p60 HD selected. The publishing UI confirmed the published-success state, AI-content disclosure enabled, not made for kids, and no paid promotion. YouTube reported no copyright-check issues during upload; that platform result is not a rights certificate. Original account and rights records remain with the owner.
 
 ## Validation
 
