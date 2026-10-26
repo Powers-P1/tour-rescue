@@ -124,6 +124,13 @@
 .judge-walkthrough h2{font-size:clamp(31px,3vw,38px)}
 .judge-walkthrough>p:not(.eyebrow){max-width:72ch;color:var(--muted);font-size:16px}
 .judge-walkthrough video{display:block;width:100%;max-width:960px;height:auto;aspect-ratio:16/9;object-fit:contain;background:#0f181d;border:1px solid var(--line);border-radius:10px;margin:24px auto 0}
+.film-player{max-width:960px;margin-inline:auto}
+.film-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:16px}
+.film-actions button{font:inherit;cursor:pointer}
+.film-actions button:disabled{cursor:wait;opacity:.7}
+.film-actions [hidden],.film-player progress[hidden]{display:none}
+.film-player [role=status]{color:var(--muted);font-size:15px;line-height:1.5;margin:12px 0}
+.film-player progress{display:block;width:min(100%,360px);height:12px;accent-color:var(--amber)}
 .recorded-qloo-study{margin-top:28px;padding-top:24px;border-top:1px solid var(--line);font-size:16px;line-height:1.55}
 .recorded-qloo-study h2{font-size:clamp(26px,3vw,34px);margin-bottom:12px}
 .recorded-qloo-study p{max-width:85ch;color:var(--muted)}

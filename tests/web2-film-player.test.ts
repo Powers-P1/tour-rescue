@@ -16,7 +16,7 @@ test('jury player builds the clean final-v4 film with 39 captions, transcript an
  // Execute the real built v2 entry point offline. Only the DOM surface is stubbed;
  // the model, recommendation, summary and markup code all run from the bundle.
  const stub=()=>({innerHTML:'',className:'',dataset:{},addEventListener(){},setAttribute(){},
-   querySelector(){return stub();},querySelectorAll(){return [];}});
+   querySelector(selector:string){return selector==='[data-film-player]'?null:stub();},querySelectorAll(){return [];}});
  const judges=stub();
  const media=()=>({matches:false,addEventListener(){}});
  let requests=0;
@@ -83,9 +83,15 @@ test('jury player builds the clean final-v4 film with 39 captions, transcript an
  const html=judgesMarkup(publicSiteModel());
  assert.equal((html.match(/href="#walkthrough"/g)??[]).length,1);
  const video=html.match(/<video\b[^>]*>[\s\S]*?<\/video>/)?.[0]??'';
- assert.match(video,/controls playsinline preload="metadata"/);
+ assert.match(video,/playsinline preload="none"/);
  assert.match(video,/poster="\/video\/tour-rescue-final-v4-poster\.jpg"/);
- assert.match(video,/src="\/video\/tour-rescue-final-v4\.mp4" type="video\/mp4"/);
+ assert.doesNotMatch(video,/<source|\ssrc="[^"]+\.mp4"/,'no eager native MP4 request before the user asks');
+ assert.match(html,/data-film-src="\/video\/tour-rescue-final-v4\.mp4"/);
+ assert.ok(html.includes('data-film-bytes="'+film.length+'"'));
+ assert.match(html,/data-film-load[^>]*>Play the two-minute film \(23 MB\)/);
+ assert.match(html,/data-film-cancel hidden>Cancel download/);
+ assert.match(html,/data-film-status role="status"/);
+ assert.match(html,/download="TourRescue-jury-final-v4.mp4"/);
  assert.match(video,/kind="captions"[^>]+srclang="en"[^>]+default/);
  assert.doesNotMatch(video,/\b(?:autoplay|loop)\b/);
  assert.match(html,/href="\/video\/transcript\.txt"/);
@@ -110,6 +116,9 @@ test('jury player builds the clean final-v4 film with 39 captions, transcript an
  for(const line of spoken)assert.ok(transcript.includes(line),line);
  assert.match(transcript,/authored replay/);assert.match(transcript,/Nothing is booked or paid/);
  assert.doesNotMatch(await readFile(new URL('../web2/dist/app/sw.js',import.meta.url),'utf8'),/\/video\//);
+ const headers=await readFile(new URL('../web2/dist/_headers',import.meta.url),'utf8');
+ assert.match(headers,/; media-src 'self' blob:;/);
+ assert.doesNotMatch(headers,/script-src[^;]*blob:|connect-src[^;]*blob:/);
  assert.deepEqual((await readdir(new URL('../docs/demo/',import.meta.url),{recursive:true})).filter(p=>p.endsWith('.mp4')).map(p=>p.replaceAll('\\','/')).sort(),[
   'final-v2/TourRescue-jury-final-v2.mp4','final-v4/TourRescue-jury-final-v4.mp4']);
  const archived=await readFile(new URL('../docs/demo/final-v2/TourRescue-jury-final-v2.mp4',import.meta.url));

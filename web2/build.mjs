@@ -72,7 +72,7 @@ await mkdir(new URL('video/',destUrl),{recursive:true});
 for (const {target, bytes} of filmAssets) await writeFile(new URL('video/' + target,destUrl),bytes);
 await buildPwa(destUrl);
 await writeFile(new URL('_headers',destUrl),`/*
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com; connect-src 'self' ${origin.origin}; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com; media-src 'self' blob:; connect-src 'self' ${origin.origin}; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
   Permissions-Policy: camera=(), microphone=(), geolocation=()

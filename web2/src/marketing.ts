@@ -226,11 +226,15 @@ export function judgesMarkup(model:PublicSiteModel):string{
  '<p class="eyebrow">OPTIONAL PRESENTATION</p><h2 id="walkthrough-title">Keep the tour moving.</h2>'+
  '<p>A two-minute film with actual responsive app captures. Recorded real Qloo evidence is separate from the synthetic 350 → 354.1 km experiment and authored AI replay. Tour SOS is a supplier sample: no contact, order or payment. Its proposed business model requires real partners.</p>'+
  '<p>Touring, gear and stage scenes are labelled AI illustrations. Motion and device frames are edited for this presentation.</p>'+
- '<video controls playsinline preload="metadata" width="1920" height="1080" poster="/video/tour-rescue-final-v4-poster.jpg" aria-label="Tour Rescue two-minute film">'+
- '<source src="/video/tour-rescue-final-v4.mp4" type="video/mp4" />'+
+ '<div class="film-player" data-film-player data-film-src="/video/tour-rescue-final-v4.mp4" data-film-bytes="23144942">'+
+ '<video id="film-video" data-film-video playsinline preload="none" width="1920" height="1080" poster="/video/tour-rescue-final-v4-poster.jpg" aria-label="Tour Rescue two-minute film" aria-describedby="film-status">'+
  '<track kind="captions" src="/video/tour-rescue-final-v4.en.vtt" srclang="en" label="English" default />'+
  '<a href="/video/tour-rescue-final-v4.mp4">Download the film</a></video>'+
- '<p>'+link('/video/tour-rescue-final-v4.mp4','Open MP4')+' · '+link('/video/transcript.txt','Read the English transcript')+' · '+link('/video/tour-rescue-final-v4.en.vtt','English captions (VTT)')+' · '+link('/video/tour-rescue-final-v4.en.srt','English subtitles (SRT)')+'</p></section>'+
+ '<div class="film-actions"><button type="button" class="m-button m-button-quiet" data-film-load aria-controls="film-video">Play the two-minute film (23 MB)</button>'+
+ '<button type="button" class="m-button m-button-quiet" data-film-cancel hidden>Cancel download</button></div>'+
+ '<p id="film-status" data-film-status role="status">The film downloads only when you press Play. Full download: 23 MB.</p>'+
+ '<progress data-film-progress aria-label="Film download in progress" hidden></progress></div>'+
+ '<p><a class="text-link" href="/video/tour-rescue-final-v4.mp4" download="TourRescue-jury-final-v4.mp4">Download MP4 (23 MB)</a> · '+link('/video/transcript.txt','Read the English transcript')+' · '+link('/video/tour-rescue-final-v4.en.vtt','English captions (VTT)')+' · '+link('/video/tour-rescue-final-v4.en.srt','English subtitles (SRT)')+'</p></section>'+
  '<section class="site-shell judge-walkthrough"><p class="eyebrow">OPTIONAL EXTENSION · SAMPLE</p><h2>When the guitar breaks. Or the delivery never comes.</h2><p>Tour SOS shows the incident → supplier options → budget review workflow. The current guided example is a damaged drum head in Ho Chi Minh City. Suppliers, prices and response times are illustrative. It does not confirm a real technician or delivery is available, contact anyone or place an order.</p>'+sosBusinessHypothesis+link('/app/?learn=sos#sos','Try the guided SOS sample →','m-button m-button-quiet')+'<p class="mini-disclosure">The partner network and payments still need to be built. No service revenue is claimed.</p></section>'+
  '<details class="judge-optional site-shell"><summary>Scope and known limits</summary>'+knownLimitsSection()+
  scopeTable()+'</details>'+

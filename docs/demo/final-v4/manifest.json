@@ -24,13 +24,13 @@
     },
     {
       "name": "QA.json",
-      "bytes": 5901,
-      "sha256": "8460afdda95bcade179acb816d1bc8b77f2cdaadf270acb757f0bffdf094fe71"
+      "bytes": 10511,
+      "sha256": "6e8cb5d02b0b888660f21721f5b9b76717473768ead1af282e5b42bb2dacfd81"
     },
     {
       "name": "README.md",
-      "bytes": 2877,
-      "sha256": "33ad8c66a5bf99e13ee128cf201a3e12b38759bf205ec478e00c4004f042548a"
+      "bytes": 3617,
+      "sha256": "88996a59f93485c8b7189a2123159a925cd7fab24b6137eb6a059cdd9ac1945a"
     },
     {
       "name": "TourRescue-jury-final-v4.mp4",
