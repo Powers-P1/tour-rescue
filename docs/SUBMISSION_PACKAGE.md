@@ -1,18 +1,18 @@
 # Tour Rescue — copy-ready submission package
 
-Prepared 24 October and updated 26 October 2026. The [handoff](HACKATHON_HANDOFF.md) records the release and owner actions. The [Tour Rescue entry](https://devpost.com/software/tour-rescue) is submitted: the 24 October owner receipt confirms submission **1259533** after explicitly authorized declarations. This document is the English reference package; later film publication and entry updates require separate receipts.
+Prepared 24 October and updated 26 October 2026. The [handoff](HACKATHON_HANDOFF.md) and [publication receipt](validation/publication-2026-10-26.md) record the completed release and owner actions. The [Tour Rescue entry](https://devpost.com/software/tour-rescue) remains **SUBMITTED, 5/5 steps complete**, submission **1259533**. Its public video embed now uses the published final-v4 film; the older YouTube film is private.
 
 ## Submission fields
 
 - Project: **Tour Rescue**
-- Tagline: **A cancelled show. A clear next call.**
+- Tagline: **The show’s off. The tour isn’t. Mobile-first help for tour managers: three checked options and a clear brief for the next promoter call.**
 - Demo: https://tour-rescue.pages.dev/judges/
 - App: https://tour-rescue.pages.dev/app/#rescue
 - Guided judging path: https://tour-rescue.pages.dev/app/?tour=start#rescue
 - Direct sensitivity experiment: https://tour-rescue.pages.dev/app/#breakpoint
 - Public source: https://github.com/Powers-P1/tour-rescue
 - Licence: MIT, detectable in the repository About area.
-- Two-minute final-v4 film: self-hosted website player release build at https://tour-rescue.pages.dev/judges/#walkthrough. A new YouTube publication is pending the owner's account action. The [100-second final-v2 film](https://youtu.be/PT3Iysktgn0) remains archived.
+- Two-minute final-v4 film: [website player](https://tour-rescue.pages.dev/judges/#walkthrough) and [YouTube](https://youtu.be/uwiPr3YNfNA), also verified in the current public Devpost embed. The [100-second final-v2 package](demo/final-v2/README.md) remains archived; its older YouTube film is private.
 - Built with: Qloo API, Claude Sonnet 5.5, TypeScript, Cloudflare Pages and Workers, SQLite Durable Objects, an OSRM road snapshot, HTML Canvas and a scoped PWA service worker.
 
 ## Description
@@ -62,7 +62,7 @@ No sign-in or key is needed for the saved demo. Keep live research separate from
 5. Optionally open AI Rescue in saved-example mode, choose either corridor-repair or evidence-gaps, inspect sources and explicitly accept a checked lead. Revalidation updates one comparison card, preserves the other and includes accepted sources in the current audit. UNKNOWN availability and fees stay UNKNOWN. Cancellation or an error preserves the previous comparison.
 6. Optionally explore the separate SOS tutorial. Its supplier approval is simulated and sends no contact or payment.
 
-Use Node 24 and `npm ci --ignore-scripts`, `npm run check`, `npm run web:build`, `npm run worker:build` for local verification. The guide-geometry application revision `2ad5133` passes **394 offline tests**, strict types, the Pages build and both core/browser CI. The Pages build comes from **web2/** into **web/dist**. Offline tests need no provider credential. Do not publish raw Qloo replies or private band excerpts in source.
+Use Node 24 and `npm ci --ignore-scripts`, `npm run check`, `npm run web:build`, `npm run worker:build` for local verification. The 26 October source `2e57ab5`, merged to main as `e1e39ef`, passes **398 offline tests**, strict types, local/Pages builds, Worker dry build and complete core/visual CI. Public production QA passed at 390×844 and 1440×1000, including the actual film's hash, default captions, play/pause and seeks to 3.2/35/87/116 seconds. The Pages build comes from **web2/** into **web/dist**. Historical acceptance reports retain their original revision counts. Offline tests need no provider credential. Do not publish raw Qloo replies or private band excerpts in source.
 
 ## Judging criteria and evidence
 
@@ -79,6 +79,6 @@ The [final-v4 film package](demo/final-v4/README.md) contains the 120-second, 19
 
 The film uses actual responsive UI captures with edited presentation motion, alongside labelled AI-generated touring, gear and stage illustrations. It separates recorded real Qloo from the synthetic 350→354.1 km experiment and authored AI replay. The four-state Ho Chi Minh City SOS sample confirms no real supplier contact, order or payment. The proposed business model is agency subscriptions and completed-local-service fees, dependent on onboarding real partners. Music is SONTALK's “We Stay (Instrumental Version)”, supplied from the owner's existing Epidemic Sound subscription/trial; Mike narration uses Epidemic Sound Voices / ElevenLabs. Source clips, full music WAVs and voice recordings are not redistributed in this package. Retain the account/channel rights evidence; technical QA is not a rights certificate.
 
-The [final-v2 package](demo/final-v2/README.md) and its 24 October YouTube publication remain recoverable. New hosting, deployment and Devpost video-replacement actions are recorded separately rather than inferred from the package.
+The website film and [current YouTube film](https://youtu.be/uwiPr3YNfNA) are published and Devpost's public embed has been replaced. YouTube received the higher-bitrate clean 120-second master with separately imported English SRT; the manual English (US) track is published and verified in the public player at 1080p60 HD. Its UI rounds the duration to 2:01. The website retains the smaller derivative above. The [final-v2 package](demo/final-v2/README.md) remains recoverable and unchanged; the older YouTube film was made private rather than permanently deleted. See the separate [publication receipt](validation/publication-2026-10-26.md).
 
-The [official rules](https://qloo.devpost.com/rules), checked 24 October, require a working demo, English description and a public repository with an open-source licence visible in About. Video is optional. Maintain free judging access until the judging period ends: **5 November, 23:45 Eastern / 6 November, 05:45 Warsaw**. The entry was submitted on 24 October with Damian's explicit authorization; keep the receipt and maintain eligibility, representation and rights evidence. The submission deadline remains **30 October 2026, 23:45 EDT / 31 October, 04:45 Warsaw**. Packaging the new film does not itself update the submitted entry or accept new legal terms.
+The [official rules](https://qloo.devpost.com/rules), checked 24 October, require a working demo, English description and a public repository with an open-source licence visible in About. Video is optional. Maintain free judging access until the judging period ends: **5 November, 23:45 Eastern / 6 November, 05:45 Warsaw**. The entry was submitted on 24 October with Damian's explicit authorization; keep the receipt and maintain eligibility, representation and rights evidence. The submission deadline remains **30 October 2026, 23:45 EDT / 31 October, 04:45 Warsaw**. The authorized 26 October video update preserved the existing submitted state and did not repeat the final submission declarations.
