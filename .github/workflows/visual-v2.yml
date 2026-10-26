@@ -9,6 +9,8 @@ on:
       - 'scripts/verify-completion.mjs'
       - 'scripts/verify-judge-workflow.mjs'
       - 'scripts/verify-mobile-agent-surface.mjs'
+      - 'scripts/verify-film-player.mjs'
+      - 'docs/demo/final-v4/**'
       - 'package.json'
       - '.github/workflows/visual-v2.yml'
   workflow_dispatch:
@@ -32,6 +34,17 @@ jobs:
           npm install --no-save --package-lock=false playwright@1.56.1
           npx playwright install chromium
       - run: npm run web:build
+      - name: Verify lazy film loading, full-200 seeking, captions and recovery
+        # H.264/AAC media needs the official codec-enabled browser. Other UI
+        # checks retain bundled Chromium. The runner already includes Chrome.
+        # https://playwright.dev/docs/browsers#media-codecs
+        run: |
+          google-chrome --version
+          node scripts/verify-film-player.mjs
+        env:
+          QA_OUTPUT: artifacts/screenshots/v2/film-player
+          PLAYWRIGHT_CHANNEL: chrome
+          FILM_COMPARE_BUNDLED: '1'
       - run: node scripts/capture-v2.mjs
       - name: Verify all v2 ARIA and responsive polish
         run: node scripts/verify-polish.mjs

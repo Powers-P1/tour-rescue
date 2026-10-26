@@ -1,0 +1,8 @@
+.gitattributes text eol=lf
+*.mp4 -text
+*.jpg -text
+*.vtt text eol=lf
+*.srt text eol=lf
+*.txt text eol=lf
+*.json text eol=lf
+*.md text eol=lf

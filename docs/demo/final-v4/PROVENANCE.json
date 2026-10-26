@@ -1,0 +1,122 @@
+{
+  "schemaVersion": "tour-rescue.film-provenance.v1",
+  "revision": "final-v4",
+  "film": "TourRescue-jury-final-v4.mp4",
+  "preparedAtUtc": "2026-10-25T23:38:28.177Z",
+  "sha256": "c9c6a5b8f3a25fc6d25093026567e57ec7cfe4e9fffe3f9da7b701a196c10d4f",
+  "reviewMaster": {
+    "file": "TourRescue-v4-review.mp4",
+    "sha256": "ffb7e749b14434b7682aa70c90a6f78a5f1bb37d6772c52ed0b826cda97be2c1",
+    "bytes": 40067802,
+    "durationSeconds": 120,
+    "width": 1920,
+    "height": 1080,
+    "fps": 60,
+    "frames": 7200,
+    "redistributed": false
+  },
+  "burnedReviewBackup": {
+    "file": "TourRescue-v4-captioned.mp4",
+    "sha256": "08c2f8d331a5895a338f3b01e38ca32c22116901112fa04f0765dac4012ab62f",
+    "redistributed": false
+  },
+  "publicationDerivative": {
+    "source": "Clean review master; map video and audio only; exclude embedded mov_text subtitles.",
+    "captionDelivery": "clean-picture-plus-native-vtt",
+    "sha256": "c9c6a5b8f3a25fc6d25093026567e57ec7cfe4e9fffe3f9da7b701a196c10d4f",
+    "bytes": 23144942,
+    "durationSeconds": 120,
+    "width": 1920,
+    "height": 1080,
+    "fps": 60,
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "subtitleStreams": 0,
+    "fullDecode": "PASS; root FFmpeg error-level decode exited 0",
+    "sampledEncodedFramesSeconds": [
+      35,
+      87,
+      116
+    ],
+    "sampledReview": "Root inspected Qloo, SOS and closing/QR frames; labels and copy intact."
+  },
+  "ui": {
+    "source": "Actual responsive browser captures from the existing v2 app, including isolated Playwright SOS captures.",
+    "synthetic": "350 → 354.1 km changes only the additional-distance cap; daily driving and four confirmed shows remain fixed.",
+    "recordedQloo": {
+      "kind": "Previously recorded evidence, not a fresh provider call during film playback",
+      "target": "Radiohead",
+      "cityCoverage": "24/24",
+      "withTaste": "Nuremberg",
+      "withoutTaste": "needs-evidence",
+      "controlAndBothOmissions": "Nuremberg unchanged",
+      "bookingFacts": "Synthetic sample",
+      "publicStudyReport": "../../validation/live-qloo-2026-10-23.md",
+      "rawProviderDataIncluded": false
+    },
+    "ai": "Separate authored saved replay; proposals enter comparison only after explicit acceptance.",
+    "sos": {
+      "scenario": "Ho Chi Minh City illustrative suppliers",
+      "selectedSupplier": "Minh Backline",
+      "estimateVnd": 1800000,
+      "capVnd": 2000000,
+      "state": "Sample approval preview / Approval simulated / Not ordered",
+      "contact": false,
+      "booking": false,
+      "payment": false
+    },
+    "business": "Proposed agency subscriptions and fees on completed local services require real partner onboarding; no traction or revenue claim.",
+    "boundary": "Responsive browser capture and edited device frames; no physical-device installation claim."
+  },
+  "motion": {
+    "ledger": "motion-ledger.json",
+    "method": "Cuts, tracked crops, zooms and rigid actual-pixel scrolls with measured tap cues.",
+    "generatedUiOrOpticalFlow": false,
+    "nativeAppAnimationClaim": false
+  },
+  "cinematicFootage": {
+    "provider": "Google Flow / Veo 3.1 Fast, with generated first-frame references",
+    "clips": "Four illustrative touring/gear/stage clips; two reused and two newly generated for v4.",
+    "sourceFps": 24,
+    "presentationFps": 60,
+    "frameRateMethod": "Duplicate source frames; no optical flow.",
+    "sourceClipsRedistributed": false,
+    "claim": "Fictional touring purpose and gear incident; no rescued concert or supplier fulfilment."
+  },
+  "narration": {
+    "provider": "Epidemic Sound Voices / ElevenLabs",
+    "voice": "Mike",
+    "sourceSpeed": 1,
+    "method": "Reused main narration plus SOS narration and three corrected phrases; complete phrases retained without speed changes.",
+    "timeline": "voice-timeline.json",
+    "sourceRecordingsRedistributed": false
+  },
+  "music": {
+    "artist": "SONTALK",
+    "title": "We Stay (Instrumental Version)",
+    "provider": "Epidemic Sound",
+    "passageSeconds": [
+      24,
+      144
+    ],
+    "continuousSourcePassage": true,
+    "source": "Project owner supplied the existing recording from their subscription/trial; account/channel coverage is retained by the owner.",
+    "sourceWavRedistributed": false,
+    "claim": "Provenance only; this manifest does not grant distribution rights."
+  },
+  "poster": {
+    "source": "Existing clean picture frame at 4.000 seconds",
+    "width": 1920,
+    "height": 1080,
+    "kind": "Actual frame from the illustrated touring scene, not generated UI."
+  },
+  "packaging": {
+    "newProviderJobs": 0,
+    "rawQlooOrPrivateAuditsIncluded": false,
+    "fullMusicWavOrSourceClipsIncluded": false,
+    "currentMp4Sources": 1,
+    "previousPackageRetained": "../final-v2/",
+    "pwaPrecache": false
+  },
+  "ownerActions": "Public hosting, rights/account coverage, Devpost state and deployment receipts are maintained separately."
+}

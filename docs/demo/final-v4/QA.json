@@ -1,0 +1,356 @@
+{
+  "schemaVersion": "tour-rescue.film-qa.v1",
+  "revision": "final-v4",
+  "film": "TourRescue-jury-final-v4.mp4",
+  "sha256": "c9c6a5b8f3a25fc6d25093026567e57ec7cfe4e9fffe3f9da7b701a196c10d4f",
+  "durationSeconds": 120,
+  "width": 1920,
+  "height": 1080,
+  "fps": 60,
+  "frames": 7200,
+  "reviewMaster": {
+    "fullDecode": "PASS in source MEDIA-QA.json / ACCEPTANCE.json",
+    "captions": {
+      "count": 39,
+      "overlaps": 0,
+      "language": "English",
+      "lastCueEndSeconds": 116.97
+    },
+    "audio": {
+      "integratedLufs": -15.91,
+      "truePeakDbtp": -4.5,
+      "loudnessRangeLu": 2.6
+    },
+    "qr": {
+      "url": "https://tour-rescue.pages.dev/judges/",
+      "symbolMatch": "PASS in source acceptance",
+      "physicalCameraTest": "Not performed"
+    }
+  },
+  "publicationDerivative": {
+    "sha256": "c9c6a5b8f3a25fc6d25093026567e57ec7cfe4e9fffe3f9da7b701a196c10d4f",
+    "bytes": 23144942,
+    "durationSeconds": 120,
+    "width": 1920,
+    "height": 1080,
+    "fps": 60,
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "subtitleStreams": 0,
+    "captionDelivery": "clean-picture-plus-native-vtt",
+    "fullDecode": "PASS; root FFmpeg error-level decode exited 0",
+    "sampledEncodedFramesSeconds": [
+      35,
+      87,
+      116
+    ],
+    "sampledReview": "Root inspected Qloo, SOS and closing/QR frames; labels and copy intact."
+  },
+  "packageChecks": {
+    "status": "PASS",
+    "verifiedFilmSha256": "c9c6a5b8f3a25fc6d25093026567e57ec7cfe4e9fffe3f9da7b701a196c10d4f",
+    "publicationBytes": 23144942,
+    "captionCueCount": 39,
+    "archiveRetained": "final-v2",
+    "publicHosting": "Self-hosted release build; YouTube publication pending owner action",
+    "typecheck": "PASS",
+    "offlineTests": 398,
+    "localBuild": "PASS",
+    "pagesBuild": "PASS",
+    "placeholderUrls": false
+  },
+  "playerChecks": {
+    "status": "LOCAL_FULL_200_PASS_PUBLIC_PREVIEW_PENDING",
+    "environment": "Actual built Pages assets. Ordinary web2/serve.mjs returns full HTTP 200 bodies, including for Range requests.",
+    "browserVersion": "156.0.4314.42",
+    "browserRouting": "Browser plugin not available; isolated Playwright",
+    "httpRange": {
+      "status": 200,
+      "bytes": 23144942,
+      "contentRange": null,
+      "sha256": "c9c6a5b8f3a25fc6d25093026567e57ec7cfe4e9fffe3f9da7b701a196c10d4f"
+    },
+    "regressionCommand": "node scripts/verify-film-player.mjs",
+    "visualCi": true,
+    "viewports": [
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "status": "passed",
+        "initialMp4Requests": 0,
+        "media": {
+          "duration": 120,
+          "width": 1920,
+          "height": 1080,
+          "captions": 39,
+          "captionMode": "showing",
+          "source": "blob:"
+        },
+        "cancelAndErrorRetry": "passed (delayed cancellation and injected HTTP 503)",
+        "nativeKeyboardPlayback": "passed",
+        "seeks": [
+          {
+            "seconds": 3.2,
+            "decodedTime": 3.2,
+            "activeCaptions": [
+              "The band is already on the road."
+            ]
+          },
+          {
+            "seconds": 35,
+            "decodedTime": 35,
+            "activeCaptions": []
+          },
+          {
+            "seconds": 87,
+            "decodedTime": 87,
+            "activeCaptions": [
+              "Review a sample quote against your budget."
+            ]
+          },
+          {
+            "seconds": 116,
+            "decodedTime": 116,
+            "activeCaptions": [
+              "Try the working demo."
+            ]
+          }
+        ],
+        "directDownload": {
+          "bytes": 23144942,
+          "sha256": "c9c6a5b8f3a25fc6d25093026567e57ec7cfe4e9fffe3f9da7b701a196c10d4f"
+        },
+        "transcriptBackAndReload": "passed",
+        "errors": [],
+        "expectedNetworkError": "HTTP503 deliberately injected only for the retry UI test; decoded frames use the unchanged actual MP4."
+      },
+      {
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "status": "passed",
+        "initialMp4Requests": 0,
+        "media": {
+          "duration": 120,
+          "width": 1920,
+          "height": 1080,
+          "captions": 39,
+          "captionMode": "showing",
+          "source": "blob:"
+        },
+        "cancelAndErrorRetry": "passed (delayed cancellation and injected HTTP 503)",
+        "nativeKeyboardPlayback": "passed",
+        "seeks": [
+          {
+            "seconds": 3.2,
+            "decodedTime": 3.2,
+            "activeCaptions": [
+              "The band is already on the road."
+            ]
+          },
+          {
+            "seconds": 35,
+            "decodedTime": 35,
+            "activeCaptions": []
+          },
+          {
+            "seconds": 87,
+            "decodedTime": 87,
+            "activeCaptions": [
+              "Review a sample quote against your budget."
+            ]
+          },
+          {
+            "seconds": 116,
+            "decodedTime": 116,
+            "activeCaptions": [
+              "Try the working demo."
+            ]
+          }
+        ],
+        "directDownload": {
+          "bytes": 23144942,
+          "sha256": "c9c6a5b8f3a25fc6d25093026567e57ec7cfe4e9fffe3f9da7b701a196c10d4f"
+        },
+        "transcriptBackAndReload": "passed",
+        "errors": [],
+        "expectedNetworkError": "HTTP503 deliberately injected only for the retry UI test; decoded frames use the unchanged actual MP4."
+      }
+    ],
+    "cleanup": {
+      "browserClosed": true,
+      "ownServerStopped": true
+    }
+  },
+  "limitations": [
+    "Source acceptance is production QA, not an independent rights certificate.",
+    "Cached ASR supports transcript/timing checks; it is not a subjective listening certificate.",
+    "No physical-device installation or camera QR test is claimed."
+  ],
+  "historicalRangePreview": {
+    "status": "HISTORICAL_LOCAL_PASS_NOT_REPRESENTATIVE_OF_PAGES",
+    "environment": "Isolated Playwright msedge; external origins blocked; task-local Range-capable static preview of actual built Pages assets.",
+    "viewports": [
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "status": "passed",
+        "durationSeconds": 120,
+        "dimensions": {
+          "width": 1920,
+          "height": 1080
+        },
+        "captionCues": 39,
+        "captionMode": "showing",
+        "seeks": [
+          {
+            "seconds": 3.2,
+            "decoded": true,
+            "activeCaptions": [
+              "The band is already on the road."
+            ]
+          },
+          {
+            "seconds": 35,
+            "decoded": true,
+            "activeCaptions": []
+          },
+          {
+            "seconds": 87,
+            "decoded": true,
+            "activeCaptions": [
+              "Review a sample quote against your budget."
+            ]
+          },
+          {
+            "seconds": 116,
+            "decoded": true,
+            "activeCaptions": [
+              "Try the working demo."
+            ]
+          }
+        ],
+        "localLinks": [
+          {
+            "label": "Open MP4",
+            "href": "/video/tour-rescue-final-v4.mp4",
+            "status": 200,
+            "bytes": 23144942
+          },
+          {
+            "label": "Read the English transcript",
+            "href": "/video/transcript.txt",
+            "status": 200,
+            "bytes": 2604
+          },
+          {
+            "label": "English captions (VTT)",
+            "href": "/video/tour-rescue-final-v4.en.vtt",
+            "status": 200,
+            "bytes": 2480
+          },
+          {
+            "label": "English subtitles (SRT)",
+            "href": "/video/tour-rescue-final-v4.en.srt",
+            "status": 200,
+            "bytes": 2580
+          }
+        ],
+        "errors": []
+      },
+      {
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "status": "passed",
+        "durationSeconds": 120,
+        "dimensions": {
+          "width": 1920,
+          "height": 1080
+        },
+        "captionCues": 39,
+        "captionMode": "showing",
+        "seeks": [
+          {
+            "seconds": 3.2,
+            "decoded": true,
+            "activeCaptions": [
+              "The band is already on the road."
+            ]
+          },
+          {
+            "seconds": 35,
+            "decoded": true,
+            "activeCaptions": []
+          },
+          {
+            "seconds": 87,
+            "decoded": true,
+            "activeCaptions": [
+              "Review a sample quote against your budget."
+            ]
+          },
+          {
+            "seconds": 116,
+            "decoded": true,
+            "activeCaptions": [
+              "Try the working demo."
+            ]
+          }
+        ],
+        "localLinks": [
+          {
+            "label": "Open MP4",
+            "href": "/video/tour-rescue-final-v4.mp4",
+            "status": 200,
+            "bytes": 23144942
+          },
+          {
+            "label": "Read the English transcript",
+            "href": "/video/transcript.txt",
+            "status": 200,
+            "bytes": 2604
+          },
+          {
+            "label": "English captions (VTT)",
+            "href": "/video/tour-rescue-final-v4.en.vtt",
+            "status": 200,
+            "bytes": 2480
+          },
+          {
+            "label": "English subtitles (SRT)",
+            "href": "/video/tour-rescue-final-v4.en.srt",
+            "status": 200,
+            "bytes": 2580
+          }
+        ],
+        "errors": []
+      }
+    ],
+    "cleanup": {
+      "browserClosed": true,
+      "ownServerStopped": true
+    },
+    "limitation": "The local Range-capable server returned206. This did not reproduce Pages full200 behavior; public native-URL seeking later failed."
+  },
+  "publicPreviewRegression": {
+    "status": "FAILED_BEFORE_BLOB_FIX",
+    "url": "https://311234bb.tour-rescue.pages.dev",
+    "sourceCommit": "1d6945f1274917bd07c619f77fcc0b82854209c3",
+    "nativePlayback": "120s metadata,39 English cues and native keyboard play/pause passed.",
+    "failure": "Native direct-URL seek to3.2s timed out after30s.",
+    "rangeResponse": {
+      "status": 200,
+      "bytes": 23144942,
+      "contentRange": null
+    },
+    "platformDocumentation": "https://developers.cloudflare.com/pages/configuration/serving-pages/",
+    "correctedPublicPreview": "PENDING_OWNER_DEPLOYMENT_AND_PUBLIC_NETWORK_QA"
+  }
+}

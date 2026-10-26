@@ -13,6 +13,7 @@ const badge=(message:string,variant='neutral')=>'<span class="m-badge m-badge-'+
 const wordmark='<a class="site-brand" href="/">'+brand()+'</a>';
 const heroPhoto='/assets/touring-backstage-v2.webp';
 const drumPhoto='/assets/touring-drum-v2.webp';
+const sosBusinessHypothesis='<p><strong>Business hypothesis.</strong> Agency subscriptions, plus fees or commissions on completed local services. First, build a vetted local partner network for backline, repairs and urgent delivery.</p>';
 
 function header(judges:boolean):string {
  if(judges) return '<div class="judges-utility"><span>Qloo Agentic Hackathon</span><strong>Judges · Start here</strong></div>'+
@@ -113,8 +114,8 @@ export function landingMarkup(model:PublicSiteModel):string{
  return header(false)+
  '<main id="main-content">'+
  '<section class="site-hero site-shell"><div class="hero-copy">'+
- '<h1>A canceled date.<span>A way forward.</span></h1>'+
- '<p class="hero-deck">For tour managers and bookers: compare the options after a cancellation and prepare the next promoter conversation.</p>'+
+ '<h1>The show’s off.<span>The tour isn’t.</span></h1>'+
+ '<p class="hero-deck">For tour managers and bookers: the band is already on the road. Find the next move, keep confirmed dates fixed and prepare the next promoter conversation.</p>'+
  '<div class="hero-actions">'+link(model.appHref,'Rescue a sample date →','m-button')+
  link('#how-it-works','Explore the product ↗')+'</div>'+
  '<p class="mini-disclosure">ⓘ Sample tour · No sign-up to explore · Never a booked show</p></div>'+
@@ -124,16 +125,17 @@ export function landingMarkup(model:PublicSiteModel):string{
  miniaturePhone(model)+'</div></section>'+
  '<section id="how-it-works" class="landing-section site-shell rescue-section"><div class="landing-map">'+
  journeyDiagram(model)+'</div><div class="section-copy"><p class="eyebrow">01 / DATE RESCUE · CORE</p>'+
- '<h2>Three directions.<span>One next move.</span></h2>'+
- '<p>Compare cultural fit and realistic travel. Pick a direction. Prepare a one-page proposal for the promoter.</p>'+
+ '<h2>A plan you can<span>stand behind.</span></h2>'+
+ '<p>Your crew still needs a plan. Compare a replacement, a detour or a day off. Qloo adds cultural-fit evidence alongside the road checks, so you can take a clear draft to the next promoter conversation.</p>'+
  '<div class="line-facts"><p>'+icon('people')+'<strong>Taste fit · Qloo</strong></p><p>'+icon('route')+'<strong>Road and timing checks</strong></p><p>'+icon('document')+'<strong>Draft outreach, ready to review</strong></p></div>'+
  link(model.appHref,'Explore the rescue →','text-amber')+
  '<p class="mini-disclosure">The demo uses synthetic taste profiles and a frozen OSRM matrix. Fresh Qloo is a separate action.</p></div></section>'+
  '<section id="local-sos" class="sos-section"><div class="site-shell sos-grid">'+
  '<div class="section-copy"><p class="eyebrow">02 / LOCAL SOS · SAMPLE</p><h2>Broken gear.<span>Local help.</span></h2>'+
  '<p>Say what happened, where you are and when it is needed. Review a concrete scope, arrival estimate and price before approving any spend.</p>'+
+ sosBusinessHypothesis+
  link('/app/#sos','See a sample local rescue →','text-amber')+
- '<p class="mini-disclosure">No supplier is contacted. Quote and travel values are fictional.</p></div>'+
+ '<p class="mini-disclosure">No supplier is contacted. Quote and travel values are fictional. The partner network and payments still need to be built. No service revenue is claimed.</p></div>'+
  '<figure class="sos-photo" role="img" aria-label="Illustrative drum fitting, not a real supplier visit"><img src="'+drumPhoto+'" alt="AI-generated illustration of a drum technician working on a bass drum" loading="lazy" width="1200" height="760"/>'+
  '<figcaption>AI illustration · not the sample supplier</figcaption>'+
  '<div class="sos-card"><small>SAMPLE QUOTE · NOT RECEIVED</small><h3>Ready to review.</h3><p>Minh Backline</p>'+
@@ -141,8 +143,9 @@ export function landingMarkup(model:PublicSiteModel):string{
  '<strong class="sos-money">1,800,000 VND</strong>'+
  '<span class="phone-button">Preview approval →</span></div></figure></div></section>'+
  '<section id="for-agencies" class="agency-band"><div class="site-shell agency-band-inner">'+
- '<div><p class="eyebrow">03 / AGENCY · SAMPLE WORKSPACE</p><h2>One calm desk.<span>Every tour.</span></h2></div>'+
- '<div><p>A clear queue of decisions, a named owner and venue-local deadlines. Switch from agency view to the artist in one step.</p>'+
+ '<div><p class="eyebrow">03 / AGENCY · SAMPLE WORKSPACE</p><h2>For the person<span>everyone calls.</span></h2></div>'+
+ '<div><p>One disrupted date can become everyone’s problem. Explore a sample queue with named owners and venue-local deadlines, then open the artist’s rescue.</p>'+
+ '<p class="mini-disclosure">Business hypothesis: per-tour or agency licensing. Willingness to pay and time saved still need to be tested with working bookers.</p>'+
  link('/app/#agency','Explore the sample agency workspace →')+'</div></div></section>'+
  '<section class="landing-judges-promo site-shell"><p class="eyebrow">FOR HACKATHON JUDGES</p>'+
  '<h2>Open the demo.<span>Try to overturn it.</span></h2><p>A short, reproducible route from cancellation to checked proposal.</p>'+
@@ -175,14 +178,14 @@ export function judgesMarkup(model:PublicSiteModel):string{
  '<main id="main-content">'+
  '<section class="judges-hero site-shell"><div class="judge-copy">'+
  '<p class="eyebrow">MOBILE FIRST · INSTALLABLE APP · NO SIGN-IN</p>'+
- '<h1>Leipzig canceled.<span>Keep the tour moving.</span></h1>'+
- '<p>For a tour manager or booker after a cancellation: compare three directions, inspect constraints and evidence, and prepare a brief for the next promoter conversation.</p>'+
+ '<h1>The show’s off.<span>The tour isn’t.</span></h1>'+
+ '<p>Leipzig canceled. The crew still needs a plan. For a tour manager or booker: compare three directions, keep four confirmed shows fixed and take a concrete brief to the next promoter conversation.</p>'+
  '<div class="hero-actions">'+link(model.appHref,'Rescue Leipzig →','m-button')+
  '<button type="button" class="m-button m-button-quiet" data-install-app>Install Tour Rescue</button></div>'+
  '<p class="mini-disclosure">Add it to your home screen. Sample rescue works offline; live Qloo and AI need a connection. '+ext(PUBLIC_REPOSITORY,'Public source & licence ↗','judges-external-link')+'</p>'+
  '<p class="mini-disclosure">ⓘ '+escape(model.rescue.cancelledDate)+
   ' · Synthetic taste fixture · Frozen OSRM · Not a booking</p>'+
- link('#walkthrough','Watch the 100-second walkthrough','text-amber')+'</div>'+proposalPreview(model)+'</section>'+
+ link('#walkthrough','Watch the two-minute film','text-amber')+'</div>'+proposalPreview(model)+'</section>'+
  '<section id="steps" class="site-shell judge-steps">'+
  '<div class="section-title"><p class="eyebrow">THE CASE</p><h2>One clear path.</h2></div>'+
  '<div class="judge-step-columns"><article><span>01 / ↗</span><h3>Open the canceled date</h3>'+
@@ -221,13 +224,18 @@ export function judgesMarkup(model:PublicSiteModel):string{
  '</section>'+
  '<section id="walkthrough" class="judge-walkthrough site-shell" aria-labelledby="walkthrough-title">'+
  '<p class="eyebrow">OPTIONAL PRESENTATION</p><h2 id="walkthrough-title">Keep the tour moving.</h2>'+
- '<p>A 100-second walkthrough of the actual interface. The synthetic rescue and saved AI replay are labelled separately from recorded live Qloo evidence. Motion and device frames are edited for this presentation.</p>'+
- '<video controls playsinline preload="metadata" width="1920" height="1080" poster="/video/tour-rescue-final-v2-poster.jpg" aria-label="Tour Rescue 100-second walkthrough">'+
- '<source src="/video/tour-rescue-final-v2.mp4" type="video/mp4" />'+
- '<track kind="captions" src="/video/tour-rescue-final-v2.en.vtt" srclang="en" label="English" default />'+
- '<a href="/video/tour-rescue-final-v2.mp4">Download the walkthrough</a></video>'+
- '<p>'+link('/video/transcript.txt','Read the English transcript')+' · '+link('/video/tour-rescue-final-v2.en.vtt','English captions (VTT)')+' · '+link('/video/tour-rescue-final-v2.en.srt','English subtitles (SRT)')+'</p></section>'+
- '<section class="site-shell judge-walkthrough"><p class="eyebrow">OPTIONAL EXTENSION · SAMPLE</p><h2>When the guitar breaks. Or the delivery never comes.</h2><p>Tour SOS shows the incident → supplier options → budget review workflow. The current guided example is a damaged drum head in Ho Chi Minh City. Suppliers, prices and response times are illustrative. It does not confirm a real technician or delivery is available, contact anyone or place an order.</p>'+link('/app/?learn=sos#sos','Explore the guided Tour SOS sample →','m-button m-button-quiet')+'</section>'+
+ '<p>A two-minute film with actual responsive app captures. Recorded real Qloo evidence is separate from the synthetic 350 → 354.1 km experiment and authored AI replay. Tour SOS is a supplier sample: no contact, order or payment. Its proposed business model requires real partners.</p>'+
+ '<p>Touring, gear and stage scenes are labelled AI illustrations. Motion and device frames are edited for this presentation.</p>'+
+ '<div class="film-player" data-film-player data-film-src="/video/tour-rescue-final-v4.mp4" data-film-bytes="23144942">'+
+ '<video id="film-video" data-film-video playsinline preload="none" width="1920" height="1080" poster="/video/tour-rescue-final-v4-poster.jpg" aria-label="Tour Rescue two-minute film" aria-describedby="film-status">'+
+ '<track kind="captions" src="/video/tour-rescue-final-v4.en.vtt" srclang="en" label="English" default />'+
+ '<a href="/video/tour-rescue-final-v4.mp4">Download the film</a></video>'+
+ '<div class="film-actions"><button type="button" class="m-button m-button-quiet" data-film-load aria-controls="film-video">Play the two-minute film (23 MB)</button>'+
+ '<button type="button" class="m-button m-button-quiet" data-film-cancel hidden>Cancel download</button></div>'+
+ '<p id="film-status" data-film-status role="status">The film downloads only when you press Play. Full download: 23 MB.</p>'+
+ '<progress data-film-progress aria-label="Film download in progress" hidden></progress></div>'+
+ '<p><a class="text-link" href="/video/tour-rescue-final-v4.mp4" download="TourRescue-jury-final-v4.mp4">Download MP4 (23 MB)</a> · '+link('/video/transcript.txt','Read the English transcript')+' · '+link('/video/tour-rescue-final-v4.en.vtt','English captions (VTT)')+' · '+link('/video/tour-rescue-final-v4.en.srt','English subtitles (SRT)')+'</p></section>'+
+ '<section class="site-shell judge-walkthrough"><p class="eyebrow">OPTIONAL EXTENSION · SAMPLE</p><h2>When the guitar breaks. Or the delivery never comes.</h2><p>Tour SOS shows the incident → supplier options → budget review workflow. The current guided example is a damaged drum head in Ho Chi Minh City. Suppliers, prices and response times are illustrative. It does not confirm a real technician or delivery is available, contact anyone or place an order.</p>'+sosBusinessHypothesis+link('/app/?learn=sos#sos','Try the guided SOS sample →','m-button m-button-quiet')+'<p class="mini-disclosure">The partner network and payments still need to be built. No service revenue is claimed.</p></section>'+
  '<details class="judge-optional site-shell"><summary>Scope and known limits</summary>'+knownLimitsSection()+
  scopeTable()+'</details>'+
  '</main>'+footer(true);

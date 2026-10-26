@@ -17,21 +17,25 @@ if (!['https:', 'http:'].includes(origin.protocol) || origin.username || origin.
   throw new Error('PUBLIC_WORKER_ORIGIN must be an HTTPS origin (HTTP localhost for dev), no credentials/path/query.');
 }
 // One canonical film source; only verified public playback assets enter dist.
-const filmRoot = new URL('../docs/demo/final-v2/', import.meta.url);
+const filmRoot = new URL('../docs/demo/final-v4/', import.meta.url);
 const filmManifest = JSON.parse(await readFile(new URL('manifest.json', filmRoot), 'utf8'));
-const filmSha = '9d5e25ece393070f3ab889e4cb2a41c8549259473b449d06e4863725d2413bb2';
-if (filmManifest.revision !== 'final-v2' || filmManifest.sha256 !== filmSha ||
-    filmManifest.film !== 'TourRescue-jury-final-v2.mp4') throw new Error('Final v2 film manifest is required.');
+const filmSha = 'c9c6a5b8f3a25fc6d25093026567e57ec7cfe4e9fffe3f9da7b701a196c10d4f';
+if (filmManifest.revision !== 'final-v4' || filmManifest.sha256 !== filmSha ||
+    filmManifest.film !== 'TourRescue-jury-final-v4.mp4' || filmManifest.durationSeconds !== 120 ||
+    filmManifest.width !== 1920 || filmManifest.height !== 1080 || filmManifest.fps !== 60 ||
+    filmManifest.captionDelivery !== 'clean-picture-plus-native-vtt') throw new Error('Final v4 publication manifest is required.');
 const filmAssets = await Promise.all([
-  ['TourRescue-jury-final-v2.mp4', 'tour-rescue-final-v2.mp4'],
-  ['poster.jpg', 'tour-rescue-final-v2-poster.jpg'],
-  ['captions.en.vtt', 'tour-rescue-final-v2.en.vtt'],
+  ['TourRescue-jury-final-v4.mp4', 'tour-rescue-final-v4.mp4'],
+  ['poster.jpg', 'tour-rescue-final-v4-poster.jpg'],
+  ['captions.en.vtt', 'tour-rescue-final-v4.en.vtt'],
+  ['captions.en.srt', 'tour-rescue-final-v4.en.srt'],
   ['narration.txt', 'transcript.txt'],
 ].map(async ([source, target]) => {
   const bytes = await readFile(new URL(source, filmRoot));
   const expected = filmManifest.files.find(file => file.name === source);
   const hash = createHash('sha256').update(bytes).digest('hex');
-  if (!expected || expected.sha256 !== hash || (source === filmManifest.film && hash !== filmSha))
+  if (!expected || expected.bytes !== bytes.length || expected.sha256 !== hash ||
+      (source === filmManifest.film && (hash !== filmSha || bytes.length > 24 * 1024 * 1024)))
     throw new Error('Final film asset hash mismatch: ' + source);
   return {target, bytes};
 }));
@@ -66,12 +70,9 @@ await cp(new URL('./assets/',import.meta.url), new URL('assets/',destUrl), {recu
 await cp(new URL('./public/',import.meta.url),destUrl,{recursive:true});
 await mkdir(new URL('video/',destUrl),{recursive:true});
 for (const {target, bytes} of filmAssets) await writeFile(new URL('video/' + target,destUrl),bytes);
-const captions=filmAssets.find(asset=>asset.target.endsWith('.vtt')).bytes.toString('utf8');
-let cue=0;const srt=captions.replace(/^WEBVTT\s*/,'').trim().split(/\r?\n\r?\n/).map(block=>++cue+'\n'+block.replace(/(\d{2}:\d{2}:\d{2})[.](\d{3})/g,'$1,$2')).join('\n\n')+'\n';
-await writeFile(new URL('video/tour-rescue-final-v2.en.srt',destUrl),srt);
 await buildPwa(destUrl);
 await writeFile(new URL('_headers',destUrl),`/*
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com; connect-src 'self' ${origin.origin}; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com; media-src 'self' blob:; connect-src 'self' ${origin.origin}; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
   Permissions-Policy: camera=(), microphone=(), geolocation=()

@@ -1,6 +1,6 @@
 # Tour Rescue — copy-ready submission package
 
-Prepared 24 October 2026. The [handoff](HACKATHON_HANDOFF.md) records the release and owner actions. This is an English submission draft, not a submitted Devpost entry.
+Prepared 24 October and updated 26 October 2026. The [handoff](HACKATHON_HANDOFF.md) records the release and owner actions. The [Tour Rescue entry](https://devpost.com/software/tour-rescue) is submitted: the 24 October owner receipt confirms submission **1259533** after explicitly authorized declarations. This document is the English reference package; later film publication and entry updates require separate receipts.
 
 ## Submission fields
 
@@ -12,7 +12,7 @@ Prepared 24 October 2026. The [handoff](HACKATHON_HANDOFF.md) records the releas
 - Direct sensitivity experiment: https://tour-rescue.pages.dev/app/#breakpoint
 - Public source: https://github.com/Powers-P1/tour-rescue
 - Licence: MIT, detectable in the repository About area.
-- Optional 100-second presentation: https://youtu.be/PT3Iysktgn0 (Damian's channel, prepared English captions); also https://tour-rescue.pages.dev/judges/#walkthrough
+- Two-minute final-v4 film: self-hosted website player release build at https://tour-rescue.pages.dev/judges/#walkthrough. A new YouTube publication is pending the owner's account action. The [100-second final-v2 film](https://youtu.be/PT3Iysktgn0) remains archived.
 - Built with: Qloo API, Claude Sonnet 5.5, TypeScript, Cloudflare Pages and Workers, SQLite Durable Objects, an OSRM road snapshot, HTML Canvas and a scoped PWA service worker.
 
 ## Description
@@ -75,6 +75,10 @@ Use Node 24 and `npm ci --ignore-scripts`, `npm run check`, `npm run web:build`,
 
 ## Media, rights and final owner actions
 
-The approved [final-v2 film package](demo/final-v2/README.md) contains the 100-second H.264/AAC film, English narration, 22-cue VTT/SRT subtitles, poster, provenance and QA. Its SHA-256 is `9d5e25ece393070f3ab889e4cb2a41c8549259473b449d06e4863725d2413bb2`. It uses actual responsive app captures with edited presentation motion. It shows the core rescue journey; SOS is a separate extension, not an unshown claim about this film. It was published on Damian's YouTube channel **UCpJTOM_Aiaysdgqpl6N8yyA** on 24 October, with the prepared SRT imported and the approved poster. YouTube's automated copyright check reported no issues; that is not an independent rights certificate. No footage or soundtrack from reference videos was reused. Retain generation/account rights evidence.
+The [final-v4 film package](demo/final-v4/README.md) contains the 120-second, 1920×1080/60 fps H.264/AAC publication derivative, 39-cue English VTT/SRT, narration transcript, poster, provenance and QA. The clean v/a file is **23,144,942 bytes**, SHA-256 `c9c6a5b8f3a25fc6d25093026567e57ec7cfe4e9fffe3f9da7b701a196c10d4f`, leaving space below the Pages 25 MiB file limit. Default native VTT supplies dialogue captions; there is no embedded subtitle stream or burned dialogue-caption layer.
 
-The [official rules](https://qloo.devpost.com/rules), checked 24 October, require a working demo, English description and a public repository with an open-source licence visible in About. Video is optional. Maintain free judging access until the judging period ends: **5 November, 23:45 Eastern / 6 November, 05:45 Warsaw**. Damian must confirm eligibility, team representation and rights, then personally submit Devpost before **30 October 2026, 23:45 EDT / 31 October, 04:45 Warsaw** and retain the receipt. The internal target is 29 October. This package accepts no legal terms and submits nothing on the owner's behalf.
+The film uses actual responsive UI captures with edited presentation motion, alongside labelled AI-generated touring, gear and stage illustrations. It separates recorded real Qloo from the synthetic 350→354.1 km experiment and authored AI replay. The four-state Ho Chi Minh City SOS sample confirms no real supplier contact, order or payment. The proposed business model is agency subscriptions and completed-local-service fees, dependent on onboarding real partners. Music is SONTALK's “We Stay (Instrumental Version)”, supplied from the owner's existing Epidemic Sound subscription/trial; Mike narration uses Epidemic Sound Voices / ElevenLabs. Source clips, full music WAVs and voice recordings are not redistributed in this package. Retain the account/channel rights evidence; technical QA is not a rights certificate.
+
+The [final-v2 package](demo/final-v2/README.md) and its 24 October YouTube publication remain recoverable. New hosting, deployment and Devpost video-replacement actions are recorded separately rather than inferred from the package.
+
+The [official rules](https://qloo.devpost.com/rules), checked 24 October, require a working demo, English description and a public repository with an open-source licence visible in About. Video is optional. Maintain free judging access until the judging period ends: **5 November, 23:45 Eastern / 6 November, 05:45 Warsaw**. The entry was submitted on 24 October with Damian's explicit authorization; keep the receipt and maintain eligibility, representation and rights evidence. The submission deadline remains **30 October 2026, 23:45 EDT / 31 October, 04:45 Warsaw**. Packaging the new film does not itself update the submitted entry or accept new legal terms.

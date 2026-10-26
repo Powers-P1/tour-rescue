@@ -1,8 +1,8 @@
 # Tour Rescue
 
-[Jury demo](https://tour-rescue.pages.dev/judges/) · [Submission package](docs/SUBMISSION_PACKAGE.md) · [Release handoff](docs/HACKATHON_HANDOFF.md)
+[Jury demo](https://tour-rescue.pages.dev/judges/) · [Two-minute film package](docs/demo/final-v4/README.md) · [Submitted Devpost entry](https://devpost.com/software/tour-rescue) · [Submission package](docs/SUBMISSION_PACKAGE.md) · [Release handoff](docs/HACKATHON_HANDOFF.md)
 
-Qloo-powered agent that repairs a concert tour when one date falls through.
+**The show’s off. The tour isn’t.** The band is already on the road and the crew still needs a plan. Tour Rescue helps tour managers and independent bookers compare their next move and prepare the next promoter conversation, using Qloo cultural-fit evidence alongside route checks.
 
 **Status: deployed hackathon prototype.** Built for the Qloo Agentic Hackathon 2026 (submission deadline 30 Oct 2026, 23:45 EDT). It prepares the next promoter conversation; it does not confirm or book a show.
 
@@ -13,6 +13,8 @@ The core is deterministic (pure TypeScript functions). The demo, live Qloo flow,
 The jury entry immediately identifies the mobile-first PWA. Install it on a phone, or use the complete desktop workflow. The offline public rescue shell excludes API responses and private research from its cache. See [the v2 judging path and validation](docs/V2_JUDGE_WORKFLOW.md) and [measured Qloo/Sonnet results](docs/validation/live-qloo-2026-10-23.md).
 
 Private band knowledge is editable in the profile and Documents screens and persists on the current device. Live AI uses bounded lexical retrieval over that snapshot, records the excerpts used, and keeps them separate from verified public venue evidence. The two research procedures map to real tools. Notes never override hard constraints, and downloaded AI audits may contain the user's private excerpts. See [the AI contract](docs/AI_RESCUE.md).
+
+**Tour SOS business hypothesis.** Agency subscription plans could be paired with fees or commissions on completed local services. This requires first building and onboarding a vetted local partner network for backline, repairs and urgent delivery. The current SOS flow is an offline sample with illustrative suppliers, prices and travel times; the partner network and payments still need to be built, and no service revenue is claimed. Willingness to pay and service economics remain untested.
 
 ## Documents
 
